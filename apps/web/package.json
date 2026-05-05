@@ -1,5 +1,5 @@
 {
-  "name": "streamer-scheduler-frontend",
+  "name": "streamautomator-web",
   "version": "2.3.1",
   "private": true,
   "dependencies": {

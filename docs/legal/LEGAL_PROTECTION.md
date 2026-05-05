@@ -4,7 +4,7 @@
 
 ### Overview
 
-This document outlines the legal protections in place for the Streamer Scheduler software and provides guidance on how to enforce your intellectual property rights.
+This document outlines the legal protections in place for the StreamAutomator software and provides guidance on how to enforce your intellectual property rights.
 
 ### Legal Documents Included
 
@@ -77,7 +77,7 @@ If you discover unauthorized use:
 ### Contact for Legal Issues
 
 For legal inquiries or to report violations:
-- Email: christiandvillar@gmail.com
+- Email: legal@streamautomator.com
 
 ---
 
@@ -85,7 +85,7 @@ For legal inquiries or to report violations:
 
 ### Resumen
 
-Este documento describe las protecciones legales implementadas para el software Streamer Scheduler y proporciona orientacion sobre como hacer valer sus derechos de propiedad intelectual.
+Este documento describe las protecciones legales implementadas para el software StreamAutomator y proporciona orientacion sobre como hacer valer sus derechos de propiedad intelectual.
 
 ### Documentos Legales Incluidos
 
@@ -158,4 +158,4 @@ Si descubre uso no autorizado:
 ### Contacto para Asuntos Legales
 
 Para consultas legales o para reportar violaciones:
-- Email: christiandvillar@gmail.com
+- Email: legal@streamautomator.com

@@ -1,4 +1,4 @@
-# Contrato de integración AkoeNet ↔ Streamer Scheduler
+# Contrato de integración AkoeNet ↔ StreamAutomator
 
 Documento **compartido**: úsalo en ambos repositorios para alinear variables, rutas y payloads.
 
@@ -6,7 +6,7 @@ Documento **compartido**: úsalo en ambos repositorios para alinear variables, r
 
 | Sistema | Responsabilidad |
 |---------|-----------------|
-| **Streamer Scheduler** (este repo) | API pública de calendario; envía webhooks POST cuando se programa un evento. |
+| **StreamAutomator** (este repo) | API pública de calendario; envía webhooks POST cuando se programa un evento. |
 | **AkoeNet** (otro repo) | Recibe webhooks; proxy `GET` autenticado hacia el Scheduler para widgets/comandos. |
 
 ---
@@ -19,6 +19,8 @@ Sin autenticación:
 - `GET {BACKEND}/api/integration` (mismo JSON)
 
 Devuelve `service`, `version`, rutas públicas, campos del webhook y enlaces a `/api/health/*`.
+
+- **`service`:** valor fijo **`streamautomator`**. *(Integraciones más antiguas podían esperar `streamer-scheduler`; actualizar comprobaciones en cliente.)*
 
 **Comprobación rápida desde AkoeNet o CI:**
 
@@ -82,7 +84,7 @@ SCHEDULER_UPCOMING_PATH=/api/streamer/{username}/events
 
 ## 4) Variables por lado
 
-### Streamer Scheduler (`apps/api/.env`)
+### StreamAutomator (`apps/api/.env`)
 
 ```env
 # Saliente hacia AkoeNet (fallback si el usuario no rellena URL en la UI)

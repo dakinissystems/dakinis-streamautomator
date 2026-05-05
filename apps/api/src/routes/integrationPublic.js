@@ -27,7 +27,7 @@ function getPackageVersion() {
 const router = express.Router();
 
 const INTEGRATION_BODY = () => ({
-  service: 'streamer-scheduler',
+  service: 'streamautomator',
   version: getPackageVersion(),
   public_api: {
     events_json: 'GET /api/streamer/{username}/events',

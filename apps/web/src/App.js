@@ -59,7 +59,7 @@ function Header({ user, token, onLogout, onMenuClick, installPromptEvent, onInst
               className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0 object-contain rounded-lg ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-white dark:ring-offset-gray-800"
               aria-hidden
             />
-            <span className="hidden sm:inline font-bold text-accent truncate text-sm sm:text-base hover:opacity-90">Streamer Scheduler</span>
+            <span className="hidden sm:inline font-bold text-accent truncate text-sm sm:text-base hover:opacity-90">StreamAutomator</span>
           </button>
           <button
             type="button"

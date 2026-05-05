@@ -1,7 +1,7 @@
 /**
  * HTML sanitization utilities
  * Prevents XSS attacks by cleaning user input
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 /**

@@ -79,7 +79,7 @@ function PublicPagePreview({ bannerUrl, position, username }) {
         </div>
         {renderBanner('bottom')}
         <div className="text-[8px] text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-600 pt-1 flex-shrink-0">
-          Powered by Streamer Scheduler
+          Powered by StreamAutomator
         </div>
       </div>
     </div>

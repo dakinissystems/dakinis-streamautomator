@@ -1,7 +1,7 @@
 /**
  * Content Service Tests
  * Basic unit tests for content service
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  * 
  * Run with: npm test
  */

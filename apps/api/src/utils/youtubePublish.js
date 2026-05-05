@@ -1,7 +1,7 @@
 /**
  * YouTube Publishing Utility
  * Handles video uploads to YouTube using OAuth2
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import { google } from 'googleapis';

@@ -102,7 +102,7 @@ If you discover unauthorized use:
 ## 📞 Contact / Contacto
 
 For legal inquiries:
-- Email: christiandvillar@gmail.com
+- Email: legal@streamautomator.com
 
 ---
 

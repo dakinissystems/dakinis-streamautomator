@@ -52,8 +52,8 @@ const DEFAULT_FIXED_COSTS = [
 export function buildPaymentsInvoicePdf(payments, options = {}) {
   const {
     logoDataUrl,
-    ownerName = 'Christian David Villar Colodro',
-    ownerEmail = 'christiandvillar@gmail.com',
+    ownerName = 'Dakinis Systems',
+    ownerEmail = 'legal@streamautomator.com',
     usePlaceholders = true,
     colUsuario = 'Usuario',
     colTipoSuscripcion = 'Tipo de suscripción',

@@ -206,7 +206,7 @@ export default function OverlayRoulette() {
         </div>
       )}
       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-white/50 text-xs">
-        Powered by Streamer Scheduler
+        Powered by StreamAutomator
       </div>
     </div>
   );

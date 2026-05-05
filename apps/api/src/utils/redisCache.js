@@ -2,7 +2,7 @@
  * Redis Cache Implementation
  * Uses the shared Redis connection from redisConnection.js (same config as queues, locks, cacheService).
  * Distributed caching for multi-instance deployments.
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import logger from './logger.js';

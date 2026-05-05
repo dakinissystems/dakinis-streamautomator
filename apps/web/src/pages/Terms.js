@@ -29,7 +29,7 @@ export default function Terms() {
           <section>
             <h2 className="text-xl font-semibold mt-6 mb-2">1. Aceptación de los términos</h2>
             <p>
-              Al acceder y utilizar Streamer Scheduler (&quot;el Servicio&quot;), aceptas quedar vinculado por los presentes
+              Al acceder y utilizar StreamAutomator (&quot;el Servicio&quot;), aceptas quedar vinculado por los presentes
               Términos y condiciones. Si no estás de acuerdo con cualquiera de sus disposiciones, debes abstenerte de
               utilizar el Servicio.
             </p>
@@ -40,7 +40,7 @@ export default function Terms() {
             <p>
               Todos los contenidos, funcionalidades y elementos del Servicio, incluyendo de forma enunciativa y no
               limitativa textos, diseños, código, logotipos, imágenes, bases de datos y software, son titularidad
-              exclusiva de Christian David Villar Colodro o de terceros autorizantes, y están protegidos por la normativa
+              exclusiva de Dakinis Systems o de terceros autorizantes, y están protegidos por la normativa
               aplicable en materia de propiedad intelectual e industrial.
             </p>
           </section>
@@ -96,7 +96,7 @@ export default function Terms() {
           <section>
             <h2 className="text-xl font-semibold mt-6 mb-2">8. Limitación de responsabilidad</h2>
             <p>
-              En la máxima medida permitida por la ley, Christian David Villar Colodro no será responsable por daños
+              En la máxima medida permitida por la ley, Dakinis Systems no será responsable por daños
               indirectos, incidentales, especiales, consecuenciales, lucro cesante o pérdida de datos derivados del uso o
               imposibilidad de uso del Servicio.
             </p>
@@ -107,7 +107,7 @@ export default function Terms() {
             <p>
               Nos reservamos el derecho a actualizar estos Términos y condiciones en cualquier momento. Para consultas
               legales o contractuales, puedes contactar en:{' '}
-              <a href="mailto:christiandvillar@gmail.com" className="text-primary-600 dark:text-primary-400 underline">christiandvillar@gmail.com</a>
+              <a href="mailto:legal@streamautomator.com" className="text-primary-600 dark:text-primary-400 underline">legal@streamautomator.com</a>
             </p>
           </section>
         </div>

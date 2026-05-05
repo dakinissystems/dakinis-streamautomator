@@ -1,7 +1,7 @@
 /**
  * Supabase Client for Backend
  * Uses Service Role Key for admin operations
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import { createClient } from '@supabase/supabase-js';

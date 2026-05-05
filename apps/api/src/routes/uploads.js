@@ -1,7 +1,7 @@
 /**
  * Upload Routes
  * Handles file upload registration and trial/pro limits
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  * 
  * IMPORTANT: The 'uploads' table in Supabase must have 'user_id' as TEXT type,
  * not UUID, to support numeric user IDs from Sequelize.

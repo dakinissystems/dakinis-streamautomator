@@ -1,10 +1,10 @@
 /**
  * Copyright strings for HTTP headers and API payloads.
- * Dakinis Systems = commercial brand; legal holder = author.
+ * Legal and commercial entity: Dakinis Systems.
  */
 
 export const COPYRIGHT_BRAND_NAME = 'Dakinis Systems';
-export const COPYRIGHT_LEGAL_HOLDER = 'Christian David Villar Colodro';
+export const COPYRIGHT_LEGAL_HOLDER = 'Dakinis Systems';
 export const COPYRIGHT_YEAR_START = 2024;
 
 function currentCopyrightYearEnd() {
@@ -23,7 +23,7 @@ export function dakinisCopyrightNotice() {
   if (!noticeCache || noticeCache.year !== end) {
     noticeCache = {
       year: end,
-      text: `Copyright © ${COPYRIGHT_YEAR_START}-${end} ${COPYRIGHT_LEGAL_HOLDER} (${COPYRIGHT_BRAND_NAME}). All rights reserved.`,
+      text: `Copyright © ${COPYRIGHT_YEAR_START}-${end} ${COPYRIGHT_LEGAL_HOLDER}. All rights reserved.`,
     };
   }
   return noticeCache.text;

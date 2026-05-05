@@ -1,7 +1,7 @@
 /**
  * Media Upload Page
  * Page for uploading and managing media files
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react';

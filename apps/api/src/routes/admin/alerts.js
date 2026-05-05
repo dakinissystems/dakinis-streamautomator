@@ -48,7 +48,7 @@ export async function putAlertConfigHandler(req, res) {
 export async function postAlertConfigTestHandler(req, res) {
   try {
     const type = req.body?.type === 'status' ? 'status' : 'dev';
-    const message = `✅ Test alert (${type}) – Streamer Scheduler – ${new Date().toISOString()}`;
+    const message = `✅ Test alert (${type}) – StreamAutomator – ${new Date().toISOString()}`;
     const sent = await sendAlert(message, type);
     if (sent) {
       res.json({ message: `Test alert sent to ${type} webhook`, sent: true });

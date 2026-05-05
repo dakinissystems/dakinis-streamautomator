@@ -72,4 +72,4 @@
 ## Contact / Contacto
 
 For questions about protection measures:
-- Email: christiandvillar@gmail.com
+- Email: legal@streamautomator.com

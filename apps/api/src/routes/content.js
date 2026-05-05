@@ -269,7 +269,7 @@ router.delete('/:id', requireAuth, checkLicense, auditLog('content_deleted', 'Co
 router.post('/test-twitter', requireAuth, async (req, res) => {
   try {
     const userId = req.user.id;
-    const testText = req.body.text || 'Test tweet from Streamer Scheduler';
+    const testText = req.body.text || 'Test tweet from StreamAutomator';
     
     logger.info('Test Twitter publish request', { userId, textLength: testText.length });
     

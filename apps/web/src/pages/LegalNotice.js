@@ -29,14 +29,14 @@ export default function LegalNotice() {
           <section>
             <h2 className="text-xl font-semibold mt-6 mb-2">1. Titular del sitio</h2>
             <p>
-              Este sitio web y la aplicación Streamer Scheduler son propiedad de Christian David Villar Colodro.
+              Este sitio web y la aplicación StreamAutomator son propiedad de Dakinis Systems.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold mt-6 mb-2">2. Objeto</h2>
             <p>
-              El presente aviso legal regula el acceso, navegación y uso de la plataforma Streamer Scheduler, así como
+              El presente aviso legal regula el acceso, navegación y uso de la plataforma StreamAutomator, así como
               las responsabilidades derivadas del uso de sus contenidos y servicios.
             </p>
             <p>
@@ -75,7 +75,7 @@ export default function LegalNotice() {
           <section>
             <h2 className="text-xl font-semibold mt-6 mb-2">6. Enlaces externos</h2>
             <p>
-              Esta plataforma puede incluir enlaces a servicios de terceros. Streamer Scheduler no se responsabiliza del
+              Esta plataforma puede incluir enlaces a servicios de terceros. StreamAutomator no se responsabiliza del
               contenido, políticas ni prácticas de dichos sitios externos.
             </p>
           </section>
@@ -93,7 +93,7 @@ export default function LegalNotice() {
             <h2 className="text-xl font-semibold mt-6 mb-2">8. Contacto</h2>
             <p>
               Para consultas legales o administrativas: {' '}
-              <a href="mailto:christiandvillar@gmail.com" className="text-primary-600 dark:text-primary-400 underline">christiandvillar@gmail.com</a>
+              <a href="mailto:legal@streamautomator.com" className="text-primary-600 dark:text-primary-400 underline">legal@streamautomator.com</a>
             </p>
           </section>
         </div>

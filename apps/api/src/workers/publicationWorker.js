@@ -2,7 +2,7 @@
  * Publication Worker Entry Point
  * Run this as a separate process in production for scalability.
  * Usage: node apps/api/src/workers/publicationWorker.js
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import dotenv from 'dotenv';

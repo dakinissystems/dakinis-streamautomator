@@ -1,7 +1,7 @@
 /**
  * Notification System
  * Email via Resend (https://resend.com). Set RESEND_API_KEY and EMAIL_ENABLED=true.
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import logger from './logger.js';
@@ -32,7 +32,7 @@ function brandEmailHtml(innerBodyHtml) {
                 <tr>
                   <td style="padding:20px 24px;background:linear-gradient(135deg,#2563eb 0%,#7c3aed 100%);color:#ffffff;">
                     <p style="margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:18px;font-weight:700;">StreamAutomator</p>
-                    <p style="margin:4px 0 0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:13px;opacity:0.95;">Streamer Scheduler</p>
+                    <p style="margin:4px 0 0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:13px;opacity:0.95;">StreamAutomator</p>
                   </td>
                 </tr>
                 <tr>

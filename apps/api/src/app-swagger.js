@@ -1,7 +1,7 @@
 /**
  * Swagger/OpenAPI Setup
  * API Documentation endpoint
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  * 
  * Note: Requires swagger-jsdoc and swagger-ui-express
  * Install: npm install swagger-jsdoc swagger-ui-express
@@ -21,7 +21,7 @@ export async function setupSwagger(app) {
     
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
       customCss: '.swagger-ui .topbar { display: none }',
-      customSiteTitle: 'Streamer Scheduler API Documentation',
+      customSiteTitle: 'StreamAutomator API Documentation',
     }));
     
     swaggerSetup = true;

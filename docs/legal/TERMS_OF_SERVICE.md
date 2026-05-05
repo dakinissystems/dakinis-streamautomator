@@ -6,11 +6,11 @@
 
 ### 1. Acceptance of Terms
 
-By accessing and using Streamer Scheduler ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
+By accessing and using StreamAutomator ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
 
 ### 2. Intellectual Property Rights
 
-All content, features, and functionality of the Service, including but not limited to text, graphics, logos, icons, images, audio clips, digital downloads, data compilations, and software, are the exclusive property of Christian David Villar Colodro and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.
+All content, features, and functionality of the Service, including but not limited to text, graphics, logos, icons, images, audio clips, digital downloads, data compilations, and software, are the exclusive property of Dakinis Systems and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.
 
 ### 3. Prohibited Uses
 
@@ -44,12 +44,12 @@ THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIN
 
 ### 8. Limitation of Liability
 
-IN NO EVENT SHALL CHRISTIAN DAVID VILLAR COLODRO BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES.
+IN NO EVENT SHALL DAKINIS SYSTEMS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES.
 
 ### 9. Contact Information
 
 For questions about these Terms of Service, please contact:
-Email: christiandvillar@gmail.com
+Email: legal@streamautomator.com
 
 ---
 
@@ -57,11 +57,11 @@ Email: christiandvillar@gmail.com
 
 ### 1. Aceptacion de Terminos
 
-Al acceder y usar Streamer Scheduler ("el Servicio"), acepta y se compromete a cumplir con los terminos y disposiciones de este acuerdo. Si no esta de acuerdo con lo anterior, no utilice este servicio.
+Al acceder y usar StreamAutomator ("el Servicio"), acepta y se compromete a cumplir con los terminos y disposiciones de este acuerdo. Si no esta de acuerdo con lo anterior, no utilice este servicio.
 
 ### 2. Derechos de Propiedad Intelectual
 
-Todo el contenido, caracteristicas y funcionalidad del Servicio, incluyendo pero no limitado a texto, graficos, logotipos, iconos, imagenes, clips de audio, descargas digitales, compilaciones de datos y software, son propiedad exclusiva de Christian David Villar Colodro y estan protegidos por leyes internacionales de derechos de autor, marcas registradas, patentes, secretos comerciales y otras leyes de propiedad intelectual.
+Todo el contenido, caracteristicas y funcionalidad del Servicio, incluyendo pero no limitado a texto, graficos, logotipos, iconos, imagenes, clips de audio, descargas digitales, compilaciones de datos y software, son propiedad exclusiva de Dakinis Systems y estan protegidos por leyes internacionales de derechos de autor, marcas registradas, patentes, secretos comerciales y otras leyes de propiedad intelectual.
 
 ### 3. Usos Prohibidos
 
@@ -95,9 +95,9 @@ EL SERVICIO SE PROPORCIONA "TAL CUAL" Y "SEGUN DISPONIBILIDAD" SIN GARANTIAS DE 
 
 ### 8. Limitacion de Responsabilidad
 
-EN NINGUN CASO CHRISTIAN DAVID VILLAR COLODRO SERA RESPONSABLE DE CUALQUIER DANO INDIRECTO, INCIDENTAL, ESPECIAL, CONSECUENTE O PUNITIVO.
+EN NINGUN CASO DAKINIS SYSTEMS SERA RESPONSABLE DE CUALQUIER DANO INDIRECTO, INCIDENTAL, ESPECIAL, CONSECUENTE O PUNITIVO.
 
 ### 9. Informacion de Contacto
 
 Para preguntas sobre estos Terminos de Servicio, contacte:
-Email: christiandvillar@gmail.com
+Email: legal@streamautomator.com

@@ -1,12 +1,12 @@
 # Copyright Notice / Aviso de Derechos de Autor
 
-**Copyright (c) 2024-2026 Christian David Villar Colodro. All rights reserved.**
+**Copyright (c) 2024-2026 Dakinis Systems. All rights reserved.**
 
-This software and associated documentation files (the "Software") are the proprietary and confidential property of Christian David Villar Colodro.
+This software and associated documentation files (the "Software") are the proprietary and confidential property of Dakinis Systems.
 
 ## Intellectual Property Rights / Derechos de Propiedad Intelectual
 
-All rights, title, and interest in and to the Software, including all intellectual property rights, are and will remain the exclusive property of Christian David Villar Colodro and its licensors.
+All rights, title, and interest in and to the Software, including all intellectual property rights, are and will remain the exclusive property of Dakinis Systems and its licensors.
 
 The Software is protected by copyright laws and international copyright treaties, as well as other intellectual property laws and treaties.
 
@@ -19,17 +19,19 @@ Violators will be prosecuted to the maximum extent possible under applicable law
 ## Contact / Contacto
 
 For licensing inquiries or permission requests:
-- Email: christiandvillar@gmail.com
+
+- Email: legal@streamautomator.com  
+- Organization: https://github.com/dakinissystems
 
 ---
 
-**(c) 2024-2026 Christian David Villar Colodro. Todos los derechos reservados.**
+**(c) 2024-2026 Dakinis Systems. Todos los derechos reservados.**
 
-Este software y los archivos de documentacion asociados (el "Software") son propiedad exclusiva y confidencial de Christian David Villar Colodro.
+Este software y los archivos de documentacion asociados (el "Software") son propiedad exclusiva y confidencial de Dakinis Systems.
 
 ## Derechos de Propiedad Intelectual
 
-Todos los derechos, titulos e intereses en y sobre el Software, incluyendo todos los derechos de propiedad intelectual, son y seran propiedad exclusiva de Christian David Villar Colodro y sus licenciantes.
+Todos los derechos, titulos e intereses en y sobre el Software, incluyendo todos los derechos de propiedad intelectual, son y seran propiedad exclusiva de Dakinis Systems y sus licenciantes.
 
 El Software esta protegido por las leyes de derechos de autor y los tratados internacionales de derechos de autor, asi como por otras leyes y tratados de propiedad intelectual.
 
@@ -42,4 +44,6 @@ Los infractores seran procesados al maximo alcance posible segun la ley aplicabl
 ## Contacto
 
 Para consultas de licencias o solicitudes de permiso:
-- Email: christiandvillar@gmail.com
+
+- Email: legal@streamautomator.com  
+- Organización: https://github.com/dakinissystems

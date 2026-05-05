@@ -1,7 +1,7 @@
 /**
  * Trial Warning Component
  * Shows warning when trial is about to expire (3-4 days left)
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import { useState } from 'react';

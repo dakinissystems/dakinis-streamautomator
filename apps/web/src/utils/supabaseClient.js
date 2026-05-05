@@ -2,7 +2,7 @@
  * Supabase Client for Frontend
  * Uses Anon Key (public, safe for frontend)
  * Single instance (singleton) to avoid "Multiple GoTrueClient instances" warning.
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import { createClient } from '@supabase/supabase-js';

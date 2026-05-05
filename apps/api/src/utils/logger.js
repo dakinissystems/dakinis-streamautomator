@@ -1,6 +1,6 @@
 /**
  * Structured Logging with Winston
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import winston from 'winston';

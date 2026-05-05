@@ -1,6 +1,6 @@
 /**
  * Interactive onboarding tour using react-joyride
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import React, { useState, useEffect } from 'react';

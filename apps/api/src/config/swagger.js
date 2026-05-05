@@ -1,14 +1,14 @@
 /**
  * Swagger/OpenAPI Configuration
  * API Documentation setup
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 export const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Streamer Scheduler API',
+      title: 'StreamAutomator API',
       version: '2.3.1',
       description: 'API for managing scheduled content across multiple platforms',
       contact: {

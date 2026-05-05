@@ -2,7 +2,7 @@
  * Landing page for non-authenticated visitors.
  * Positioning: automation hub for streamers — schedule, announce, manage from one dashboard.
  * No user counts or social proof numbers (pre-launch).
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -120,7 +120,7 @@ export default function Landing() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Top nav */}
       <nav className="flex justify-between items-center px-4 sm:px-6 py-4">
-        <span className="text-lg font-semibold text-gray-900 dark:text-white">{t('dashboard.appTitle') || 'Streamer Scheduler'}</span>
+        <span className="text-lg font-semibold text-gray-900 dark:text-white">{t('dashboard.appTitle') || 'StreamAutomator'}</span>
         <div className="flex items-center gap-3 sm:gap-4">
           <button
             type="button"
@@ -220,7 +220,7 @@ export default function Landing() {
             <div className="p-6 rounded-xl border-2 border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-900/10">
               <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <X className="w-5 h-5 text-red-500 flex-shrink-0" />
-                {t('landing.compareWithout') || 'Without Streamer Scheduler'}
+                {t('landing.compareWithout') || 'Without StreamAutomator'}
               </h3>
               <ul className="mt-4 space-y-2 text-gray-700 dark:text-gray-300 text-sm">
                 <li>• {t('landing.compareWithout1') || 'Forget to announce your stream'}</li>
@@ -231,7 +231,7 @@ export default function Landing() {
             <div className="p-6 rounded-xl border-2 border-green-200 dark:border-green-900/50 bg-green-50/50 dark:bg-green-900/10">
               <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                {t('landing.compareWith') || 'With Streamer Scheduler'}
+                {t('landing.compareWith') || 'With StreamAutomator'}
               </h3>
               <ul className="mt-4 space-y-2 text-gray-700 dark:text-gray-300 text-sm">
                 <li>• {t('landing.compareWith1') || 'Schedule streams and auto-announce everywhere'}</li>
@@ -433,7 +433,7 @@ export default function Landing() {
             {t('landing.builtForTitle') || 'Built for creators'}
           </h2>
           <p className="mt-4 text-gray-600 dark:text-gray-300">
-            {t('landing.builtForDesc') || 'Consistency builds viewers. Plan your streams and never miss announcements again. Most tools are made for marketing teams — Streamer Scheduler is creator-first so you can focus on streaming.'}
+            {t('landing.builtForDesc') || 'Consistency builds viewers. Plan your streams and never miss announcements again. Most tools are made for marketing teams — StreamAutomator is creator-first so you can focus on streaming.'}
           </p>
         </div>
       </section>

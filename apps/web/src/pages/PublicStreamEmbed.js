@@ -145,7 +145,7 @@ export default function PublicStreamEmbed() {
           rel="noopener noreferrer"
           className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex-shrink-0"
         >
-          {t('publicStream.poweredBy') || 'Powered by'} Streamer Scheduler
+          {t('publicStream.poweredBy') || 'Powered by'} StreamAutomator
         </a>
       </div>
       {(showLive || (countdown && !countdown.live && firstEvent)) && (

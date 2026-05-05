@@ -25,7 +25,7 @@ router.get('/todo', async (req, res) => {
 
     if (!key) {
       res.set('Content-Type', 'text/plain');
-      return res.status(400).send('Missing key. Add your key from Streamer Scheduler → Settings → Bots.');
+      return res.status(400).send('Missing key. Add your key from StreamAutomator → Settings → Bots.');
     }
     if (!text) {
       res.set('Content-Type', 'text/plain');

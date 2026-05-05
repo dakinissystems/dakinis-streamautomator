@@ -1,7 +1,7 @@
 /**
  * Pricing page – suggested tiers from market analysis.
  * FREE | 7€/mes | 15€/mes (adjustable while deciding)
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -152,7 +152,7 @@ export default function Pricing() {
           </h2>
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
             {t('pricing.roiText') ||
-              'If you stream 4 times a week and even 5 viewers miss each stream because they did not see the announcement, you lose 20 viewers every week. Streamer Scheduler makes sure your audience always knows when you go live.'}
+              'If you stream 4 times a week and even 5 viewers miss each stream because they did not see the announcement, you lose 20 viewers every week. StreamAutomator makes sure your audience always knows when you go live.'}
           </p>
         </section>
 

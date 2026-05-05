@@ -955,7 +955,7 @@ export default function SettingsBotsTab({ user, token, t, setUser }) {
               })}
             </div>
             <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-              {t('bots.overlaysHint') || 'Each overlay refreshes automatically. They show "Powered by Streamer Scheduler" so viewers can find the app.'}
+              {t('bots.overlaysHint') || 'Each overlay refreshes automatically. They show "Powered by StreamAutomator" so viewers can find the app.'}
             </p>
           </>
         )}

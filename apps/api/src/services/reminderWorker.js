@@ -1,7 +1,7 @@
 /**
  * Stream Reminder Worker
  * Processes one job from the stream-reminders queue: send email and record ReminderSent.
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import { Content, User, StreamReminder, ReminderSent } from '../modules/reminders/infrastructure/models.js';

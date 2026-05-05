@@ -1,5 +1,5 @@
 /**
- * Header banners: show configurable banners in the header area (below Streamer Scheduler / User / EN/ES / Logout).
+ * Header banners: show configurable banners in the header area (below StreamAutomator / User / EN/ES / Logout).
  * Config: from localStorage key header_banners_config first, then REACT_APP_HEADER_BANNERS env.
  * Each item: { id?, text, textEs?, url?, style?, dismissible?, imageUrl? }
  */

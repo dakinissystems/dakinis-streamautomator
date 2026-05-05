@@ -1,6 +1,6 @@
 /**
  * Centralized Database Configuration
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import dotenv from 'dotenv';
@@ -51,7 +51,7 @@ const sequelize = usePostgres
           : false,
         // Supabase pooler compatibility
         ...(databaseUrl.includes('pooler.supabase.com') && {
-          application_name: 'streamer-scheduler',
+          application_name: 'streamautomator',
         }),
       },
       pool: {

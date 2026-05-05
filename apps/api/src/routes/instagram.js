@@ -1,6 +1,6 @@
 /**
  * Instagram Business (Graph API) — token stays on server.
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import express from 'express';
