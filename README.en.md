@@ -2,15 +2,20 @@
 
 ---
 
-# Streamer Scheduler
+# StreamAutomator
 
-A web application to schedule and manage content across multiple social platforms from a single place.
+SaaS platform to schedule and manage content across multiple social platforms from one place. Active development lives in the **Dakinis Systems** repository:
+
+- **Repository:** [github.com/dakinissystems/dakinis-streamautomator](https://github.com/dakinissystems/dakinis-streamautomator)
+- **Ecosystem:** [Dakinis Systems](https://github.com/dakinissystems) — SaaS tools for creators and digital businesses.
+
+*(You may still see the historical name “Streamer Scheduler” in docs and the UI; it refers to the same product.)*
 
 ---
 
 ## What it does
 
-Streamer Scheduler is a content management platform that allows content creators and streamers to:
+StreamAutomator is a content management platform that allows content creators and streamers to:
 
 - **Schedule posts** across multiple platforms (Twitch, Twitter/X, Instagram, Discord)
 - **Manage content** with a visual calendar interface
@@ -22,7 +27,7 @@ Streamer Scheduler is a content management platform that allows content creators
 ## Repository layout
 
 ```text
-streamer-scheduler/
+dakinis-streamautomator/
 ├── apps/
 │   ├── api/          # Backend (Node.js / Express): API, worker, scheduler
 │   └── web/          # Frontend (React / Create React App)
@@ -235,4 +240,4 @@ For issues, questions, or support, please contact the development team.
 ---
 
 **Version:** 2.3.1  
-**Last updated:** April 2026
+**Last updated:** May 2026 · Canonical repo: [dakinis-streamautomator](https://github.com/dakinissystems/dakinis-streamautomator)

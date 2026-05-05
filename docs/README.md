@@ -1,6 +1,6 @@
 # Documentación (índice)
 
-Índice de la carpeta **docs/** del monorepo **Streamer Scheduler**. README del producto: [README.md](../README.md) (ES) · [README.en.md](../README.en.md) (EN).
+Índice de la carpeta **docs/** de **StreamAutomator** (Dakinis). README del producto: [README.md](../README.md) (ES) · [README.en.md](../README.en.md) (EN). Repositorio: [dakinis-streamautomator](https://github.com/dakinissystems/dakinis-streamautomator).
 
 ## Información para usuarios
 
