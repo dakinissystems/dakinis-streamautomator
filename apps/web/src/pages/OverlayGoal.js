@@ -29,7 +29,7 @@ export default function OverlayGoal() {
         const res = await fetch(`/api/webhooks/goal?key=${encodeURIComponent(key)}`);
         const body = await res.text();
         if (!cancelled) {
-          setText(body || 'No goal set. Set a follower or sub goal in Streamer Scheduler → Settings.');
+          setText(body || 'No goal set. Set a follower or sub goal in StreamAutomator → Settings.');
         }
       } catch (e) {
         devCatchLog('OverlayGoal.load', e);
@@ -65,7 +65,7 @@ export default function OverlayGoal() {
           {text}
         </div>
         <div className="mt-3 text-[10px] text-slate-400">
-          Powered by Streamer Scheduler
+          Powered by StreamAutomator
         </div>
       </div>
     </div>

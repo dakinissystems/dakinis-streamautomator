@@ -1,5 +1,5 @@
 {
-  "name": "streamer-scheduler-backend",
+  "name": "streamautomator-api",
   "version": "2.3.1",
   "main": "src/apiServer.js",
   "type": "module",

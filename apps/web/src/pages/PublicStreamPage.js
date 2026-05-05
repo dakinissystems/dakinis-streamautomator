@@ -438,7 +438,7 @@ export default function PublicStreamPage() {
 
         <footer className="mt-8 pt-6 pb-2 border-t border-accent-light dark:border-gray-700 text-center bg-accent-subtle dark:bg-gray-900/50 rounded-lg px-4" role="contentinfo">
           <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-            {t('publicStream.poweredBy') || 'Powered by'} <span className="font-medium text-gray-700 dark:text-gray-300">Streamer Scheduler</span>
+            {t('publicStream.poweredBy') || 'Powered by'} <span className="font-medium text-gray-700 dark:text-gray-300">StreamAutomator</span>
           </p>
           <Link
             to="/"

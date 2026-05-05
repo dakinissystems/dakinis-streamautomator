@@ -9,8 +9,6 @@ SaaS platform to schedule and manage content across multiple social platforms fr
 - **Repository:** [github.com/dakinissystems/dakinis-streamautomator](https://github.com/dakinissystems/dakinis-streamautomator)
 - **Ecosystem:** [Dakinis Systems](https://github.com/dakinissystems) — SaaS tools for creators and digital businesses.
 
-*(You may still see the historical name “Streamer Scheduler” in docs and the UI; it refers to the same product.)*
-
 ---
 
 ## What it does
@@ -38,6 +36,8 @@ dakinis-streamautomator/
 ```
 
 On **Render** (or any host with a service root directory), set the API service **Root Directory** to `apps/api`.
+
+On Windows you can open the whole ecosystem from **`D:\\dakinis-systems\\`**: `streamautomator\\backend` and `streamautomator\\client` are junctions into this repo’s **`apps\\api`** and **`apps\\web`** (plus AkoeNet, landing, core, and the new shared packages tree). See **`D:\\dakinis-systems\\README.md`**.
 
 ---
 
@@ -219,7 +219,7 @@ If `DISCORD_BOT_TOKEN` is not set in production, scheduled Discord publications 
 
 ## License
 
-Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+Copyright © 2024-2026 Dakinis Systems. All rights reserved.
 
 This software is proprietary and confidential. Unauthorized copying, distribution, or modification is strictly prohibited.
 

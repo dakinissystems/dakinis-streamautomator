@@ -455,9 +455,9 @@ export default function AdminDashboard({ token, user, onLogout }) {
       }
       const pdfBlob = buildPaymentsInvoicePdf(data, {
         logoDataUrl,
-        appName: t('dashboard.appTitle') || 'Streamer Scheduler',
-        ownerName: 'Christian David Villar Colodro',
-        ownerEmail: 'christiandvillar@gmail.com',
+        appName: t('dashboard.appTitle') || 'StreamAutomator',
+        ownerName: 'Dakinis Systems',
+        ownerEmail: 'legal@streamautomator.com',
         colUsuario: t('admin.pdfColUsuario'),
         colTipoSuscripcion: t('admin.pdfColTipoSuscripcion'),
         colPago: t('admin.pdfColPago'),

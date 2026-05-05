@@ -79,7 +79,7 @@ export default function OverlaySuggestions() {
             {idea || 'Waiting for !idea or !suggest from chat...'}
           </div>
           <div className="mt-2 text-[10px] text-slate-400">
-            Powered by Streamer Scheduler
+            Powered by StreamAutomator
           </div>
         </div>
       </div>

@@ -2,7 +2,7 @@
  * Cache Service
  * Redis-based caching for frequently accessed data.
  * Falls back to in-memory cache if Redis unavailable.
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import logger from '../utils/logger.js';

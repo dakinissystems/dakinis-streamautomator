@@ -29,8 +29,8 @@ export default function Privacy() {
           <section>
             <h2 className="text-xl font-semibold mt-6 mb-2">1. Responsable del tratamiento</h2>
             <p>
-              Christian David Villar Colodro es responsable del tratamiento de los datos personales recabados a través de
-              Streamer Scheduler (&quot;el Servicio&quot;). Esta Política de privacidad describe qué datos tratamos, con qué
+              Dakinis Systems es responsable del tratamiento de los datos personales recabados a través de
+              StreamAutomator (&quot;el Servicio&quot;). Esta Política de privacidad describe qué datos tratamos, con qué
               finalidad y cuáles son tus derechos.
             </p>
           </section>
@@ -101,7 +101,7 @@ export default function Privacy() {
           <section>
             <h2 className="text-xl font-semibold mt-6 mb-2">8. Contacto</h2>
             <p>
-              Para consultas sobre esta Política de privacidad o sobre el tratamiento de tus datos: <a href="mailto:christiandvillar@gmail.com" className="text-primary-600 dark:text-primary-400 underline">christiandvillar@gmail.com</a>.
+              Para consultas sobre esta Política de privacidad o sobre el tratamiento de tus datos: <a href="mailto:legal@streamautomator.com" className="text-primary-600 dark:text-primary-400 underline">legal@streamautomator.com</a>.
             </p>
           </section>
         </div>

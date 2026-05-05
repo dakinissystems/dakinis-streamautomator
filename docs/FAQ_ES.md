@@ -1,4 +1,4 @@
-# Preguntas frecuentes (FAQ) – Streamer Scheduler
+# Preguntas frecuentes (FAQ) – StreamAutomator
 
 [Guía de usuarios (ES)](GUIA-USUARIOS.md) · [User guide (EN)](USER-GUIDE.md) · [FAQ (EN)](FAQ_EN.md)
 
@@ -118,4 +118,4 @@ Usa **Configuración → Soporte** para enviar un mensaje, o el correo/canal que
 
 ---
 
-*Última actualización: 2026. Streamer Scheduler – FAQ.*
+*Última actualización: 2026. StreamAutomator – FAQ.*

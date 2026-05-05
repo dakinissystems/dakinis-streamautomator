@@ -1,6 +1,6 @@
 /**
- * Streamer Scheduler - Backend Application
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * StreamAutomator API (Node/Express) · Dakinis Systems
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  * Proprietary Software - Unauthorized copying, distribution, or modification is strictly prohibited.
  */
 
@@ -221,7 +221,7 @@ function redirectApiAdminToSpa(req, res) {
     return res.status(404).json({
       error: 'Endpoint not found',
       message:
-        'The admin dashboard runs on the Streamer Scheduler frontend (React), not on the API host. Use https://your-app-domain/admin — the same origin as users use for the app. Set FRONTEND_URL (or PUBLIC_FRONTEND_URL) on this server to enable an automatic redirect from /admin.',
+        'The admin dashboard runs on the StreamAutomator frontend (React), not on the API host. Use https://your-app-domain/admin — the same origin as users use for the app. Set FRONTEND_URL (or PUBLIC_FRONTEND_URL) on this server to enable an automatic redirect from /admin.',
       path: req.path,
     });
   }
@@ -432,7 +432,7 @@ setupSwagger(app);
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({ 
-    message: 'Streamer Scheduler API',
+    message: 'StreamAutomator API',
     version: '2.3.1',
     status: 'running',
     endpoints: {

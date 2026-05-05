@@ -2,7 +2,7 @@
  * Stream Reminder Queue Service
  * Uses BullMQ + Redis: producer enqueues one job per (contentId, streamReminderId), worker sends email.
  * Replaces in-process cron for scalability.
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import logger from '../utils/logger.js';

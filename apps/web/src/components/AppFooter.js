@@ -40,7 +40,7 @@ export default function AppFooter({ className = '' }) {
           >
             {t('footer.brandName') || COPYRIGHT_BRAND_NAME}
           </a>
-          {t('footer.copyrightSuffix') || ' (trading name of Christian Villar). All rights reserved.'}
+          {t('footer.copyrightSuffix') || '. All rights reserved.'}
         </span>
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
           <Link to="/faq" className="hover:text-accent underline">{t('faq.menuTitle') || 'FAQ'}</Link>

@@ -167,7 +167,7 @@ export default function Overlay() {
           >
             <div className="text-xs font-semibold tracking-wide uppercase text-slate-300">{title}</div>
             <div className="mt-1 text-base font-medium">{data.main || '—'}</div>
-            <div className="mt-2 text-[10px] text-slate-400">Powered by Streamer Scheduler</div>
+            <div className="mt-2 text-[10px] text-slate-400">Powered by StreamAutomator</div>
           </div>
         </div>
       </div>
@@ -225,7 +225,7 @@ export default function Overlay() {
           className={`mt-3 text-[10px] ${transparentCard ? 'text-white/60' : 'text-slate-400'}`}
           style={transparentCard ? { textShadow: textShadowOverlay } : undefined}
         >
-          Powered by Streamer Scheduler
+          Powered by StreamAutomator
         </div>
       </div>
     </div>

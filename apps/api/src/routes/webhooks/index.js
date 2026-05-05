@@ -54,7 +54,7 @@ router.post('/todo', async (req, res) => {
   try {
     const user = await getUserByApiKey(req);
     if (!user) {
-      return res.status(401).json({ error: 'Invalid or missing API key. Use the key from Streamer Scheduler → Settings → Bots.' });
+      return res.status(401).json({ error: 'Invalid or missing API key. Use the key from StreamAutomator → Settings → Bots.' });
     }
 
     const text = (req.body?.text ?? req.body?.title ?? req.query?.text ?? '').trim();
@@ -85,7 +85,7 @@ async function handleCreateEvent(req, res) {
   try {
     const user = await getUserByApiKey(req);
     if (!user) {
-      return res.status(401).json({ error: 'Invalid or missing API key. Use the key from Streamer Scheduler → Settings → Bots.' });
+      return res.status(401).json({ error: 'Invalid or missing API key. Use the key from StreamAutomator → Settings → Bots.' });
     }
 
     const title = (req.body?.title ?? req.body?.event ?? req.body?.text ?? '').trim();
@@ -972,7 +972,7 @@ router.get('/goal', async (req, res) => {
     const goalType = fullUser?.streamGoalType || null;
     const target = fullUser?.streamGoalTarget ?? null;
     if (!goalType || target == null || target < 1) {
-      sendText(res, 'No goal set. Set a follower or sub goal in Streamer Scheduler → Settings.');
+      sendText(res, 'No goal set. Set a follower or sub goal in StreamAutomator → Settings.');
       return;
     }
     let current = null;

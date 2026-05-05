@@ -6,7 +6,7 @@ import { devCatchLog } from './devCatchLog';
  * When user pastes in Schedule, we parse and fill the form.
  */
 const CLIPBOARD_MAGIC = '_source';
-const CLIPBOARD_APP = 'streamer-scheduler';
+const CLIPBOARD_APP = 'streamautomator';
 
 /**
  * Build clipboard text from a content/post object.

@@ -1,7 +1,7 @@
 /**
  * Getting started checklist for new users (Dashboard).
  * Dismissible; state stored in localStorage. Does not block any functionality.
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import React, { useState, useEffect } from 'react';

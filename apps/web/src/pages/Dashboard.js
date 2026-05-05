@@ -762,7 +762,7 @@ const Dashboard = ({ user, token, ...props }) => {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 min-w-0">
           <div className="flex justify-between items-center h-14 sm:h-16 gap-2 min-w-0">
             <div className="flex items-center min-w-0 flex-1">
-              <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white truncate">{t('dashboard.appTitle') || 'Streamer Scheduler'}</h1>
+              <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white truncate">{t('dashboard.appTitle') || 'StreamAutomator'}</h1>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
               <div className="flex space-x-2">

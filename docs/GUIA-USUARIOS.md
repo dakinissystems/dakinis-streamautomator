@@ -1,14 +1,14 @@
-# Guía para usuarios – Streamer Scheduler
+# Guía para usuarios – StreamAutomator
 
 [English](USER-GUIDE.md) · [FAQ (ES)](FAQ_ES.md) · [FAQ (EN)](FAQ_EN.md)
 
-Información para usar **Streamer Scheduler**: qué es la aplicación, cómo empezar y cómo usar sus funciones principales.
+Información para usar **StreamAutomator**: qué es la aplicación, cómo empezar y cómo usar sus funciones principales.
 
 ---
 
-## ¿Qué es Streamer Scheduler?
+## ¿Qué es StreamAutomator?
 
-Streamer Scheduler es una aplicación web que te permite **programar streams y publicaciones** y **automatizar anuncios** para varias plataformas desde un solo panel. Pensada para streamers y creadores que quieren planificar Twitch, Discord, X (Twitter), Instagram y YouTube, compartir una página pública de horario y usar bots de chat (Nightbot, Streamer.bot) con comandos como !schedule y !nextstream, sin tener que entrar en cada plataforma por separado.
+StreamAutomator es una aplicación web que te permite **programar streams y publicaciones** y **automatizar anuncios** para varias plataformas desde un solo panel. Pensada para streamers y creadores que quieren planificar Twitch, Discord, X (Twitter), Instagram y YouTube, compartir una página pública de horario y usar bots de chat (Nightbot, Streamer.bot) con comandos como !schedule y !nextstream, sin tener que entrar en cada plataforma por separado.
 
 ---
 
@@ -193,4 +193,4 @@ Para que el contenido se publique en cada red, debes **vincular** tus cuentas:
 
 ---
 
-*Última actualización: 2026. Streamer Scheduler – Guía para usuarios.*
+*Última actualización: 2026. StreamAutomator – Guía para usuarios.*

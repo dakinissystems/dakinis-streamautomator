@@ -1,7 +1,7 @@
 /**
  * WebSocket Client (Socket.IO)
  * Real-time notifications
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  * 
  * Note: Requires socket.io-client. Install: npm install socket.io-client
  */

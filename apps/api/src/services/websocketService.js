@@ -1,7 +1,7 @@
 /**
  * WebSocket Service (Socket.IO)
  * Real-time notifications for content publishing + roulette overlay
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  *
  * Note: Requires socket.io. Install: npm install socket.io
  */

@@ -1,6 +1,6 @@
 /**
  * Application-wide constants and configuration
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 export const APP_CONFIG = {

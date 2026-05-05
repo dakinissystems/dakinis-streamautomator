@@ -80,7 +80,7 @@ export default function OverlayNextStream() {
           </div>
         )}
         <div className="mt-3 text-[10px] text-slate-400">
-          Powered by Streamer Scheduler
+          Powered by StreamAutomator
         </div>
       </div>
     </div>

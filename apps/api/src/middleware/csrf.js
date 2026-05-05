@@ -1,7 +1,7 @@
 /**
  * CSRF Protection Middleware
  * Protects against Cross-Site Request Forgery attacks
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import { randomBytes } from 'crypto';

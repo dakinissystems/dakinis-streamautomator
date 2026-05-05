@@ -1,7 +1,7 @@
 /**
  * Upload Helper Functions
  * Complete flow for uploading files with trial/pro limits
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import { uploadFileThroughBackend } from '../features/uploads/api';

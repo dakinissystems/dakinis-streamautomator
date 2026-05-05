@@ -1,6 +1,6 @@
 /**
- * Streamer Scheduler - Frontend Application
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * StreamAutomator — frontend · Dakinis Systems
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  * Proprietary Software - Unauthorized copying, distribution, or modification is strictly prohibited.
  */
 

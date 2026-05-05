@@ -3,7 +3,7 @@
  * - GET /api/health/live  → 200 OK only (for Render / load balancers).
  * - GET /api/health/ready → DB + Redis check; 200 if both OK, else 503.
  * - GET /api/health       → Full status: status, redis, db, dbResponseTimeMs, memoryUsageMb, queue, uptime.
- * Copyright © 2024-2026 Christian David Villar Colodro. All rights reserved.
+ * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
 import express from 'express';
