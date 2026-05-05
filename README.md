@@ -2,15 +2,20 @@
 
 ---
 
-# Streamer Scheduler
+# StreamAutomator
 
-Una aplicación web para programar y gestionar contenido en múltiples plataformas sociales desde un solo lugar.
+Plataforma SaaS para programar y gestionar contenido en múltiples redes sociales desde un solo lugar. El desarrollo activo del código tiene lugar en el repositorio de **Dakinis Systems**:
+
+- **Repositorio:** [github.com/dakinissystems/dakinis-streamautomator](https://github.com/dakinissystems/dakinis-streamautomator)
+- **Ecosistema:** [Dakinis Systems](https://github.com/dakinissystems) — herramientas SaaS para creadores y negocios digitales.
+
+*(En documentación y UI aún puedes ver el nombre histórico «Streamer Scheduler»; es el mismo producto.)*
 
 ---
 
 ## Qué hace
 
-Streamer Scheduler es una plataforma de gestión de contenido que permite a creadores de contenido y streamers:
+StreamAutomator es una plataforma de gestión de contenido que permite a creadores de contenido y streamers:
 
 - **Programar publicaciones** en múltiples plataformas (Twitch, Twitter/X, Instagram, Discord)
 - **Gestionar contenido** con una interfaz de calendario visual
@@ -22,7 +27,7 @@ Streamer Scheduler es una plataforma de gestión de contenido que permite a crea
 ## Estructura del repositorio
 
 ```text
-streamer-scheduler/
+dakinis-streamautomator/
 ├── apps/
 │   ├── api/          # Backend (Node.js / Express): API, worker, scheduler
 │   └── web/          # Frontend (React / Create React App)
@@ -264,7 +269,7 @@ Ver **[LICENSE](LICENSE)** para más detalles.
 
 ## Documentación
 
-Todo el índice (guías ES/EN, FAQ, Discord, legal, scripts SQL, monitor/Redis) está en **[docs/README.md](docs/README.md)**. El README en inglés del proyecto es [README.en.md](README.en.md).
+Todo el índice (guías ES/EN, FAQ, Discord, legal, scripts SQL) está en **[docs/README.md](docs/README.md)**. El README en inglés del proyecto es [README.en.md](README.en.md).
 
 ---
 
@@ -275,4 +280,4 @@ Para incidencias, preguntas o soporte, contacta al equipo de desarrollo.
 ---
 
 **Versión:** 2.3.1  
-**Última actualización:** Abril 2026
+**Última actualización:** Mayo 2026 · Repositorio canónico: [dakinis-streamautomator](https://github.com/dakinissystems/dakinis-streamautomator)
