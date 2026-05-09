@@ -2,7 +2,8 @@
  * Bridge Dakinis platform/auth JWTs (UUID sub, tenant slug) → StreamAutomator Users + memberships.
  */
 
-import { User, Tenant, Membership, sequelize } from '../models/index.js';
+import { User, sequelize } from '../modules/users/infrastructure/models.js';
+import { Tenant, Membership } from '../modules/tenants/infrastructure/models.js';
 import { LICENSE_TYPES } from '../constants/licenseTypes.js';
 import logger from '../utils/logger.js';
 
