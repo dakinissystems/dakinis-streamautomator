@@ -41,7 +41,7 @@ import {
   linkSupabaseSchema,
   switchActiveTenantSchema,
 } from '../validators/userSchemas.js';
-import { Membership, Tenant } from '../models/index.js';
+import { Tenant, Membership } from '../modules/tenants/infrastructure/models.js';
 import { ensureDefaultTenantForUser } from '../modules/tenants/application/tenantResolutionService.js';
 import logger from '../utils/logger.js';
 
