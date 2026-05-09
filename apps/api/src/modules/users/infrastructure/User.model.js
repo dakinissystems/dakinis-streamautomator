@@ -18,6 +18,12 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  platformAuthSub: {
+    type: DataTypes.STRING(36),
+    allowNull: true,
+    unique: true,
+    comment: 'dakinis platform/auth user id (JWT sub, UUID)',
+  },
   oauthProvider: {
     type: DataTypes.STRING,
     allowNull: true,

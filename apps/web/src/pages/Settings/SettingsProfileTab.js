@@ -185,6 +185,9 @@ export default function SettingsProfileTab({
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
             {t('settings.streamGoalHint') || 'Set a follower or sub goal for the !goal chat command. Connect Twitch in Integrations to show current count.'}
+            <span className="block mt-2 text-xs text-gray-500 dark:text-gray-500">
+              {t('settings.streamGoalOptional') || 'These fields are optional — you can save profile changes without configuring a goal or webhook.'}
+            </span>
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>

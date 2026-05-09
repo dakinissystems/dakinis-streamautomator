@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, useNavigate, Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShoppingBag, Globe, LogOut, Video } from 'lucide-react';
+import { BrowserRouter as Router, useNavigate, Link, useLocation, useSearchParams } from 'react-router-dom';
+import { Menu, X, ShoppingBag, Globe, LogOut, Video, Building2 } from 'lucide-react';
 import { AppRoutes } from './routes/AppRoutes';
 import HeaderBanners from './components/HeaderBanners';
 import MessagesAndNotificationsDropdown from './components/MessagesAndNotificationsDropdown';
@@ -138,7 +138,16 @@ function Header({ user, token, onLogout, onMenuClick, installPromptEvent, onInst
 function Sidebar({ user, open, onClose, adminUnreadMessageCount = 0, adminFinance = true }) {
   const { t } = useLanguage();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const settingsTab = searchParams.get('tab') || 'profile';
   const supportCount = adminUnreadMessageCount ?? 0;
+
+  const getSidebarLinkClasses = (active) =>
+    `block px-3 py-2 rounded font-medium transition-colors ${
+      active
+        ? 'bg-color-sidebar/10 text-color-sidebar dark:bg-color-sidebar/20'
+        : 'text-gray-700 dark:text-gray-300 hover:bg-color-sidebar/10 dark:hover:bg-gray-700'
+    }`;
   
   // Helper to check if route is active
   const isActive = (path) => {
@@ -194,7 +203,21 @@ function Sidebar({ user, open, onClose, adminUnreadMessageCount = 0, adminFinanc
         {!user?.isAdmin && <Link to="/suggestions" className={getLinkClasses("/suggestions")}>{t('suggestions.menu') || 'Suggestions'}</Link>}
         {!user?.isAdmin && <Link to="/stream-timeline" className={getLinkClasses("/stream-timeline")}>{t('timeline.menu') || 'Timeline'}</Link>}
         {!user?.isAdmin && <Link to="/messages" className={getLinkClasses("/messages")}>{t('common.messages')}</Link>}
-        <Link to="/settings" className={getLinkClasses("/settings")}>{t('settings.title')}</Link>
+        <Link
+          to="/settings"
+          className={getSidebarLinkClasses(location.pathname === '/settings' && settingsTab !== 'workspace')}
+        >
+          {t('settings.title')}
+        </Link>
+        <Link
+          to="/settings?tab=workspace"
+          className={getSidebarLinkClasses(location.pathname === '/settings' && settingsTab === 'workspace')}
+        >
+          <span className="flex items-center gap-2">
+            <Building2 className="w-4 h-4 flex-shrink-0 opacity-90" aria-hidden />
+            {t('settings.workspace')}
+          </span>
+        </Link>
         <Link to="/profile" className={getLinkClasses("/profile")}>{t('profile.title')}</Link>
         {user?.isAdmin && (
           <>

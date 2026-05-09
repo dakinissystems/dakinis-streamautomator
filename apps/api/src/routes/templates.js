@@ -140,7 +140,8 @@ router.post('/:id/create-content', requireAuth, validateBody(Joi.object({
       req.params.id,
       req.user.id,
       req.body.scheduledFor,
-      req.body.variables
+      req.body.variables,
+      { tenantId: req.tenantId }
     );
     res.status(201).json(content);
   } catch (err) {

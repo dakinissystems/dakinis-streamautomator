@@ -56,7 +56,18 @@ export default function Login({ setAuth }) {
     setNotice(null);
     if (oauthError === 'oauth_failed') {
       setError(t('login.oauthFailed') || 'OAuth authentication failed. Please try again.');
-      setNotice(t('login.oauthFailedTwitterHint') || 'If you were signing in with X (Twitter), their page may have had a temporary issue. Please try again.');
+      const reasonRaw = urlParams.get('reason');
+      let detail = null;
+      try {
+        detail = reasonRaw ? decodeURIComponent(reasonRaw) : null;
+      } catch {
+        detail = reasonRaw;
+      }
+      if (detail) {
+        setNotice(detail);
+      } else {
+        setNotice(t('login.oauthFailedTwitterHint') || 'If you were signing in with X (Twitter), their page may have had a temporary issue. Please try again.');
+      }
     } else if (oauthError === 'discord_not_configured') {
       setError(t('login.discordNotConfigured') || 'Discord login is not configured. Set DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET in the backend .env with the numeric Application ID from Discord Developer Portal.');
     } else if (oauthError === 'twitch_not_configured') {

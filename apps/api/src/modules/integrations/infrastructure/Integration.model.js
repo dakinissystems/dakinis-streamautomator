@@ -11,6 +11,11 @@ const Integration = sequelize.define('Integration', {
       key: 'id',
     },
   },
+  tenantId: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    field: 'tenant_id',
+  },
   provider: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -88,7 +93,7 @@ const Integration = sequelize.define('Integration', {
   },
 }, {
   indexes: [
-    { unique: true, fields: ['userId', 'provider'], name: 'integrations_user_provider_unique' },
+    { unique: true, fields: ['userId', 'provider', 'tenantId'], name: 'integrations_user_provider_tenant_unique' },
     { fields: ['provider', 'status'] },
     { fields: ['expiresAt'] },
   ],

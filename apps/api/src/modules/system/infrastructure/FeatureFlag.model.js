@@ -2,6 +2,12 @@ import { DataTypes } from 'sequelize';
 import { sequelize } from '../../../config/database.js';
 
 const FeatureFlag = sequelize.define('FeatureFlag', {
+  tenantId: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    field: 'tenant_id',
+    comment: 'Null = global flag',
+  },
   key: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -25,7 +31,7 @@ const FeatureFlag = sequelize.define('FeatureFlag', {
   },
 }, {
   indexes: [
-    { unique: true, fields: ['key'] },
+    { unique: true, fields: ['tenantId', 'key'], name: 'feature_flags_tenant_key_unique' },
     { fields: ['enabled'] },
   ],
 });

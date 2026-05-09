@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Save, User, Bell, Globe, Shield, Palette, Key, MessageSquare, Download, Bot, Layout } from 'lucide-react';
+import { Save, User, Bell, Globe, Shield, Palette, Key, MessageSquare, Download, Bot, Layout, Building2 } from 'lucide-react';
 import {
   createCheckout,
   createCustomerPortal,
@@ -48,9 +48,11 @@ import SettingsSupportTab from './SettingsSupportTab';
 import SettingsDataTab from './SettingsDataTab';
 import SettingsBotsTab from './SettingsBotsTab';
 import SettingsPublicPageTab from './SettingsPublicPageTab';
+import SettingsWorkspaceTab from './SettingsWorkspaceTab';
 
 const getTabsConfig = (t) => [
   { id: 'profile', name: t('settings.profile'), Icon: User },
+  { id: 'workspace', name: t('settings.workspace'), Icon: Building2 },
   { id: 'notifications', name: t('settings.notifications'), Icon: Bell },
   { id: 'platforms', name: t('settings.platforms'), Icon: Globe },
   { id: 'bots', name: t('settings.bots') || 'Bots', Icon: Bot },
@@ -62,7 +64,7 @@ const getTabsConfig = (t) => [
   { id: 'data', name: t('settings.dataExport'), Icon: Download },
 ];
 
-export default function Settings({ user, token, setUser }) {
+export default function Settings({ user, token, setUser, setAuth }) {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -574,7 +576,23 @@ export default function Settings({ user, token, setUser }) {
     }
     setLoading(true);
     try {
-      const response = await apiClient.put('/user/profile', profileData, {
+      const goalType = profileData.streamGoalType === 'followers' || profileData.streamGoalType === 'subs'
+        ? profileData.streamGoalType
+        : null;
+      let goalTarget = null;
+      if (goalType) {
+        const raw = profileData.streamGoalTarget;
+        if (raw !== '' && raw != null) {
+          const n = typeof raw === 'number' ? raw : parseInt(String(raw).trim(), 10);
+          if (Number.isFinite(n) && n >= 1) goalTarget = n;
+        }
+      }
+      const payload = {
+        ...profileData,
+        streamGoalType: goalType,
+        streamGoalTarget: goalTarget,
+      };
+      const response = await apiClient.put('/user/profile', payload, {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
       });
@@ -836,6 +854,10 @@ export default function Settings({ user, token, setUser }) {
             onProfilePhotoRemove={handleProfilePhotoRemove}
             t={t}
           />
+        );
+      case 'workspace':
+        return (
+          <SettingsWorkspaceTab user={user} setUser={setUser} setAuth={setAuth} t={t} />
         );
       case 'notifications':
         return (

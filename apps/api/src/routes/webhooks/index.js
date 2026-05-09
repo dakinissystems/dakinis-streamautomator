@@ -28,6 +28,7 @@ import { announceStreamStarted } from '../../utils/discordAnnounce.js';
 import rouletteService from '../../modules/content/application/rouletteService.js';
 import { emitRouletteToUser } from '../../services/websocketService.js';
 import { buildPublicStreamerShareUrl } from '../../utils/publicStreamerShareUrl.js';
+import { ensureDefaultTenantForUser, getPrimaryTenantIdForUser } from '../../modules/tenants/application/tenantResolutionService.js';
 
 const router = express.Router();
 
@@ -115,7 +116,11 @@ async function handleCreateEvent(req, res) {
       platforms,
     };
 
-    const created = await contentService.createContent(user.id, contentData);
+    await ensureDefaultTenantForUser(user.id);
+    const tenantId = await getPrimaryTenantIdForUser(user.id);
+    const created = await contentService.createContent(user.id, contentData, {
+      tenantId,
+    });
     const first = Array.isArray(created) ? created[0] : created;
 
     logger.info('Webhook event created', {

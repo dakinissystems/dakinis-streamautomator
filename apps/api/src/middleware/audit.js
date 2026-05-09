@@ -25,6 +25,7 @@ export async function createAuditLog(options) {
       ipAddress: options.ipAddress,
       userAgent: options.userAgent,
       metadata: options.metadata,
+      tenantId: options.tenantId ?? null,
     });
   } catch (error) {
     // Don't fail the request if audit logging fails
@@ -63,6 +64,7 @@ export function auditLog(action, resourceType) {
         
         createAuditLog({
           userId: req.user?.id,
+          tenantId: req.tenantId ?? null,
           action,
           resourceType,
           resourceId,

@@ -42,6 +42,11 @@ const AuditLog = sequelize.define('AuditLog', {
     allowNull: true,
     comment: 'Additional metadata about the action',
   },
+  tenantId: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    field: 'tenant_id',
+  },
 }, {
   tableName: 'AuditLogs',
   indexes: [

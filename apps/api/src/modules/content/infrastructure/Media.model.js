@@ -38,6 +38,16 @@ const Media = sequelize.define('Media', {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  tenantId: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    field: 'tenant_id',
+  },
+  deletedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'deleted_at',
+  },
 });
 
 export default Media;

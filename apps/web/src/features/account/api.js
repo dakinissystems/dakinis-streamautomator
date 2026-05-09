@@ -79,3 +79,15 @@ export async function disconnectDiscord() { return (await apiClient.post('/user/
 export async function disconnectYoutube() { return (await apiClient.post('/youtube/disconnect')).data; }
 export async function disconnectSlack() { return (await apiClient.post('/user/disconnect-slack')).data; }
 
+/** SaaS workspaces (tenants) for the current user */
+export async function getWorkspaceTenants() {
+  const res = await apiClient.get('/user/tenants');
+  return res.data;
+}
+
+/** Switch active tenant; returns { token, user } */
+export async function switchActiveWorkspaceTenant(tenantId) {
+  const res = await apiClient.post('/user/tenant/active', { tenantId });
+  return res.data;
+}
+

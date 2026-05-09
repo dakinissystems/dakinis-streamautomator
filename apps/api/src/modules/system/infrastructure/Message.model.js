@@ -90,6 +90,11 @@ const Message = sequelize.define('Message', {
     references: { model: 'Users', key: 'id' },
     comment: 'Admin user who resolved the conversation',
   },
+  deletedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'deleted_at',
+  },
 }, {
   tableName: 'Messages',
   indexes: [

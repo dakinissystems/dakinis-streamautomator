@@ -21,7 +21,7 @@ import { setupStreamingWorkspace } from '../modules/integrations/application/sla
 import { generateLicenseKey, generateTemporaryPassword, generateUsernameSuffix } from '../utils/cryptoUtils.js';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import { generateAuthData, buildUserResponse, createLinkState, verifyLinkState, createTwitterOAuth2State, verifyTwitterOAuth2State, isAkoenetGlobalWebhookConfigured } from '../utils/authUtils.js';
+import { generateAuthData, buildUserResponse, createLinkState, verifyLinkState, createTwitterOAuth2State, verifyTwitterOAuth2State, isAkoenetGlobalWebhookConfigured, TENANT_SWITCH_FORBIDDEN } from '../utils/authUtils.js';
 import { supabase as supabaseAdmin } from '../utils/supabaseClient.js';
 import { validateBody } from '../middleware/validate.js';
 import { contentService } from '../modules/content/application/contentService.js';
@@ -38,11 +38,12 @@ import {
   adminResetPasswordSchema,
   adminAssignTrialSchema,
   extendTrialSchema,
-  linkSupabaseSchema
+  linkSupabaseSchema,
+  switchActiveTenantSchema,
 } from '../validators/userSchemas.js';
+import { Membership, Tenant } from '../models/index.js';
+import { ensureDefaultTenantForUser } from '../modules/tenants/application/tenantResolutionService.js';
 import logger from '../utils/logger.js';
-
-const router = express.Router();
 
 /** All OAuth/login redirects go here. For custom domain (e.g. streamautomator.com), set FRONTEND_URL to that domain in Render. */
 const RAW_FRONTEND_URL = process.env.FRONTEND_URL || process.env.PUBLIC_FRONTEND_URL || 'http://localhost:3000';
@@ -57,14 +58,18 @@ const FRONTEND_URL = FRONTEND_URL_SAFE;
 const TWITCH_OAUTH_REDIRECT_BASE = (process.env.TWITCH_OAUTH_REDIRECT_BASE_URL || BACKEND_URL).replace(/\/$/, '');
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-jwt-secret';
 
+const router = express.Router();
+
 // Helper function to generate JWT and redirect for OAuth callbacks
-const generateAuthResponse = (user, res) => {
-  const authData = generateAuthData(user);
-  
-  // Redirect to frontend with token
-  const redirectUrl = `${FRONTEND_URL}/auth/callback?token=${authData.token}&user=${encodeURIComponent(JSON.stringify(authData.user))}`;
-  
-  res.redirect(redirectUrl);
+const generateAuthResponse = async (user, res) => {
+  try {
+    const authData = await generateAuthData(user);
+    const redirectUrl = `${FRONTEND_URL}/auth/callback?token=${authData.token}&user=${encodeURIComponent(JSON.stringify(authData.user))}`;
+    res.redirect(redirectUrl);
+  } catch (err) {
+    logger.error('OAuth redirect: failed to build auth payload', { error: err.message });
+    res.redirect(`${FRONTEND_URL}/login?error=oauth_failed`);
+  }
 };
 
 // Configure Google OAuth Strategy
@@ -132,6 +137,36 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     }
   }));
 }
+
+const isGoogleConfigured = () => {
+  const id = (process.env.GOOGLE_CLIENT_ID || '').trim();
+  const secret = (process.env.GOOGLE_CLIENT_SECRET || '').trim();
+  return id.length > 0 && secret.length > 0;
+};
+
+/** Match Discord/Twitch pattern: avoid Passport "Unknown authentication strategy" when OAuth is not configured. */
+const googleAuth = (req, res, next) => {
+  if (!isGoogleConfigured()) {
+    logger.warn('Google OAuth attempted but Google is not configured');
+    return res.redirect(`${FRONTEND_URL}/login?error=google_not_configured`);
+  }
+  passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+};
+
+const googleCallback = (req, res, next) => {
+  if (!isGoogleConfigured()) {
+    return res.redirect(`${FRONTEND_URL}/login?error=google_not_configured`);
+  }
+  passport.authenticate('google', { session: false, failureRedirect: `${FRONTEND_URL}/login?error=oauth_failed` })(req, res, async (err) => {
+    if (err) return next(err);
+    try {
+      await generateAuthResponse(req.user, res);
+    } catch (e) {
+      logger.error('Google OAuth callback: auth payload failed', { error: e.message });
+      return res.redirect(`${FRONTEND_URL}/login?error=oauth_failed`);
+    }
+  });
+};
 
 // Twitch OAuth validation function
 const isTwitchConfigured = () => {
@@ -424,7 +459,7 @@ export async function googleLoginHandler(req, res) {
     }
 
     // 3) Return JWT and user
-    const authResponse = generateAuthData(dbUser);
+    const authResponse = await generateAuthData(dbUser);
     res.json({
       token: authResponse.token,
       user: authResponse.user,
@@ -452,20 +487,16 @@ export async function googleLoginHandler(req, res) {
 router.post('/google-login', googleLoginHandler);
 
 // OAuth Routes (Passport fallback)
-router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-router.get('/auth/google/callback', 
-  passport.authenticate('google', { session: false, failureRedirect: `${FRONTEND_URL}/login?error=oauth_failed` }),
-  (req, res) => {
-    generateAuthResponse(req.user, res);
-  }
-);
+router.get('/auth/google', googleAuth);
+router.get('/auth/google/callback', googleCallback);
 
 /** Base URL for Twitch OAuth redirect_uri: never use Supabase (Twitch must redirect back to our API). */
 function getTwitchRedirectBase() {
-  const back = (process.env.BACKEND_URL || '').replace(/\/$/, '');
+  const twitchOnly = (process.env.TWITCH_OAUTH_REDIRECT_BASE_URL || '').trim().replace(/\/$/, '');
+  if (twitchOnly) return twitchOnly;
+  const back = (process.env.BACKEND_URL || '').trim().replace(/\/$/, '');
   if (back && !back.includes('supabase.co')) return back;
-  return (process.env.TWITCH_OAUTH_REDIRECT_BASE_URL || 'http://localhost:5000').replace(/\/$/, '');
+  return 'http://localhost:5000';
 }
 
 /** GET /auth/twitch - Redirect to Twitch OAuth2 (id.twitch.tv; Kraken is deprecated). */
@@ -533,7 +564,7 @@ router.get('/auth/twitch/callback', async (req, res) => {
   try {
     const user = await processTwitchOAuthUser(access_token, refresh_token || null, twitchUser);
     logger.info('Twitch OAuth login successful', { userId: user.id, email: user.email });
-    generateAuthResponse(user, res);
+    await generateAuthResponse(user, res);
   } catch (err) {
     logger.error('Twitch OAuth process user failed', { error: err.message });
     return res.redirect(`${FRONTEND_URL}/login?error=oauth_failed&reason=${encodeURIComponent(err.message || 'processing_failed')}`);
@@ -715,7 +746,7 @@ export const twitterOAuth2Callback = async (req, res) => {
       hasUsedTrial: true,
     });
   }
-  generateAuthResponse(user, res);
+  await generateAuthResponse(user, res);
 };
 
 /** GET /auth/twitter/mode - Tell frontend whether to use backend OAuth2 or Supabase for X (Twitter). */
@@ -866,7 +897,7 @@ router.get('/auth/twitter/link', twitterLinkStart);
 router.get('/auth/twitter/link/callback', twitterLinkCallback);
 
 // Export for app.js: register these BEFORE authenticateToken so Discord/Twitch OAuth works without JWT
-export { isDiscordConfigured, isTwitchConfigured, isTwitterOAuth2Configured };
+export { isDiscordConfigured, isGoogleConfigured, isTwitchConfigured, isTwitterOAuth2Configured };
 
 // Discord OAuth handlers - define before using in routes
 export const discordAuth = (req, res, next) => {
@@ -881,17 +912,20 @@ export const discordCallback = (req, res, next) => {
   if (!isDiscordConfigured()) {
     return res.redirect(`${FRONTEND_URL}/login?error=discord_not_configured`);
   }
-  passport.authenticate('discord', { session: false, failureRedirect: `${FRONTEND_URL}/login?error=oauth_failed` })(req, res, (err) => {
+  passport.authenticate('discord', { session: false, failureRedirect: `${FRONTEND_URL}/login?error=oauth_failed` })(req, res, async (err) => {
     if (err) return next(err);
-    // Use generateAuthResponse for consistency, but handle returnTo state
     const returnTo = (req.query.state || '').trim() || undefined;
-    if (returnTo) {
-      const authData = generateAuthData(req.user);
-      const redirectUrl = `${FRONTEND_URL}/auth/callback?token=${authData.token}&user=${encodeURIComponent(JSON.stringify(authData.user))}&returnTo=${encodeURIComponent(returnTo)}`;
-      return res.redirect(redirectUrl);
+    try {
+      if (returnTo) {
+        const authData = await generateAuthData(req.user);
+        const redirectUrl = `${FRONTEND_URL}/auth/callback?token=${authData.token}&user=${encodeURIComponent(JSON.stringify(authData.user))}&returnTo=${encodeURIComponent(returnTo)}`;
+        return res.redirect(redirectUrl);
+      }
+      await generateAuthResponse(req.user, res);
+    } catch (e) {
+      logger.error('Discord OAuth callback: auth payload failed', { error: e.message });
+      return res.redirect(`${FRONTEND_URL}/login?error=oauth_failed`);
     }
-    // Standard OAuth callback - use generateAuthResponse
-    generateAuthResponse(req.user, res);
   });
 };
 
@@ -1345,7 +1379,7 @@ router.post('/register', validateBody(registerSchema), async (req, res) => {
     const user = await User.create(userData);
     
     // Generate authentication data (token + user response)
-    const authData = generateAuthData(user);
+    const authData = await generateAuthData(user);
     
     res.status(201).json({ 
       message: 'User registered', 
@@ -1391,7 +1425,7 @@ router.post('/login', validateBody(loginSchema), async (req, res) => {
     // This will be updated when password is actually changed via the change password endpoint
     
     // Generate authentication data (token + user response)
-    const authData = generateAuthData(user);
+    const authData = await generateAuthData(user);
     
     res.json(authData);
   } catch (err) {
@@ -1695,7 +1729,7 @@ export async function autoCreateFirstStreamHandler(req, res) {
       platforms: ['twitch'],
       status: CONTENT_STATUS.DRAFT,
     };
-    const created = await contentService.createContent(userId, payload);
+    const created = await contentService.createContent(userId, payload, { tenantId: req.tenantId });
     const item = Array.isArray(created) ? created[0] : created;
     logger.info('Auto-created first stream for user', { userId, contentId: item?.id });
     res.status(201).json({ created: item, message: 'First stream created. Edit it in Schedule.' });
@@ -1704,6 +1738,62 @@ export async function autoCreateFirstStreamHandler(req, res) {
     res.status(500).json({ error: err.message || 'Server error' });
   }
 }
+
+router.get('/tenants', requireAuth, async (req, res) => {
+  try {
+    await ensureDefaultTenantForUser(req.user.id);
+    const rows = await Membership.findAll({
+      where: { userId: req.user.id },
+      include: [
+        {
+          model: Tenant,
+          attributes: ['id', 'name', 'slug', 'plan', 'createdAt'],
+          required: true,
+        },
+      ],
+      order: [['createdAt', 'ASC']],
+      attributes: ['tenantId', 'role', 'createdAt'],
+    });
+    const tenants = rows.map((m) => {
+      const tp = m.Tenant?.get ? m.Tenant.get({ plain: true }) : m.Tenant;
+      return {
+        role: m.role,
+        joinedAt: m.createdAt ?? null,
+        tenant: tp
+          ? {
+              id: Number(tp.id),
+              name: tp.name,
+              slug: tp.slug,
+              plan: tp.plan ?? 'free',
+              createdAt: tp.createdAt ?? null,
+            }
+          : null,
+      };
+    });
+    const activeTenantId =
+      req.tenantId !== undefined && req.tenantId !== null ? Number(req.tenantId) : null;
+    res.json({ tenants, activeTenantId: Number.isFinite(activeTenantId) ? activeTenantId : null });
+  } catch (err) {
+    logger.error('List tenants error', { error: err.message, userId: req.user?.id });
+    res.status(500).json({ error: 'Could not load workspaces', details: err.message });
+  }
+});
+
+/** POST — set JWT active tenant (requires membership). Returns new token + user payload. */
+router.post('/tenant/active', requireAuth, validateBody(switchActiveTenantSchema), async (req, res) => {
+  try {
+    const dbUser = await User.findByPk(req.user.id);
+    if (!dbUser) return res.status(404).json({ error: 'User not found' });
+    const authData = await generateAuthData(dbUser, { activeTenantId: req.body.tenantId });
+    res.json(authData);
+  } catch (err) {
+    if (err.code === TENANT_SWITCH_FORBIDDEN) {
+      return res.status(403).json({ error: err.message || 'Not a member of this tenant' });
+    }
+    logger.error('Switch active tenant error', { error: err.message, userId: req.user?.id });
+    res.status(500).json({ error: 'Could not switch workspace', details: err.message });
+  }
+});
 
 router.get('/onboarding-status', requireAuth, onboardingStatusHandler);
 router.post('/auto-create-first-stream', requireAuth, autoCreateFirstStreamHandler);
@@ -2999,6 +3089,7 @@ router.put('/profile', requireAuth, validateBody(updateProfileSchema), auditLog(
     if (discordClipsChannelId !== undefined) user.discordClipsChannelId = discordClipsChannelId && String(discordClipsChannelId).trim() ? String(discordClipsChannelId).trim() : null;
     if (streamGoalType !== undefined) user.streamGoalType = streamGoalType === 'followers' || streamGoalType === 'subs' ? streamGoalType : null;
     if (streamGoalTarget !== undefined) user.streamGoalTarget = streamGoalTarget != null && Number.isInteger(Number(streamGoalTarget)) && Number(streamGoalTarget) >= 1 ? Number(streamGoalTarget) : null;
+    if (streamGoalType !== undefined && !user.streamGoalType) user.streamGoalTarget = null;
     if (discordAnnounceWebhookUrl !== undefined) user.discordAnnounceWebhookUrl = discordAnnounceWebhookUrl && String(discordAnnounceWebhookUrl).trim() ? String(discordAnnounceWebhookUrl).trim() : null;
     if (akoenetWebhookUrl !== undefined) {
       const u = akoenetWebhookUrl && String(akoenetWebhookUrl).trim() ? String(akoenetWebhookUrl).trim() : null;

@@ -82,7 +82,7 @@ export function AppRoutes({ user, token, setAuth, setUser, clearAuth }) {
         path="/settings"
         element={
           <PrivateRoute user={user}>
-            <Settings user={user} token={token} setUser={setUser} />
+            <Settings user={user} token={token} setUser={setUser} setAuth={setAuth} />
           </PrivateRoute>
         }
       />

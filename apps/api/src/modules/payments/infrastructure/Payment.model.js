@@ -59,6 +59,11 @@ const Payment = sequelize.define('Payment', {
     defaultValue: false,
     comment: 'Whether this payment is part of a recurring subscription',
   },
+  tenantId: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    field: 'tenant_id',
+  },
 });
 
 export default Payment;

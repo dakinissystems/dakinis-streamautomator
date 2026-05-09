@@ -124,9 +124,35 @@ export const updateProfileSchema = Joi.object({
     Joi.object({ x: Joi.number().min(0).max(100).required(), y: Joi.number().min(0).max(100).required() }),
     Joi.string().pattern(/^\{.*\}$/) // JSON string from stored custom position
   ).optional(),
-  streamGoalType: Joi.string().valid('followers', 'subs').allow(null).optional(),
-  streamGoalTarget: Joi.number().integer().min(1).allow(null).optional(),
-  discordAnnounceWebhookUrl: Joi.string().uri().allow('', null).optional(),
+  // Stream goal: all optional; '' / omitted must not block saving other profile fields
+  streamGoalType: Joi.string()
+    .valid('followers', 'subs')
+    .allow(null, '')
+    .optional()
+    .custom((v) => (v === '' ? null : v)),
+  streamGoalTarget: Joi.any()
+    .optional()
+    .allow(null, '')
+    .custom((v, helpers) => {
+      if (v === '' || v === null || v === undefined) return null;
+      const n = typeof v === 'number' ? v : parseInt(String(v).trim(), 10);
+      if (!Number.isFinite(n) || n < 1) {
+        return helpers.error('any.invalid', { message: 'Stream goal target must be a positive integer' });
+      }
+      return n;
+    }),
+  // Lenient: invalid / placeholder URLs are cleared so save is not blocked
+  discordAnnounceWebhookUrl: Joi.string().max(2000).allow('', null).optional().custom((value) => {
+    if (value == null || (typeof value === 'string' && !value.trim())) return null;
+    const trimmed = String(value).trim();
+    try {
+      const u = new URL(trimmed);
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+      return trimmed;
+    } catch {
+      return null;
+    }
+  }),
   akoenetWebhookUrl: Joi.string().uri().max(2000).allow('', null).optional(),
   akoenetAnnounceChannelId: Joi.string().max(100).allow('', null).optional(),
   akoenetServerId: Joi.string().max(100).allow('', null).optional(),
@@ -214,4 +240,9 @@ export const linkSupabaseSchema = Joi.object({
   supabaseAccessToken: Joi.string().required().messages({
     'any.required': 'Supabase access token is required'
   })
+}).required();
+
+/** Set active SaaS tenant (must be a membership of the authenticated user). */
+export const switchActiveTenantSchema = Joi.object({
+  tenantId: Joi.number().integer().positive().required(),
 }).required();
