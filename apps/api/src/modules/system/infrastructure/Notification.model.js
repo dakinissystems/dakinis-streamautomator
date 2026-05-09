@@ -23,6 +23,16 @@ const Notification = sequelize.define('Notification', {
     references: { model: 'Users', key: 'id' },
     onDelete: 'CASCADE',
   },
+  tenantId: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    field: 'tenant_id',
+  },
+  deletedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'deleted_at',
+  },
 }, {
   tableName: 'Notifications',
   indexes: [

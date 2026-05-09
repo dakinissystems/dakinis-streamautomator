@@ -61,6 +61,12 @@ const Content = sequelize.define('Content', {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  tenantId: {
+    type: DataTypes.BIGINT,
+    allowNull: true,
+    field: 'tenant_id',
+    comment: 'SaaS workspace (nullable for legacy rows)',
+  },
   discordGuildId: {
     type: DataTypes.STRING,
     allowNull: true,

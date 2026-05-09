@@ -20,7 +20,7 @@ export const swaggerOptions = {
     },
     servers: [
       {
-        url: process.env.BACKEND_URL || 'http://localhost:5000',
+        url: process.env.BACKEND_URL || 'http://localhost:4002',
         description: 'Development server',
       },
     ],

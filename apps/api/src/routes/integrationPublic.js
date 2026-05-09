@@ -34,7 +34,7 @@ const INTEGRATION_BODY = () => ({
     upcoming_alias: 'GET /api/streamer/{username}/upcoming',
     legacy_upcoming: 'GET /api/public/streamer/{username}/upcoming',
   },
-  auth: 'Public endpoints above require no JWT. Optional: resolve username as Users.username (slug) or Twitch login if TWITCH_CLIENT_* set and account linked.',
+  auth: 'Public endpoints require no JWT. Prefer discovery under /api/integrations/* (canonical); /api/integration/* is the same router kept for backward compatibility. Optional: resolve username as Users.username (slug) or Twitch login if TWITCH_CLIENT_* set and account linked.',
   outbound_webhook_to_akoenet: {
     method: 'POST',
     path_on_akoenet_example: '/integrations/scheduler/webhooks/stream-scheduled',

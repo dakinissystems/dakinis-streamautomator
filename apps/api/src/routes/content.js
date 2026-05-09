@@ -13,6 +13,7 @@ import { auditLog } from '../middleware/audit.js';
 import { postTweet } from '../utils/twitterPublish.js';
 import platformConfigService from '../modules/system/application/platformConfigService.js';
 import logger from '../utils/logger.js';
+import { normalizeTenantId, scopedUserTenantWhere } from '../utils/tenantScope.js';
 
 const router = express.Router();
 
@@ -43,7 +44,9 @@ router.post('/', requireAuth, checkLicense, contentCreationLimiter, validateBody
         maxLength: TWITTER_MAX_CHARS,
       });
     }
-    const created = await contentService.createContent(req.user.id, req.body);
+    const created = await contentService.createContent(req.user.id, req.body, {
+      tenantId: req.tenantId,
+    });
     res.status(201).json(created);
   } catch (err) {
     logger.error('Error creating content', {
@@ -59,6 +62,7 @@ router.post('/', requireAuth, checkLicense, contentCreationLimiter, validateBody
 router.get('/', requireAuth, async (req, res) => {
   try {
     const result = await contentService.getUserContent(req.user.id, {
+      tenantId: req.tenantId,
       query: req.query,
       status: req.query.status,
       platform: req.query.platform,
@@ -92,8 +96,9 @@ router.get('/', requireAuth, async (req, res) => {
 
 router.get('/export', requireAuth, async (req, res) => {
   try {
+    const tenantNumeric = normalizeTenantId(req.tenantId);
     const contents = await Content.findAll({
-      where: { userId: req.user.id },
+      where: scopedUserTenantWhere(req.user.id, tenantNumeric, { deletedAt: null }),
       order: [['scheduledFor', 'DESC']],
     });
 
@@ -135,21 +140,20 @@ router.get('/debug-scheduled', requireAuth, async (req, res) => {
     const userId = req.user.id;
     const now = new Date();
 
+    const tenantNumeric = normalizeTenantId(req.tenantId);
+
     const scheduled = await Content.findAll({
-      where: {
-        userId,
-        status: 'scheduled',
-      },
+      where: scopedUserTenantWhere(userId, tenantNumeric, { status: 'scheduled', deletedAt: null }),
       order: [['scheduledFor', 'ASC']],
       limit: 10,
     });
 
     const due = await Content.findAll({
-      where: {
-        userId,
+      where: scopedUserTenantWhere(userId, tenantNumeric, {
         status: 'scheduled',
         scheduledFor: { [Op.lte]: now },
-      },
+        deletedAt: null,
+      }),
       order: [['scheduledFor', 'ASC']],
       limit: 10,
     });
@@ -190,7 +194,9 @@ router.get('/debug-scheduled', requireAuth, async (req, res) => {
 // Get content by id - allowed without license (read-only)
 router.get('/:id', requireAuth, async (req, res) => {
   try {
-    const content = await contentService.getContentById(req.params.id, req.user.id);
+    const content = await contentService.getContentById(req.params.id, req.user.id, {
+      tenantId: req.tenantId,
+    });
     res.json(content);
   } catch (err) {
     if (err.message === 'Content not found') {
@@ -231,7 +237,9 @@ router.put('/:id', requireAuth, checkLicense, validateBody(updateContentSchema),
         maxLength: TWITTER_MAX_CHARS,
       });
     }
-    const content = await contentService.updateContent(req.params.id, req.user.id, req.body);
+    const content = await contentService.updateContent(req.params.id, req.user.id, req.body, {
+      tenantId: req.tenantId,
+    });
     res.json(content);
   } catch (err) {
     if (err.message === 'Content not found') {
@@ -250,7 +258,9 @@ router.put('/:id', requireAuth, checkLicense, validateBody(updateContentSchema),
 // Delete content (requires valid license)
 router.delete('/:id', requireAuth, checkLicense, auditLog('content_deleted', 'Content'), async (req, res) => {
   try {
-    const result = await contentService.deleteContent(req.params.id, req.user.id);
+    const result = await contentService.deleteContent(req.params.id, req.user.id, {
+      tenantId: req.tenantId,
+    });
     res.json(result);
   } catch (err) {
     if (err.message === 'Content not found') {

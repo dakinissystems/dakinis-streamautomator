@@ -1,111 +1,26 @@
-# Protection Summary / Resumen de Protección
+# Protection Summary — Dakinis StreamAutomator (Basic)
 
-## ✅ Implemented Protections / Protecciones Implementadas
+## English
 
-### Legal Documents / Documentos Legales
+# Legal notice and intellectual property protection — Dakinis StreamAutomator
 
-1. **LICENSE** - Proprietary software license
-   - Explicit restrictions on copying, modification, distribution
-   - Copyright ownership clearly stated
-   - Legal penalties for violations
+This document provides a legal basis to protect Dakinis StreamAutomator software, brand, and content.
+It does not constitute professional legal advice. Validate it with a lawyer in your jurisdiction before production.
 
-2. **TERMS_OF_SERVICE.md** - Complete terms of service
-   - User agreement terms
-   - Prohibited uses
-   - Intellectual property rights
-   - Available in English and Spanish
-
-3. **COPYRIGHT_NOTICE.md** - Copyright declaration
-   - Clear ownership statement
-   - Contact information for licensing
-
-4. **LEGAL_PROTECTION.md** - Enforcement guide
-   - Steps to take if infringement is discovered
-   - DMCA takedown procedures
-   - Legal action guidance
-
-### Code-Level Protections / Protecciones a Nivel de Código
-
-1. **Copyright Headers in Source Files**
-   - `apps/api/src/app.js` - Copyright header added
-   - `apps/web/src/index.js` - Copyright header added
-   - `apps/web/public/index.html` - Copyright meta tag and comment
-
-2. **HTTP Headers**
-   - Backend sends copyright headers in all responses
-   - X-Copyright header
-   - X-Proprietary header
-
-3. **Documentation Updates**
-   - Copyright notices in source code files
-   - Links to legal documents
-
-### Files Created / Archivos Creados
-
-- ✅ LICENSE
-- ✅ TERMS_OF_SERVICE.md
-- ✅ COPYRIGHT_NOTICE.md
-- ✅ LEGAL_PROTECTION.md
-- ✅ PROTECTION_CHECKLIST.md
-- ✅ PROTECTION_SUMMARY.md (this file)
-
-### Files Modified / Archivos Modificados
-
-- ✅ Source code files - Copyright headers in all files
-- ✅ apps/api/src/app.js - Added copyright header and protection middleware
-- ✅ apps/web/src/index.js - Added copyright header
-- ✅ apps/web/public/index.html - Added copyright meta tag and comment
-
-## 🔒 Additional Recommendations / Recomendaciones Adicionales
-
-### For Production / Para Producción
-
-1. **Code Minification**
-   ```bash
-   # Frontend already uses react-scripts build which minifies
-   # Consider additional obfuscation if needed
-   ```
-
-2. **Environment Security**
-   - Never commit .env files (already in .gitignore)
-   - Use Render environment variables for production
-   - Rotate secrets regularly
-
-3. **Monitoring**
-   - Set up error tracking (Sentry, LogRocket)
-   - Monitor API usage patterns
-   - Set up alerts for suspicious activity
-
-4. **Legal Monitoring**
-   - Regularly search for unauthorized copies
-   - Monitor GitHub/GitLab for forks
-   - Set up Google Alerts for your project name
-
-## 📋 Next Steps / Próximos Pasos
-
-1. Review PROTECTION_CHECKLIST.md for additional measures
-2. Consider code obfuscation for sensitive logic
-3. Set up monitoring and alerting
-4. Regularly update dependencies for security
-5. Keep legal documents current
-
-## ⚖️ Legal Enforcement / Cumplimiento Legal
-
-If you discover unauthorized use:
-
-1. Document everything (screenshots, URLs, timestamps)
-2. Send cease and desist letter
-3. File DMCA takedown if code is published online
-4. Consult with IP attorney for legal action
-5. Seek damages and injunctive relief
-
-## 📞 Contact / Contacto
-
-For legal inquiries:
-- Email: legal@streamautomator.com
+1) Ownership and copyright
+All source code, architecture, design, texts, logos, and related assets associated with Dakinis StreamAutomator are owned by the respective rightsholder (or its licensors).
+You may not copy, distribute, reverse engineer, publish, or commercially exploit the software without written authorization.
 
 ---
 
-**Remember:** No technical protection is 100% effective. Legal protection through copyright, terms of service, and enforcement actions is your primary defense.
+## Español
 
-**Recuerda:** Ninguna protección técnica es 100% efectiva. La protección legal a través de derechos de autor, términos de servicio y acciones de cumplimiento es tu defensa principal.
+# Protección legal de Dakinis StreamAutomator
+
+Este documento define una base legal operativa para proteger el software, la marca y el contenido de Dakinis StreamAutomator.
+No constituye asesoría legal profesional. Se recomienda validarlo con un abogado de tu jurisdicción antes de producción.
+
+1) Titularidad y derechos de autor
+Todo el código fuente, arquitectura, diseño, textos, logos y activos asociados a Dakinis StreamAutomator son propiedad de su titular (o de sus licenciantes).
+Se prohíbe la copia, distribución, ingeniería inversa, publicación o explotación comercial del software sin autorización escrita.
+

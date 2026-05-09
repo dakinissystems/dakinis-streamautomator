@@ -6,9 +6,16 @@
 
 import jwt from 'jsonwebtoken';
 import { buildLicenseSummary } from './licenseUtils.js';
+import {
+  getStreamautomatorJwtAudience,
+  getStreamautomatorJwtIssuer,
+} from './jwtAccess.js';
 
 const jwtSecret = process.env.JWT_SECRET || 'dev-jwt-secret';
 const JWT_EXPIRY = process.env.JWT_EXPIRY || '7d';
+
+/** Thrown when user requests active tenant membership they do not have */
+export const TENANT_SWITCH_FORBIDDEN = 'TENANT_SWITCH_FORBIDDEN';
 
 /**
  * Create a short-lived state token for OAuth link flow (userId in state)
@@ -74,18 +81,30 @@ export function verifyTwitterOAuth2State(stateToken, purpose) {
 /**
  * Generate JWT token for a user
  * @param {Object} user - User object with id, email, username, isAdmin
+ * @param {number|null} [tenantId] - Active SaaS tenant (workspace)
  * @returns {string} JWT token
  */
-export function generateToken(user) {
+export function generateToken(user, tenantId = null) {
+  const payload = {
+    id: user.id,
+    sub: String(user.id),
+    email: user.email,
+    username: user.username,
+    isAdmin: user.isAdmin,
+    role: user.isAdmin ? 'admin' : 'member',
+    permissions: [],
+    iss: getStreamautomatorJwtIssuer(),
+    aud: getStreamautomatorJwtAudience(),
+  };
+  const tid = tenantId !== undefined && tenantId !== null ? Number(tenantId) : null;
+  if (tid !== null && Number.isFinite(tid)) {
+    payload.tenantId = tid;
+    payload.tenant = String(tid);
+  }
   return jwt.sign(
-    {
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      isAdmin: user.isAdmin
-    },
+    payload,
     jwtSecret,
-    { expiresIn: JWT_EXPIRY }
+    { expiresIn: JWT_EXPIRY, algorithm: 'HS256' }
   );
 }
 
@@ -101,13 +120,14 @@ export function isAkoenetGlobalWebhookConfigured() {
   return !!(url && secret);
 }
 
-export function buildUserResponse(user) {
+export function buildUserResponse(user, extras = {}) {
   // Convert Sequelize instance to plain object if needed
   const userPlain = user.get ? user.get({ plain: true }) : user;
   const licenseSummary = buildLicenseSummary(userPlain);
   const akoenetGlobalWebhookConfigured = isAkoenetGlobalWebhookConfigured();
+  const { tenantId = undefined } = extras;
 
-  return {
+  const out = {
     id: userPlain.id,
     username: userPlain.username,
     email: userPlain.email,
@@ -134,19 +154,48 @@ export function buildUserResponse(user) {
     akoenetSendClips: userPlain.akoenetSendClips === true,
     akoenetGlobalWebhookConfigured,
   };
+  if (tenantId != null && Number.isFinite(Number(tenantId))) {
+    out.tenantId = Number(tenantId);
+  }
+  return out;
 }
 
 /**
  * Generate authentication response with token and user data
  * @param {Object} user - Sequelize User instance or plain user object
- * @returns {Object} Object with token and user data
+ * @param {{ activeTenantId?: number|null }} [options]
+ * @returns {Promise<Object>} Object with token and user data
  */
-export function generateAuthData(user) {
-  const token = generateToken(user);
-  const userResponse = buildUserResponse(user);
+export async function generateAuthData(user, options = {}) {
+  const svc = await import('../modules/tenants/application/tenantResolutionService.js');
+  await svc.ensureDefaultTenantForUser(user.id);
+
+  let tenantId;
+  const chosen = options.activeTenantId;
+
+  if (chosen !== undefined && chosen !== null && chosen !== '') {
+    const tid = Number(chosen);
+    if (!Number.isFinite(tid)) {
+      const e = new Error('Invalid tenant');
+      e.code = TENANT_SWITCH_FORBIDDEN;
+      throw e;
+    }
+    const ok = await svc.verifyUserTenantMembership(user.id, tid);
+    if (!ok) {
+      const e = new Error('Not a member of this tenant');
+      e.code = TENANT_SWITCH_FORBIDDEN;
+      throw e;
+    }
+    tenantId = tid;
+  } else {
+    tenantId = await svc.getPrimaryTenantIdForUser(user.id);
+  }
+
+  const token = generateToken(user, tenantId);
+  const userResponse = buildUserResponse(user, { tenantId });
 
   return {
     token,
-    user: userResponse
+    user: userResponse,
   };
 }

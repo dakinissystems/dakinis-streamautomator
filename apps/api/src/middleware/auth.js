@@ -3,11 +3,16 @@
  * Validates JWT tokens and attaches user to request
  */
 
-import jwt from 'jsonwebtoken';
 import { User } from '../modules/users/infrastructure/models.js';
 import { normalizeLicenseType, resolveLicenseExpiry } from '../utils/licenseUtils.js';
 import { generateLicenseKey } from '../utils/cryptoUtils.js';
 import logger from '../utils/logger.js';
+import { verifyStreamautomatorAccessToken } from '../utils/jwtAccess.js';
+import {
+  isPlatformAuthSubject,
+  loadOrProvisionStreamAutomatorUser,
+  resolveTenantNumericId,
+} from '../services/platformAuthBridge.js';
 
 const jwtSecret = process.env.JWT_SECRET || 'dev-jwt-secret';
 
@@ -37,10 +42,26 @@ async function ensureTrialForOAuthUser(user) {
   }
 }
 
+function legacyNumericTenantFromPayload(payload) {
+  let tokenTenantId =
+    payload.tenantId !== undefined && payload.tenantId !== null
+      ? Number(payload.tenantId)
+      : payload.tenant_id !== undefined && payload.tenant_id !== null
+        ? Number(payload.tenant_id)
+        : null;
+  if (!Number.isFinite(tokenTenantId) && payload.tenant != null && String(payload.tenant).trim() !== '') {
+    tokenTenantId = Number(payload.tenant);
+  }
+  if (!Number.isFinite(tokenTenantId)) tokenTenantId = null;
+  return tokenTenantId;
+}
+
 /**
  * Middleware to authenticate requests using JWT
  * Attaches user object to req.user if token is valid.
  * For GET /api/user/twitch/connect, also accepts token in query (redirect flow has no Authorization header).
+ *
+ * Supports Dakinis platform/auth tokens (UUID `sub`, tenant slug in `tenantId`) and legacy app tokens (numeric sub).
  */
 export function authenticateToken(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -54,48 +75,93 @@ export function authenticateToken(req, res, next) {
 
   if (!token) {
     req.user = null;
+    req.tenantId = null;
     return next();
   }
 
-  try {
-    const payload = jwt.verify(token, jwtSecret);
-    
-    // Attach user to request (async lookup)
-    User.findByPk(payload.id)
-      .then(async (user) => {
-        if (!user) {
+  (async () => {
+    try {
+      const payload = verifyStreamautomatorAccessToken(token, jwtSecret);
+      const uidRaw = payload.id !== undefined ? payload.id : payload.sub;
+
+      if (isPlatformAuthSubject(uidRaw)) {
+        const tenantNumeric = await resolveTenantNumericId(payload, req);
+        const email = typeof payload.email === 'string' ? payload.email : '';
+        const platformRole = typeof payload.role === 'string' ? payload.role : 'user';
+        const user = await loadOrProvisionStreamAutomatorUser({
+          platformSub: String(uidRaw),
+          email,
+          platformRole,
+          tenantNumericId: tenantNumeric,
+        });
+        if (!user || user.isDisabled) {
+          if (user?.isDisabled) {
+            logger.info('Blocked request from disabled user (platform auth)', { userId: user.id });
+          }
           req.user = null;
-          return next();
-        }
-        if (user.isDisabled) {
-          logger.info('Blocked request from disabled user', { userId: user.id });
-          req.user = null;
+          req.tenantId = null;
           return next();
         }
         await ensureTrialForOAuthUser(user);
         req.user = user.get({ plain: true });
+        req.tenantId = tenantNumeric;
         return next();
-      })
-      .catch(err => {
-        logger.error('Error fetching user in auth middleware', {
-          error: err.message,
-          userId: payload.id,
-          stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+      }
+
+      let tokenTenantId = legacyNumericTenantFromPayload(payload);
+
+      if (process.env.TRUST_GATEWAY_IDENTITY_HEADERS === 'true') {
+        const h = (req.get('x-tenant-id') || '').trim();
+        if (h) {
+          const n = Number(h);
+          if (Number.isFinite(n)) tokenTenantId = n;
+        }
+      }
+
+      const userIdNum = uidRaw !== undefined && uidRaw !== null ? Number(uidRaw) : NaN;
+      if (!Number.isFinite(userIdNum)) {
+        req.user = null;
+        req.tenantId = null;
+        return next();
+      }
+
+      const user = await User.findByPk(userIdNum);
+      if (!user) {
+        req.user = null;
+        req.tenantId = null;
+        return next();
+      }
+      if (user.isDisabled) {
+        logger.info('Blocked request from disabled user', { userId: user.id });
+        req.user = null;
+        req.tenantId = null;
+        return next();
+      }
+      await ensureTrialForOAuthUser(user);
+      req.user = user.get({ plain: true });
+      req.tenantId = tokenTenantId;
+      return next();
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        req.user = null;
+      } else if (error.name === 'JsonWebTokenError') {
+        req.user = null;
+      } else {
+        logger.error('authenticateToken error', {
+          message: error.message,
+          stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
         });
         req.user = null;
-        next();
-      });
-  } catch (error) {
-    // Token is invalid or expired
-    if (error.name === 'TokenExpiredError') {
-      req.user = null;
-    } else if (error.name === 'JsonWebTokenError') {
-      req.user = null;
-    } else {
-      req.user = null;
+      }
+      req.tenantId = null;
+      return next();
     }
+  })().catch((err) => {
+    logger.error('authenticateToken async failure', { message: err.message });
+    req.user = null;
+    req.tenantId = null;
     next();
-  }
+  });
 }
 
 /**

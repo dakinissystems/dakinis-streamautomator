@@ -13,6 +13,7 @@ import { checkoutSchema, verifySessionSchema, subscribeSchema, createCheckoutSes
 import logger from '../utils/logger.js';
 import { sendPaymentSuccessNotification, sendPaymentFailedNotification } from '../utils/notifications.js';
 import { syncEntitlementsFromLicense } from '../modules/system/application/entitlementService.js';
+import { getPrimaryTenantIdForUser } from '../modules/tenants/application/tenantResolutionService.js';
 
 const router = express.Router();
 
@@ -265,6 +266,7 @@ router.post('/checkout', requireAuth, validateBody(checkoutSchema), async (req, 
     // Create payment record, using Stripe Price as source of truth for amount/currency
     const payment = await Payment.create({
       userId: req.user.id,
+      tenantId: req.tenantId ?? null,
       licenseType,
       amount: resolvedAmount,
       currency: resolvedCurrency,
@@ -373,8 +375,10 @@ router.post('/verify-session', requireAuth, validateBody(verifySessionSchema), a
       await syncEntitlementsFromLicense(user.id, user.licenseType, user.licenseExpiresAt);
       const plan = PLANS[licenseType];
       if (plan && !payment) {
+        const tenantId = await getPrimaryTenantIdForUser(userId);
         await Payment.create({
           userId,
+          tenantId,
           licenseType,
           amount: plan.amount,
           currency: plan.currency,
@@ -540,8 +544,10 @@ export async function handleStripeWebhook(req, res) {
             // Create payment record for subscription
             const plan = PLANS[licenseType];
             if (plan) {
+              const tenantId = await getPrimaryTenantIdForUser(user.id);
               await Payment.create({
                 userId: user.id,
+                tenantId,
                 licenseType,
                 amount: plan.amount,
                 currency: plan.currency,
@@ -723,8 +729,10 @@ export async function handleStripeWebhook(req, res) {
           const plan = PLANS[licenseType];
           
           if (plan) {
+            const tenantId = await getPrimaryTenantIdForUser(user.id);
             const payment = await Payment.create({
               userId: user.id,
+              tenantId,
               licenseType,
               amount: plan.amount,
               currency: plan.currency,

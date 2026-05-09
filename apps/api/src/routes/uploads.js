@@ -643,12 +643,13 @@ router.post('/file', requireAuth, (req, res, next) => {
     const { data: insertData, error: insertError } = await supabase
       .from('uploads')
       .insert([
-        { 
-          user_id: authenticatedUserId, 
-          bucket, 
+        {
+          user_id: String(authenticatedUserId),
+          bucket,
           file_path: uploadData.path,
-          created_at: new Date().toISOString()
-        }
+          ...(req.tenantId != null ? { tenant_id: Number(req.tenantId) } : {}),
+          created_at: new Date().toISOString(),
+        },
       ])
       .select();
 

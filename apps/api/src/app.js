@@ -148,14 +148,14 @@ app.options('*', cors({
   origin: corsOriginConfig,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Tenant-Id'],
 }));
 
 app.use(cors({
   origin: corsOriginConfig,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Tenant-Id'],
 }));
 
 app.use(helmet({
@@ -186,7 +186,9 @@ app.use(metricsMiddleware);
 app.get('/api/csrf-token', getCsrfToken);
 
 // AkoeNet / integrators: discovery (no auth). Mount before heavy routes.
+// Canonical prefix for gateway allowlists: /api/integrations/* — legacy /api/integration/* kept for compat.
 app.use('/api/integration', integrationPublicRoutes);
+app.use('/api/integrations', integrationPublicRoutes);
 
 // OAuth routes: register before authenticateToken so login/link callbacks work without JWT
 // (callbacks are GET redirects from the provider and do not send Authorization header).

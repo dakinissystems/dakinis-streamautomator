@@ -34,6 +34,8 @@ import StreamItem from '../modules/content/infrastructure/StreamItem.model.js';
 import StreamSuggestion from '../modules/content/infrastructure/StreamSuggestion.model.js';
 import StreamTimelineEvent from '../modules/content/infrastructure/StreamTimelineEvent.model.js';
 import ReminderSent from '../modules/reminders/infrastructure/ReminderSent.model.js';
+import Tenant from '../modules/tenants/infrastructure/Tenant.model.js';
+import Membership from '../modules/tenants/infrastructure/Membership.model.js';
 
 // 👤 User and 📝 Content are now defined in module infrastructure files.
 
@@ -117,6 +119,11 @@ ReminderSent.belongsTo(StreamReminder, { foreignKey: 'streamReminderId' });
 Content.hasMany(ReminderSent, { foreignKey: 'contentId', onDelete: 'CASCADE' });
 ReminderSent.belongsTo(Content, { foreignKey: 'contentId' });
 
+User.hasMany(Membership, { foreignKey: 'userId' });
+Membership.belongsTo(User, { foreignKey: 'userId' });
+Tenant.hasMany(Membership, { foreignKey: 'tenantId' });
+Membership.belongsTo(Tenant, { foreignKey: 'tenantId' });
+
 // ⚙️ SystemConfig is now defined in module infrastructure files.
 
 export {
@@ -148,4 +155,6 @@ export {
   StreamTimelineEvent,
   ReminderSent,
   StripeWebhookEvent,
+  Tenant,
+  Membership,
 };

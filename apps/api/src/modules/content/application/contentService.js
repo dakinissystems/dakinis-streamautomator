@@ -9,6 +9,7 @@ import logger from '../../../utils/logger.js';
 import { parsePagination, formatPaginatedResponse } from '../../../utils/pagination.js';
 import { enqueueDiscordSync } from '../../../services/discordQueueService.js';
 import { enqueueAkoeNetStreamScheduled } from '../../../services/akoeNetWebhookService.js';
+import { normalizeTenantId, scopedUserTenantWhere } from '../../../utils/tenantScope.js';
 
 function isDiscordEventContent(content) {
   const platforms = Array.isArray(content.platforms) ? content.platforms : [];
@@ -18,7 +19,9 @@ function isDiscordEventContent(content) {
 }
 
 export class ContentService {
-  async createContent(userId, contentData) {
+  async createContent(userId, contentData, ctx = {}) {
+    const tenantNumeric = normalizeTenantId(ctx.tenantId);
+
     const scheduledFor = new Date(contentData.scheduledFor);
     const eventEndTime = contentData.eventEndTime ? new Date(contentData.eventEndTime) : null;
     const occurrences = this.buildOccurrences(scheduledFor, contentData.recurrence);
@@ -46,6 +49,7 @@ export class ContentService {
           eventDates: eventDates || null,
           eventLocationUrl: eventLocationUrl || null,
           userId,
+          ...(tenantNumeric != null ? { tenantId: tenantNumeric } : {}),
           files: filesData,
         });
       })
@@ -71,23 +75,39 @@ export class ContentService {
 
   async getUserContent(userId, options = {}) {
     const { page, limit, offset } = parsePagination(options.query || {});
-    const where = { userId, deletedAt: null };
+    const tenantNumeric = normalizeTenantId(options.tenantId);
+    const base = {
+      userId,
+      deletedAt: null,
+    };
 
-    if (options.status) where.status = options.status;
-    if (options.platform) where.platforms = { [Op.contains]: [options.platform] };
+    if (options.status) base.status = options.status;
+    if (options.platform) base.platforms = { [Op.contains]: [options.platform] };
 
     if (options.dateFrom || options.dateTo) {
-      where.scheduledFor = {};
-      if (options.dateFrom) where.scheduledFor[Op.gte] = new Date(options.dateFrom);
-      if (options.dateTo) where.scheduledFor[Op.lte] = new Date(options.dateTo);
+      base.scheduledFor = {};
+      if (options.dateFrom) base.scheduledFor[Op.gte] = new Date(options.dateFrom);
+      if (options.dateTo) base.scheduledFor[Op.lte] = new Date(options.dateTo);
+    }
+
+    const andBranches = [];
+    if (tenantNumeric != null) {
+      andBranches.push({
+        [Op.or]: [{ tenantId: tenantNumeric }, { tenantId: null }],
+      });
     }
 
     if (options.search) {
-      where[Op.or] = [
-        { title: { [Op.iLike]: `%${options.search}%` } },
-        { content: { [Op.iLike]: `%${options.search}%` } },
-      ];
+      andBranches.push({
+        [Op.or]: [
+          { title: { [Op.iLike]: `%${options.search}%` } },
+          { content: { [Op.iLike]: `%${options.search}%` } },
+        ],
+      });
     }
+
+    let where =
+      andBranches.length > 0 ? { [Op.and]: [base, ...andBranches] } : base;
 
     const findOptions = {
       where,
@@ -103,10 +123,12 @@ export class ContentService {
       const msg = (err && err.message) || '';
       if (/deletedAt.*does not exist|column.*deletedAt/i.test(msg)) {
         logger.warn('Content list: deletedAt column missing, listing without soft-delete filter. Run: npm run migrate', { userId });
-        delete where.deletedAt;
+        if (base.deletedAt !== undefined) delete base.deletedAt;
+        let whereRecover = base;
+        if (andBranches.length > 0) whereRecover = { [Op.and]: [base, ...andBranches] };
         const { count, rows } = await Content.findAndCountAll({
           ...findOptions,
-          where,
+          where: whereRecover,
           attributes: { exclude: ['deletedAt'] },
         });
         return formatPaginatedResponse(rows, count, page, limit);
@@ -115,16 +137,18 @@ export class ContentService {
     }
   }
 
-  async getContentById(contentId, userId) {
+  async getContentById(contentId, userId, ctx = {}) {
+    const tenantNumeric = normalizeTenantId(ctx.tenantId);
+    const base = scopedUserTenantWhere(userId, tenantNumeric, { id: contentId });
     const content = await Content.findOne({
-      where: { id: contentId, userId, deletedAt: null },
+      where: { ...base, deletedAt: null },
     });
     if (!content) throw new Error('Content not found');
     return content;
   }
 
-  async updateContent(contentId, userId, updateData) {
-    const content = await this.getContentById(contentId, userId);
+  async updateContent(contentId, userId, updateData, ctx = {}) {
+    const content = await this.getContentById(contentId, userId, ctx);
     const { mediaUrls, mediaItems, ...restData } = updateData;
     let filesData = content.files;
 
@@ -154,8 +178,8 @@ export class ContentService {
     return content;
   }
 
-  async deleteContent(contentId, userId) {
-    const content = await this.getContentById(contentId, userId);
+  async deleteContent(contentId, userId, ctx = {}) {
+    const content = await this.getContentById(contentId, userId, ctx);
     if (content.discordEventId && content.discordGuildId) {
       await content.update({ deletedAt: new Date() });
       enqueueDiscordSync(contentId).catch((err) =>

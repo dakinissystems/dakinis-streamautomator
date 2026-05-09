@@ -111,14 +111,14 @@ export class TemplateService {
     };
   }
 
-  async createContentFromTemplate(templateId, userId, scheduledFor, variables = {}) {
+  async createContentFromTemplate(templateId, userId, scheduledFor, variables = {}, ctx = {}) {
     const template = await this.getTemplateById(templateId, userId);
     const rendered = this.renderTemplate(template, variables);
 
     const content = await contentService.createContent(userId, {
       ...rendered,
       scheduledFor,
-    });
+    }, ctx);
 
     logger.info('Content created from template', {
       userId,
