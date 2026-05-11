@@ -481,7 +481,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 4002;
 const enableLogging = process.env.ENABLE_LOGGING === 'true';
 const logLevel = process.env.LOG_LEVEL || 'info';
 
@@ -524,6 +524,7 @@ async function initServer() {
   }
 
   const server = app.listen(PORT, '0.0.0.0', async () => {
+    console.log(`StreamAutomator API listening on ${PORT}`);
     logger.info('Server started', {
       port: PORT,
       environment: nodeEnv,
