@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "start": "serve -s dist --listen tcp://0.0.0.0:${PORT:-5173}",
+    "start": "node scripts/serve-dist.mjs",
     "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0 --port ${PORT:-4173}",
+    "preview": "node scripts/vite-preview.mjs",
     "test": "node scripts/vitest-run.mjs",
     "check:architecture": "node scripts/check-api-imports.js",
     "check:locales": "node scripts/compare-locales.mjs",
