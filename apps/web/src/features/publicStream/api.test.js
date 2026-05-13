@@ -1,19 +1,20 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import {
   getPublicStreamerEvents,
   subscribeStreamReminder,
 } from './api';
 import { apiClient } from '../../shared/api/client';
 
-jest.mock('../../shared/api/client', () => ({
+vi.mock('../../shared/api/client', () => ({
   apiClient: {
-    get: jest.fn(),
-    post: jest.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
   },
 }));
 
 describe('features/publicStream/api', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('encodes username when loading events', async () => {

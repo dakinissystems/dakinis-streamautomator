@@ -1,18 +1,19 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import {
   getTwitchBits,
   getTwitchDashboardStats,
 } from './api';
 import { apiClient } from '../../shared/api/client';
 
-jest.mock('../../shared/api/client', () => ({
+vi.mock('../../shared/api/client', () => ({
   apiClient: {
-    get: jest.fn(),
+    get: vi.fn(),
   },
 }));
 
 describe('features/twitchBits/api', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('loads bits with selected format', async () => {

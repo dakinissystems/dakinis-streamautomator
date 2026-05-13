@@ -1,3 +1,4 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import {
   getStreamItems,
   deleteSuggestion,
@@ -5,17 +6,17 @@ import {
 } from './api';
 import { apiClient } from '../../shared/api/client';
 
-jest.mock('../../shared/api/client', () => ({
+vi.mock('../../shared/api/client', () => ({
   apiClient: {
-    get: jest.fn(),
-    delete: jest.fn(),
-    patch: jest.fn(),
+    get: vi.fn(),
+    delete: vi.fn(),
+    patch: vi.fn(),
   },
 }));
 
 describe('features/content/api', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls stream-items with optional type and sort', async () => {

@@ -2,9 +2,20 @@
   "name": "streamautomator-web",
   "version": "2.3.1",
   "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 5173",
+    "test": "vitest run",
+    "check:architecture": "node scripts/check-api-imports.js",
+    "check:locales": "node scripts/compare-locales.mjs",
+    "update-browserslist": "npx update-browserslist-db@latest"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.93.1",
-    "axios": "^1.3.4",
+    "axios": "^1.16.1",
     "date-fns": "^2.30.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.1.0",
@@ -15,41 +26,16 @@
     "react-hot-toast": "^2.5.2",
     "react-joyride": "^2.9.3",
     "react-router-dom": "^6.8.0",
-    "react-scripts": "^5.0.1",
     "recharts": "^3.7.0"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "check:architecture": "node scripts/check-api-imports.js",
-    "check:locales": "node scripts/compare-locales.mjs",
-    "eject": "react-scripts eject",
-    "update-browserslist": "npx update-browserslist-db@latest"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
   "devDependencies": {
+    "@vitejs/plugin-react": "^4.4.1",
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.21",
     "serve": "^14.2.1",
-    "tailwindcss": "^3.2.7"
+    "tailwindcss": "^3.2.7",
+    "vite": "^6.3.4",
+    "vitest": "^3.1.1"
   },
   "optionalDependencies": {
     "socket.io-client": "^4.8.3"

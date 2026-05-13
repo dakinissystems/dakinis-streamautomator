@@ -134,9 +134,18 @@ const corsOriginConfig = (() => {
     if (urls.includes(origin)) return cb(null, origin);
     // Dev: any localhost / 127.0.0.1 port (CRA, Vite, alternate ports) so ACAO is always set when Origin is local
     if (!isProduction && isLocalDevBrowserOrigin(origin)) return cb(null, origin);
-    // Production fallback: allow Render frontends when env not set
-    if (isProduction && (origin === 'https://stream-schedule-v1.onrender.com' || /^https:\/\/[\w-]+\.onrender\.com$/.test(origin))) {
-      return cb(null, origin);
+    // Production fallback: Render + dominios Dakinis / StreamAutomator (definir FRONTEND_URLS para lista cerrada)
+    if (isProduction) {
+      if (origin === 'https://stream-schedule-v1.onrender.com' || /^https:\/\/[\w-]+\.onrender\.com$/.test(origin)) {
+        return cb(null, origin);
+      }
+      const prodDefaults = [
+        'https://streamautomator.com',
+        'https://www.streamautomator.com',
+        'https://dakinissystems.com',
+        'https://www.dakinissystems.com',
+      ];
+      if (prodDefaults.includes(origin)) return cb(null, origin);
     }
     return cb(null, false);
   };
