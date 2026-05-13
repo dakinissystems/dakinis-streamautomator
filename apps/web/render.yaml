@@ -1,6 +1,6 @@
 # Build settings
 buildCommand: npm install && npm run build
-startCommand: npx serve -s dist -l $PORT
+startCommand: npm start
 
 # Environment variables (VITE_* preferred; REACT_APP_* still supported via Vite define shim)
 envVars:

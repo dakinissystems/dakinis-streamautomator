@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "start": "vite",
+    "start": "serve -s dist --listen tcp://0.0.0.0:${PORT:-5173}",
     "build": "vite build",
-    "preview": "vite preview --port 5173",
+    "preview": "vite preview --host 0.0.0.0 --port ${PORT:-4173}",
     "test": "node scripts/vitest-run.mjs",
     "check:architecture": "node scripts/check-api-imports.js",
     "check:locales": "node scripts/compare-locales.mjs",
@@ -26,13 +26,13 @@
     "react-hot-toast": "^2.5.2",
     "react-joyride": "^2.9.3",
     "react-router-dom": "^6.8.0",
-    "recharts": "^3.7.0"
+    "recharts": "^3.7.0",
+    "serve": "^14.2.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.4.1",
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.21",
-    "serve": "^14.2.1",
     "tailwindcss": "^3.2.7",
     "vite": "^6.3.4",
     "vitest": "^3.1.1"
