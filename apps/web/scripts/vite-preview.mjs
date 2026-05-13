@@ -1,6 +1,6 @@
 /**
  * Local/staging preview after build. Do not pass --host/--port on the CLI;
- * Railway should use `npm start` (serve dist) in production.
+ * Railway production uses Railpack Caddy (no custom start). Local: npm run start:local
  */
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';

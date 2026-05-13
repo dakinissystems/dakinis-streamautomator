@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "start": "node scripts/serve-dist.mjs",
+    "start:local": "node scripts/serve-dist.mjs",
     "build": "vite build",
     "preview": "node scripts/vite-preview.mjs",
     "test": "node scripts/vitest-run.mjs",
