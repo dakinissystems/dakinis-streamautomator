@@ -8,7 +8,7 @@
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview --port 5173",
-    "test": "vitest run",
+    "test": "node scripts/vitest-run.mjs",
     "check:architecture": "node scripts/check-api-imports.js",
     "check:locales": "node scripts/compare-locales.mjs",
     "update-browserslist": "npx update-browserslist-db@latest"
