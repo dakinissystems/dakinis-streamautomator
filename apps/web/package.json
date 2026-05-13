@@ -3,6 +3,9 @@
   "version": "2.3.1",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vite",
     "start": "node scripts/serve-dist.mjs",
