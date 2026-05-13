@@ -1,6 +1,6 @@
 /**
  * Local/staging preview after build. Do not pass --host/--port on the CLI;
- * Railway production uses Railpack Caddy (no custom start). Local: npm run start:local
+ * Local preview after build only. Production uses `npm start` (serve-prod.mjs).
  */
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
