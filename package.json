@@ -6,7 +6,7 @@
   "scripts": {
     "install:all": "npm install --prefix apps/api && npm install --prefix apps/web",
     "dev:api": "npm run dev --prefix apps/api",
-    "dev:web": "npm start --prefix apps/web",
+    "dev:web": "npm run dev --prefix apps/web",
     "start:api": "npm start --prefix apps/api",
     "build:web": "npm run build --prefix apps/web",
     "test:api": "npm test --prefix apps/api",
