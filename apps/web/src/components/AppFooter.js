@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { COPYRIGHT_BRAND_NAME, getCopyrightYearEnd } from '../constants/copyright';
 
-const DAKINIS_SYSTEMS_URL = 'https://dakinissystems.onrender.com/';
+const DAKINIS_SYSTEMS_URL = 'https://dakinissystems.com/';
 
 export default function AppFooter({ className = '' }) {
   const { t } = useLanguage();
