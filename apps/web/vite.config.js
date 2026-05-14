@@ -82,6 +82,12 @@ export default defineConfig(({ mode }) => {
       outDir: 'dist',
       sourcemap: true,
     },
+    preview: {
+      host: '0.0.0.0',
+      port: Number(process.env.PORT) || 4173,
+      strictPort: true,
+      allowedHosts: true,
+    },
     test: {
       environment: 'node',
       globals: true,
