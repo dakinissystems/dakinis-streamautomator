@@ -232,7 +232,7 @@ Para que el login con Google o Twitch no redirija a localhost:
 
 **Conectar Twitch para programar eventos y bits:** el flujo usa el API (no Supabase). En el **servicio API** de Render (Dashboard → tu servicio backend → **Environment**) define:
 - **FRONTEND_URL**: URL del frontend (ej. `https://streamautomator.com`). Si no está definida, tras autorizar en Twitch la redirección puede apuntar a localhost y provocar `bad_oauth_state`.
-- **BACKEND_URL**: URL pública del API (ej. `https://stream-schedule-api.onrender.com`) para `redirect_uri` y webhooks. Opcional si el API ya conoce su propia URL.
+- **BACKEND_URL**: URL pública del API (ej. `https://dakinissystems.com`) para `redirect_uri` y webhooks. Opcional si el API ya conoce su propia URL.
 
 **Conectar X (Twitter) desde producción:** si ves *"X (Twitter) is not configured"* al usar la app en Render:
 
@@ -242,8 +242,8 @@ Para que el login con Google o Twitch no redirija a localhost:
    Guarda y redeploy del backend.
 
 2. **X Developer Portal** → tu app → **App info** → **Callback URI / Redirect URL**. Además de las de local y Supabase, añade **exactamente** estas (con tu URL del API en producción):
-   - `https://stream-schedule-api.onrender.com/api/user/auth/twitter/callback`
-   - `https://stream-schedule-api.onrender.com/api/user/auth/twitter/link/callback`
+   - `https://dakinissystems.com/api/user/auth/twitter/callback`
+   - `https://dakinissystems.com/api/user/auth/twitter/link/callback`
    Sin estas URLs de producción, el backend no puede completar el flujo OAuth en Render.
 
 **Publicar en Discord (eventos y mensajes programados):** conectar Discord en Ajustes usa OAuth (`DISCORD_CLIENT_ID` y `DISCORD_CLIENT_SECRET`). Para que el backend **publique** en tus servidores (eventos programados, mensajes, etc.) hace falta además el **token del bot**:
