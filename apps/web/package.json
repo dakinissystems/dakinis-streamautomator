@@ -8,10 +8,8 @@
   },
   "scripts": {
     "dev": "vite",
-    "start": "node scripts/serve-prod.mjs",
-    "start:local": "node scripts/serve-prod.mjs",
     "build": "vite build",
-    "preview": "node scripts/vite-preview.mjs",
+    "preview": "vite preview",
     "test": "node scripts/vitest-run.mjs",
     "check:architecture": "node scripts/check-api-imports.js",
     "check:locales": "node scripts/compare-locales.mjs",
@@ -30,8 +28,7 @@
     "react-hot-toast": "^2.5.2",
     "react-joyride": "^2.9.3",
     "react-router-dom": "^6.8.0",
-    "recharts": "^3.7.0",
-    "serve-handler": "^6.1.7"
+    "recharts": "^3.7.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.4.1",
