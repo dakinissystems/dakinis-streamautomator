@@ -1242,12 +1242,12 @@ router.post('/subscribe', requireAuth, validateBody(subscribeSchema), async (req
 // Get subscription status
 router.get('/subscription', requireAuth, async (req, res) => {
   if (!stripe) {
-    return res.status(500).json({ error: 'Stripe is not configured' });
+    return res.json({ hasSubscription: false, subscription: null, stripeConfigured: false });
   }
 
+  let user = null;
   try {
-    // Get latest user data to ensure we have subscription fields
-    const user = await User.findByPk(req.user.id);
+    user = await User.findByPk(req.user.id);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -1257,50 +1257,54 @@ router.get('/subscription', requireAuth, async (req, res) => {
     if (!subscriptionId) {
       return res.json({
         hasSubscription: false,
-        subscription: null
+        subscription: null,
+        stripeConfigured: true,
       });
     }
 
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    
+
     res.json({
       hasSubscription: true,
+      stripeConfigured: true,
       subscription: {
         id: subscription.id,
         status: subscription.status,
         currentPeriodStart: new Date(subscription.current_period_start * 1000).toISOString(),
         currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000).toISOString() : null
-      }
+        canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000).toISOString() : null,
+      },
     });
   } catch (error) {
-    // Subscription might not exist anymore
     if (error.code === 'resource_missing') {
-      // Clear subscription ID from user
-      const userToUpdate = await User.findByPk(req.user.id);
+      const userToUpdate = user || (await User.findByPk(req.user.id));
       if (userToUpdate) {
         userToUpdate.stripeSubscriptionId = null;
         userToUpdate.subscriptionStatus = null;
         await userToUpdate.save();
       }
-      
+
       return res.json({
         hasSubscription: false,
-        subscription: null
+        subscription: null,
+        stripeConfigured: true,
       });
     }
-    
+
     logger.error('Error retrieving subscription', {
       error: error.message,
       errorCode: error.code,
       userId: req.user?.id,
-      subscriptionId: user?.stripeSubscriptionId
+      subscriptionId: user?.stripeSubscriptionId ?? null,
     });
-    
-    res.status(500).json({ 
-      error: 'Failed to retrieve subscription', 
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+
+    const isSchemaError = /column .* does not exist|relation .* does not exist/i.test(error.message || '');
+    res.status(isSchemaError ? 503 : 500).json({
+      error: isSchemaError
+        ? 'Database schema out of date — run npm run migrate on the API service'
+        : 'Failed to retrieve subscription',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });
