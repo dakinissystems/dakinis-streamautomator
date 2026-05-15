@@ -1,4 +1,5 @@
 import { apiClient, API_BASE_URL } from '../../shared/api/client';
+import { getApiBasePath } from '../../shared/config/apiOrigin.js';
 import { supabase } from '../../utils/supabaseClient';
 
 const OAUTH_LINK_MODE_KEY = 'oauthLinkMode';
@@ -42,18 +43,7 @@ export async function loginWithGoogle() {
 }
 
 export function loginWithTwitch() {
-  let backend = (process.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_API_URL || 'http://localhost:5000').replace(/\/$/, '');
-  if (
-    typeof window !== 'undefined' &&
-    window.location?.hostname &&
-    !window.location.hostname.includes('localhost') &&
-    backend.includes('localhost')
-  ) {
-    const host = window.location.hostname;
-    backend = host.startsWith('api.') ? `https://${host}` : `https://api.${host}`;
-  }
-  const base = backend.endsWith('/api') ? backend : `${backend}/api`;
-  window.location.replace(`${base}/user/auth/twitch`);
+  window.location.replace(`${getApiBasePath()}/user/auth/twitch`);
 }
 
 export async function loginWithTwitter() {

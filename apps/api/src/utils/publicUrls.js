@@ -39,6 +39,7 @@ export function getBackendPublicUrl() {
   if (isProd) {
     const railway = trimUrl(process.env.RAILWAY_PUBLIC_DOMAIN).replace(/^https?:\/\//i, '');
     if (railway) return `https://${railway}`;
+    return 'https://api.streamautomator.com';
   }
 
   return 'http://localhost:5000';
