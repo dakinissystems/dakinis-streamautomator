@@ -3,15 +3,13 @@
  * Requires DATABASE_URL (and DATABASE_SSL=true for Supabase).
  */
 import dotenv from 'dotenv';
+import { readdir } from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { pathToFileURL, fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 dotenv.config();
-
-const { sequelize } = await import('../config/database.js');
-const models = await import('../models/index.js');
 
 const SKIP_ATTRS = new Set(['id', 'createdAt', 'updatedAt']);
 
@@ -19,15 +17,40 @@ function modelColumnName(attr) {
   return attr.field || attr.name;
 }
 
+async function loadModelsFromModules() {
+  const modulesRoot = path.join(__dirname, '../modules');
+  const models = [];
+
+  async function walk(dir) {
+    const entries = await readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        await walk(fullPath);
+      } else if (entry.name.endsWith('.model.js')) {
+        const mod = await import(pathToFileURL(fullPath).href);
+        if (mod.default?.getTableName) {
+          models.push(mod.default);
+        }
+      }
+    }
+  }
+
+  await walk(modulesRoot);
+  return models;
+}
+
 async function audit() {
+  const { sequelize } = await import('../config/database.js');
   await sequelize.authenticate();
   const qi = sequelize.getQueryInterface();
   const missingTables = [];
   const missingColumns = [];
 
-  const entries = Object.entries(models).filter(([k, v]) => v?.getTableName && k !== 'sequelize');
+  const models = await loadModelsFromModules();
 
-  for (const [modelName, model] of entries) {
+  for (const model of models) {
+    const modelName = model.name;
     const tableName = typeof model.getTableName() === 'string'
       ? model.getTableName()
       : model.tableName;
