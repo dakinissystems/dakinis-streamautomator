@@ -59,6 +59,7 @@ import { csrfProtection, getCsrfToken } from './middleware/csrf.js';
 import { metricsMiddleware, metrics } from './utils/metrics.js';
 import { setupSwagger } from './app-swagger.js';
 import logger from './utils/logger.js';
+import { isProbeRequest } from './utils/isProbeRequest.js';
 import { getPublicAdminDashboardUrl } from './utils/publicFrontendUrl.js';
 import platformConfigService from './modules/system/application/platformConfigService.js';
 import { handleTwitchEventSub } from './routes/twitchWebhook.js';
@@ -460,12 +461,17 @@ app.get('/', (req, res) => {
 
 // 404 handler - Always return JSON, never HTML
 app.use((req, res) => {
-  logger.warn('404 - Endpoint not found', {
+  const meta = {
     path: req.path,
     originalUrl: req.originalUrl,
     method: req.method,
-    query: req.query
-  });
+    query: req.query,
+  };
+  if (isProbeRequest(req.path)) {
+    logger.debug('404 probe scan', meta);
+  } else {
+    logger.warn('404 - Endpoint not found', meta);
+  }
   res.status(404).json({
     error: 'Endpoint not found',
     path: req.path,
