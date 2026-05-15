@@ -25,6 +25,7 @@ export default {
       { name: 'recurrence', type: Sequelize.JSONB, allowNull: true },
       { name: 'discordGuildId', type: Sequelize.STRING, allowNull: true },
       { name: 'discordChannelId', type: Sequelize.STRING, allowNull: true },
+      { name: 'discordAnnouncementChannelId', type: Sequelize.STRING, allowNull: true },
       { name: 'publishedAt', type: Sequelize.DATE, allowNull: true },
       { name: 'publishError', type: Sequelize.STRING, allowNull: true },
       { name: 'idempotencyKeys', type: Sequelize.JSONB, allowNull: true },
@@ -40,6 +41,7 @@ export default {
       { name: 'lastSyncedAt', type: Sequelize.DATE, allowNull: true },
       { name: 'deletedAt', type: Sequelize.DATE, allowNull: true },
       { name: 'twitchSegmentId', type: Sequelize.STRING, allowNull: true },
+      { name: 'tenant_id', type: Sequelize.BIGINT, allowNull: true },
     ];
 
     for (const col of toAdd) {
