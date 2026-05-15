@@ -2,18 +2,13 @@
 /** Add googleId, twitchId, discordId so one account can link multiple OAuth providers. */
 export default {
   async up(queryInterface, Sequelize) {
-    await queryInterface.addColumn('Users', 'googleId', {
-      type: Sequelize.STRING,
-      allowNull: true,
-    });
-    await queryInterface.addColumn('Users', 'twitchId', {
-      type: Sequelize.STRING,
-      allowNull: true,
-    });
-    await queryInterface.addColumn('Users', 'discordId', {
-      type: Sequelize.STRING,
-      allowNull: true,
-    });
+    const columns = await queryInterface.describeTable('Users');
+    const add = async (name, def) => {
+      if (!columns[name]) await queryInterface.addColumn('Users', name, def);
+    };
+    await add('googleId', { type: Sequelize.STRING, allowNull: true });
+    await add('twitchId', { type: Sequelize.STRING, allowNull: true });
+    await add('discordId', { type: Sequelize.STRING, allowNull: true });
   },
 
   async down(queryInterface) {
