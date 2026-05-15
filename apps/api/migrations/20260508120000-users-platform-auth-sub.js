@@ -2,12 +2,15 @@
 /** @param {typeof import('sequelize')} Sequelize */
 
 export async function up(queryInterface, Sequelize) {
-  await queryInterface.addColumn('Users', 'platformAuthSub', {
-    type: Sequelize.STRING(36),
-    allowNull: true,
-    unique: true,
-    comment: 'dakinis platform/auth JWT sub (UUID) for unified login',
-  });
+  const table = await queryInterface.describeTable('Users');
+  if (!table.platformAuthSub) {
+    await queryInterface.addColumn('Users', 'platformAuthSub', {
+      type: Sequelize.STRING(36),
+      allowNull: true,
+      unique: true,
+      comment: 'dakinis platform/auth JWT sub (UUID) for unified login',
+    });
+  }
 
   const dialect = queryInterface.sequelize.getDialect();
   if (dialect === 'postgres') {
@@ -19,5 +22,8 @@ export async function up(queryInterface, Sequelize) {
 }
 
 export async function down(queryInterface) {
-  await queryInterface.removeColumn('Users', 'platformAuthSub');
+  const table = await queryInterface.describeTable('Users');
+  if (table.platformAuthSub) {
+    await queryInterface.removeColumn('Users', 'platformAuthSub');
+  }
 }

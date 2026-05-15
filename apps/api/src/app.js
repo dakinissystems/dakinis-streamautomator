@@ -505,7 +505,12 @@ async function initServer() {
     await sequelize.authenticate();
     const dbType = process.env.DATABASE_URL ? 'PostgreSQL (Supabase)' : 'SQLite';
     logger.info('Database connection established', { dbType, environment: nodeEnv });
-    
+
+    if (nodeEnv === 'production') {
+      const { runPendingMigrations } = await import('./scripts/migrationRunner.js');
+      await runPendingMigrations({ closeConnection: false, skipAuthenticate: true });
+    }
+
     // Only sync in non-production environments
     // Note: sync({ alter: true }) can cause issues with existing tables
     // Migrations handle schema changes, so sync is mainly for initial setup
