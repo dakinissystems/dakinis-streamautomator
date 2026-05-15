@@ -44,18 +44,14 @@ import {
 import { Tenant, Membership } from '../modules/tenants/infrastructure/models.js';
 import { ensureDefaultTenantForUser } from '../modules/tenants/application/tenantResolutionService.js';
 import logger from '../utils/logger.js';
+import { getBackendPublicUrl, getFrontendPublicUrl } from '../utils/publicUrls.js';
 
-/** All OAuth/login redirects go here. For custom domain (e.g. streamautomator.com), set FRONTEND_URL to that domain in Render. */
-const RAW_FRONTEND_URL = process.env.FRONTEND_URL || process.env.PUBLIC_FRONTEND_URL || 'http://localhost:3000';
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
-/** In production, never redirect users to localhost (avoids bad_oauth_state ending on localhost when FRONTEND_URL is unset on Render). */
-const FRONTEND_URL_SAFE =
-  (process.env.NODE_ENV === 'production' && (!RAW_FRONTEND_URL || RAW_FRONTEND_URL.includes('localhost')))
-    ? 'https://streamautomator.com'
-    : RAW_FRONTEND_URL;
-const FRONTEND_URL = FRONTEND_URL_SAFE;
-/** Base URL for Twitch OAuth redirect_uri (authorize + callback). Use this if BACKEND_URL points elsewhere (e.g. Supabase). */
-const TWITCH_OAUTH_REDIRECT_BASE = (process.env.TWITCH_OAUTH_REDIRECT_BASE_URL || BACKEND_URL).replace(/\/$/, '');
+/** OAuth/login redirects — set FRONTEND_URL / BACKEND_URL on Railway (or use RAILWAY_PUBLIC_DOMAIN for API). */
+const BACKEND_URL = getBackendPublicUrl();
+const FRONTEND_URL = getFrontendPublicUrl();
+const FRONTEND_URL_SAFE = FRONTEND_URL;
+/** Base URL for Twitch OAuth redirect_uri (authorize + callback). */
+const TWITCH_OAUTH_REDIRECT_BASE = getBackendPublicUrl();
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-jwt-secret';
 
 const router = express.Router();
@@ -490,13 +486,9 @@ router.post('/google-login', googleLoginHandler);
 router.get('/auth/google', googleAuth);
 router.get('/auth/google/callback', googleCallback);
 
-/** Base URL for Twitch OAuth redirect_uri: never use Supabase (Twitch must redirect back to our API). */
+/** Base URL for Twitch OAuth redirect_uri (never localhost in production). */
 function getTwitchRedirectBase() {
-  const twitchOnly = (process.env.TWITCH_OAUTH_REDIRECT_BASE_URL || '').trim().replace(/\/$/, '');
-  if (twitchOnly) return twitchOnly;
-  const back = (process.env.BACKEND_URL || '').trim().replace(/\/$/, '');
-  if (back && !back.includes('supabase.co')) return back;
-  return 'http://localhost:5000';
+  return getBackendPublicUrl();
 }
 
 /** GET /auth/twitch - Redirect to Twitch OAuth2 (id.twitch.tv; Kraken is deprecated). */

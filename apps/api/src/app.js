@@ -534,11 +534,22 @@ async function initServer() {
 
   const server = app.listen(PORT, '0.0.0.0', async () => {
     console.log(`StreamAutomator API listening on ${PORT}`);
+    const { getBackendPublicUrl, getFrontendPublicUrl } = await import('./utils/publicUrls.js');
+    const backendPublic = getBackendPublicUrl();
+    const frontendPublic = getFrontendPublicUrl();
     logger.info('Server started', {
       port: PORT,
       environment: nodeEnv,
-      logLevel
+      logLevel,
+      backendPublicUrl: backendPublic,
+      frontendPublicUrl: frontendPublic,
+      twitchCallback: `${backendPublic}/api/user/auth/twitch/callback`,
     });
+    if (nodeEnv === 'production' && /localhost|127\.0\.0\.1/.test(backendPublic)) {
+      logger.error(
+        'BACKEND_URL missing in production — OAuth will use localhost. Set BACKEND_URL or RAILWAY_PUBLIC_DOMAIN on Railway.'
+      );
+    }
     // Initialize WebSocket if available
     try {
       const { initWebSocket } = await import('./services/websocketService.js');
