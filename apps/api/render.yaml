@@ -28,4 +28,4 @@ startCommand: node src/app.js
 envVars:
   - NODE_ENV=production
   - FRONTEND_URL=https://streamautomator.com
-  - BACKEND_URL=https://dakinissystems.com
+  - BACKEND_URL=https://stream-schedule-api.onrender.com
