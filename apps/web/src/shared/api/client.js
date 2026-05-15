@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { isTokenExpired, clearAuth } from '../../utils/auth';
+import { getApiOrigin } from '../config/apiOrigin.js';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-export const API_BASE_URL = `${API_URL}/api`;
+const API_URL = getApiOrigin();
+export const API_BASE_URL = API_URL.endsWith('/api') ? API_URL : `${API_URL}/api`;
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,

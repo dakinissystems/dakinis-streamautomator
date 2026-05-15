@@ -5,5 +5,5 @@ startCommand: npm start
 # Environment variables (VITE_* preferred; REACT_APP_* still supported via Vite define shim)
 envVars:
   - NODE_ENV=production
-  - VITE_API_URL=https://stream-schedule-api.onrender.com
+  - VITE_API_URL=https://api.streamautomator.com
   - VITE_FRONTEND_URL=https://streamautomator.com
