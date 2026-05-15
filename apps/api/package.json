@@ -12,6 +12,7 @@
     "start:worker": "node src/workerServer.js",
     "migrate": "node src/scripts/runMigrations.js",
     "migrate:status": "node src/scripts/checkMigrations.js",
+    "audit:schema": "node src/scripts/auditDbSchema.js",
     "validate:performance": "node src/scripts/validatePerformance.js",
     "check:expirations": "node src/scripts/checkLicenseExpirations.js",
     "lint": "eslint src/**/*.js",
