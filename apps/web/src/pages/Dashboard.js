@@ -11,6 +11,7 @@ import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
+import { enUS } from 'date-fns/locale';
 import toast from 'react-hot-toast';
 import { formatDate, formatDateWithUTC, formatDateWithTimezone, getTimezoneMessage } from '../utils/dateUtils';
 import { getPlatformColor } from '../utils/platformColors';
@@ -582,7 +583,7 @@ const Dashboard = ({ user, token, ...props }) => {
 
   // Memoized calendar localizer
   const localizer = useMemo(() => {
-    const locales = { 'en-US': require('date-fns/locale/en-US') };
+    const locales = { 'en-US': enUS };
     return dateFnsLocalizer({
       format,
       parse,
