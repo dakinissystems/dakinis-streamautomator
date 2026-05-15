@@ -13,6 +13,14 @@ import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import toast from 'react-hot-toast';
+
+const calendarLocalizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  locales: { 'en-US': enUS },
+});
 import { formatDate, formatDateWithUTC, formatDateWithTimezone, getTimezoneMessage } from '../utils/dateUtils';
 import { getPlatformColor } from '../utils/platformColors';
 import { copyPostToClipboard } from '../utils/copyPastePost';
@@ -581,18 +589,6 @@ const Dashboard = ({ user, token, ...props }) => {
     });
   }, [contents, searchTerm, filters.status, filters.platform, filters.dateRange, dateRangeBounds]);
 
-  // Memoized calendar localizer
-  const localizer = useMemo(() => {
-    const locales = { 'en-US': enUS };
-    return dateFnsLocalizer({
-      format,
-      parse,
-      startOfWeek,
-      getDay,
-      locales
-    });
-  }, []);
-
   const DragAndDropCalendar = useMemo(() => withDragAndDrop(BigCalendar), []);
 
   // This week's schedule (for Copy / Tweet)
@@ -1113,7 +1109,7 @@ const Dashboard = ({ user, token, ...props }) => {
           </div>
           <div className="dashboard-calendar-wrapper h-[300px] min-h-[260px] sm:h-[400px] md:h-[450px] lg:h-[520px] w-full overflow-hidden rounded border border-gray-200 dark:border-gray-600">
             <DragAndDropCalendar
-              localizer={localizer}
+              localizer={calendarLocalizer}
               events={calendarEvents}
               startAccessor="start"
               endAccessor="end"
