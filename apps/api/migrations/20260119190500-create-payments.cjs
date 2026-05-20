@@ -3,6 +3,11 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
+    const dialect = queryInterface.sequelize.getDialect();
+    const nowDefault =
+      dialect === 'sqlite' ? Sequelize.literal('(datetime(\'now\'))') : Sequelize.fn('NOW');
+    const amountType = dialect === 'sqlite' ? Sequelize.REAL : Sequelize.DECIMAL(10, 2);
+
     await queryInterface.createTable('Payments', {
       id: {
         allowNull: false,
@@ -43,12 +48,12 @@ module.exports = {
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.fn('NOW')
+        defaultValue: nowDefault
       },
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE,
-        defaultValue: Sequelize.fn('NOW')
+        defaultValue: nowDefault
       }
     });
   },

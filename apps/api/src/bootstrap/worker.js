@@ -53,7 +53,19 @@ export async function startWorkerProcess() {
     );
   }
 
-  logger.info('Worker server started', { environment: nodeEnv });
+  const publicationOn = process.env.ENABLE_PUBLICATION_WORKER !== 'false';
+  const remindersOn = process.env.ENABLE_REMINDER_WORKER !== 'false';
+  const redisUrl = Boolean(String(process.env.REDIS_URL || '').trim());
+
+  logger.info('Worker server started', {
+    environment: nodeEnv,
+    publicationWorker: publicationOn,
+    reminderWorker: remindersOn,
+    redisConfigured: redisUrl,
+  });
+  console.log(
+    `[StreamAutomator] Worker ready — env=${nodeEnv} publication=${publicationOn} reminders=${remindersOn} redis=${redisUrl}`
+  );
 }
 
 export default startWorkerProcess;

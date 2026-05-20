@@ -98,7 +98,19 @@ export async function startSchedulerProcess() {
     }
   }, MONITOR_INTERVAL_MS);
 
-  logger.info('Scheduler server started', { environment: nodeEnv });
+  const legacyOn = process.env.ENABLE_LEGACY_SCHEDULER !== 'false';
+  const remindersOn = process.env.ENABLE_STREAM_REMINDER_WORKER !== 'false';
+  const redisUrl = Boolean(String(process.env.REDIS_URL || '').trim());
+
+  logger.info('Scheduler server started', {
+    environment: nodeEnv,
+    legacyScheduler: legacyOn,
+    streamReminderProducer: remindersOn,
+    redisConfigured: redisUrl,
+  });
+  console.log(
+    `[StreamAutomator] Scheduler ready — env=${nodeEnv} legacy=${legacyOn} reminders=${remindersOn} redis=${redisUrl}`
+  );
 }
 
 export default startSchedulerProcess;
