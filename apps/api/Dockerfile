@@ -12,7 +12,7 @@ COPY migrations ./migrations
 COPY scripts ./scripts
 COPY src ./src
 
-ENV NODE_ENV=development
+ENV NODE_ENV=production
 EXPOSE 4002
 ENV PORT=4002
 

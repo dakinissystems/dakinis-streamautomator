@@ -22,10 +22,11 @@ if (databaseUrl && typeof databaseUrl === 'string') {
 const usePostgres = Boolean(databaseUrl);
 const nodeEnv = process.env.NODE_ENV || 'development';
 const enableLogging = process.env.ENABLE_LOGGING === 'true';
-const isProduction = nodeEnv === 'production';
+const onRailway = Boolean(process.env.RAILWAY_ENVIRONMENT);
+const isProduction = nodeEnv === 'production' || onRailway;
 const requireSSL = isProduction || process.env.DATABASE_SSL === 'true';
 
-// In production, DATABASE_URL and SSL are required
+// In production / Railway, DATABASE_URL and SSL are required (never fall back to SQLite)
 if (isProduction && !databaseUrl) {
   logger.error('DATABASE_URL is required in production environment');
   throw new Error('DATABASE_URL is required in production environment');
