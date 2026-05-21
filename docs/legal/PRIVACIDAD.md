@@ -1,83 +1,57 @@
-# Política de Privacidad — Dakinis StreamAutomator
-Última actualización: 2026-05-08
+# Política de Privacidad — StreamAutomator
 
-Esta Política explica cómo Dakinis StreamAutomator recopila, utiliza y protege datos personales.
+Última actualización: 2026-05-19
 
-1. Responsable del tratamiento
-Responsable: Christian
-Contacto: privacy@streamautomator.com
-País/Jurisdicción: España
+**URL pública (OAuth / revisión Google):** https://streamautomator.com/privacy
 
-2. Datos que podemos recopilar
-- Datos de cuenta: nombre de usuario, email (si aplica) e identificadores de OAuth.
-- Datos de contenido: mensajes, archivos y metadatos asociados.
-- Datos de conexión y seguridad: IP, logs de acceso, identificadores de sesión y eventos relevantes de seguridad.
-- Datos de configuración del usuario: preferencias, ajustes y permisos dentro de la app.
+## 1. Responsable
 
-3. Finalidades del tratamiento
-- Crear y administrar cuentas.
-- Prestar las funciones de comunicación en tiempo real de la plataforma.
-- Moderación, seguridad, prevención de fraude y cumplimiento legal.
-- Mejoras técnicas y operativas del servicio.
+Dakinis Systems (nombre comercial de Christian Villar) — España  
+Privacidad: privacy@streamautomator.com · Legal: legal@streamautomator.com
 
-4. Base legal
-Tratamos datos sobre las siguientes bases, según corresponda:
-- ejecución del contrato (prestación del servicio)
-- interés legítimo (seguridad, prevención de abuso, mejora del servicio)
-- cumplimiento de obligaciones legales
-- consentimiento cuando sea exigible
+## 2. Datos que tratamos
 
-5. Conservación de datos
-Conservamos los datos mientras la cuenta esté activa o mientras sean necesarios para fines operativos, legales o de seguridad.
-Podemos mantener registros bloqueados cuando exista una obligación legal o una controversia.
+- Cuenta: usuario, email, perfil.
+- OAuth: tokens e identificadores de Google, Twitch, Discord, YouTube y X cuando conectas esas plataformas.
+- Contenido: publicaciones programadas, eventos y archivos que subes.
+- Técnicos: logs, IP, diagnóstico de seguridad.
 
-6. Compartición de datos
-Podemos compartir datos con:
-- proveedores de infraestructura (hosting, base de datos, almacenamiento)
-- autoridades competentes cuando exista un requerimiento legal
-No vendemos datos personales.
+## 3. Google (login y YouTube)
 
-7. Transferencias internacionales
-Si existen transferencias internacionales, aplicaremos salvaguardas adecuadas conforme a la normativa aplicable.
+Si usas **inicio de sesión con Google** o **YouTube**, cumplimos la [Política de datos de usuario de Google API Services](https://developers.google.com/terms/api-services-user-data-policy).
 
-8. Derechos de las personas usuarias (RGPD)
-Puedes ejercer, según corresponda:
-- acceso
-- rectificación
-- supresión
-- oposición
-- limitación del tratamiento
-- portabilidad
+**Scopes mínimos:**
 
-Para ejercer derechos: usa el canal indicado en la aplicación en `/legal/dpo` (formulario DPO).
-Antes de ejecutar solicitudes, puede requerirse verificación de identidad.
+- Login: `profile`, `email`
+- YouTube: `youtube.upload`, `youtube.readonly` (solo para funciones de publicación/gestión acordadas)
 
-9. Seguridad
-Aplicamos medidas técnicas y organizativas razonables para proteger datos frente a accesos no autorizados, alteración o pérdida.
+No vendemos datos de Google ni los usamos para publicidad comportamental. Puedes desconectar integraciones en Ajustes y revocar permisos en https://myaccount.google.com/permissions
 
-10. Menores de edad
-El servicio no está dirigido a menores de 14 años. Si detectamos datos de menores sin una base legal aplicable, podremos restringir o eliminar la cuenta.
+## 4. Otras plataformas
 
-11. Cookies y almacenamiento local
-La aplicación utiliza almacenamiento local/cookies para sesión y preferencias (por ejemplo, tokens de sesión y ajustes).
-Cuando sea exigible, se solicita consentimiento para componentes no esenciales.
-Para más información: `/legal/cookies`.
+Twitch, Discord y X se tratan solo para las funciones que actives. Debes cumplir también sus términos.
 
-12. Actuación en la UE (RGPD / DSA)
-Si operamos con usuarios en la UE:
-- aplicamos procesos de gestión de derechos RGPD
-- habilitamos mecanismos de reporte de contenido ilegal
-- publicamos información de moderación y transparencia cuando resulte exigible
+## 5. Encargados
 
-13. Cambios a esta Política
-Podemos actualizar esta Política. Publicaremos la versión vigente con su fecha de actualización.
+Hosting, base de datos y, si está configurado, Supabase para autenticación. No vendemos datos personales.
 
-14. Contacto
-Consultas de privacidad: privacy@akoenet.local
+## 6. Conservación y seguridad
 
-15. DPO y avisos de copyright
-- DPO / protección de datos: formulario en `/legal/dpo`
-- Retirada por copyright (DMCA): formulario en `/legal/dmca`
+Datos mientras la cuenta esté activa o sea necesario por ley. Medidas técnicas razonables (HTTPS, control de acceso).
 
-Nota: Este documento no constituye asesoría legal profesional.
+## 7. Derechos (RGPD)
 
+Acceso, rectificación, supresión, oposición, limitación y portabilidad: privacy@streamautomator.com
+
+## 8. Eliminación de cuenta
+
+- En la app: Ajustes → eliminar cuenta.
+- Por email: privacy@streamautomator.com
+
+## 9. Cookies
+
+Ver política de cookies. No usamos analítica de terceros por defecto en el front.
+
+## 10. Cambios
+
+Publicaremos la versión vigente con fecha de actualización.
