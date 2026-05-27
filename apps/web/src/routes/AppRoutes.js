@@ -35,7 +35,7 @@ import { PrivateRoute, AdminRoute, UserRoute } from './routeGuards';
 const Overlay = lazy(() => import('../pages/Overlay'));
 const OverlayRoulette = lazy(() => import('../pages/OverlayRoulette'));
 
-export function AppRoutes({ user, token, setAuth, setUser, clearAuth }) {
+export function AppRoutes({ user, token, setAuth, setUser, signOut }) {
   return (
     <Routes>
       <Route path="/login" element={<Login setAuth={setAuth} />} />
@@ -74,7 +74,7 @@ export function AppRoutes({ user, token, setAuth, setUser, clearAuth }) {
         path="/admin"
         element={
           <AdminRoute user={user}>
-            <AdminDashboard user={user} token={token} onLogout={clearAuth} />
+            <AdminDashboard user={user} token={token} onLogout={signOut} />
           </AdminRoute>
         }
       />

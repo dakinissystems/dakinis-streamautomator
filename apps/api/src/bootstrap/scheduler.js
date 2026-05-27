@@ -9,6 +9,7 @@ import { runReconciliation } from '../services/discordSyncService.js';
 import { notifyDbSlow, notifyQueueProblems, checkRedisRecovery } from '../modules/system/application/alertService.js';
 import { getQueueStats } from '../services/publicationQueueService.js';
 import { enqueueStreamReminderJobs, runStreamReminders } from '../modules/reminders/application/jobs/reminderOrchestrator.js';
+import { dakinisInitSentry } from '../utils/sentry.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -33,6 +34,7 @@ async function initDatabase() {
 }
 
 export async function startSchedulerProcess() {
+  await dakinisInitSentry('streamautomator-scheduler');
   await initDatabase();
 
   startSchedulerProducer();

@@ -59,6 +59,7 @@ import { csrfProtection, getCsrfToken } from './middleware/csrf.js';
 import { metricsMiddleware, metrics } from './utils/metrics.js';
 import { setupSwagger } from './app-swagger.js';
 import logger from './utils/logger.js';
+import { dakinisInitSentry, dakinisCaptureException } from './utils/sentry.js';
 import { isProbeRequest } from './utils/isProbeRequest.js';
 import { getPublicAdminDashboardUrl } from './utils/publicFrontendUrl.js';
 import platformConfigService from './modules/system/application/platformConfigService.js';
@@ -482,6 +483,11 @@ app.use((req, res) => {
 
 // Error handler - Always return JSON
 app.use((err, req, res, next) => {
+  dakinisCaptureException(err, {
+    path: req.path,
+    method: req.method,
+    ip: req.ip,
+  });
   logger.error('Unhandled error', {
     error: err.message,
     stack: err.stack,
@@ -501,6 +507,7 @@ const enableLogging = process.env.ENABLE_LOGGING === 'true';
 const logLevel = process.env.LOG_LEVEL || 'info';
 
 async function initServer() {
+  await dakinisInitSentry('streamautomator-api');
   try {
     await sequelize.authenticate();
     const dbType = process.env.DATABASE_URL ? 'PostgreSQL (Supabase)' : 'SQLite';
