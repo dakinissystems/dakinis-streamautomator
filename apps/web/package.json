@@ -17,7 +17,6 @@
     "update-browserslist": "npx update-browserslist-db@latest"
   },
   "dependencies": {
-    "@dakinis/auth-client": "file:../../../../platform/shared/packages/auth-client",
     "@sentry/react": "^9.47.1",
     "@supabase/supabase-js": "^2.93.1",
     "axios": "^1.16.1",
