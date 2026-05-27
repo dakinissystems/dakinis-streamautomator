@@ -12,6 +12,10 @@ const dist = path.join(__dirname, '..', 'dist');
 const port = Number(process.env.PORT || 8080);
 const host = '0.0.0.0';
 
+console.log(
+  `[streamautomator-web] PORT=${process.env.PORT ?? '(unset)'} → listening on ${port} (static dist/)`
+);
+
 if (!existsSync(path.join(dist, 'index.html'))) {
   console.error('[streamautomator-web] dist/index.html missing — run npm run build');
   process.exit(1);
