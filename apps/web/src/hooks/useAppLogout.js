@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { dakinisPerformClientLogout } from '@dakinis/auth-client/logout';
+import { dakinisPerformClientLogout } from '../lib/dakinis-client-logout.js';
 import { useAuth } from '../store/authStore';
 
 /** Unified sign-out: clear local auth + redirect to /login. */
