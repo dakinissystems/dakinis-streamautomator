@@ -9,6 +9,7 @@ import { Toaster } from 'react-hot-toast';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { StreamModeProvider, useStreamMode } from './contexts/StreamModeContext';
 import { AuthProvider, useAuth } from './store/authStore';
+import { useAppLogout } from './hooks/useAppLogout';
 import { getStoredAccentColor, applyAccentColor, THEME_CHANGE_EVENT } from './utils/themeUtils';
 import { getUnreadMessageCount } from './features/messaging/api';
 import { getAdminFeatures } from './features/admin/api';
@@ -18,7 +19,7 @@ import AppFooter from './components/AppFooter';
 
 const PUBLIC_PAGES_WITH_OWN_FOOTER = ['/', '/pricing', '/privacy', '/terms', '/legal-notice', '/aviso-legal', '/faq'];
 
-function Header({ user, token, onLogout, onMenuClick, installPromptEvent, onInstallApp }) {
+function Header({ user, token, onSignOut, onMenuClick, installPromptEvent, onInstallApp }) {
   const navigate = useNavigate();
   const { t, toggleLanguage, language } = useLanguage();
   const { streamMode, toggleStreamMode } = useStreamMode();
@@ -120,7 +121,7 @@ function Header({ user, token, onLogout, onMenuClick, installPromptEvent, onInst
           </span>
           <button
             type="button"
-            onClick={() => { onLogout(); navigate('/login'); }}
+            onClick={() => onSignOut?.()}
             className="p-2 sm:px-4 sm:py-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800"
             title={t('common.logout')}
             aria-label={t('common.logout')}
@@ -363,7 +364,8 @@ function DraggableMerchandisingButton({ link, position, token, setUser, user, t 
 }
 
 function AppContent() {
-  const { user, token, setAuth, clearAuth, setUser } = useAuth();
+  const { user, token, setAuth, setUser } = useAuth();
+  const signOut = useAppLogout();
   const { t } = useLanguage();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -466,9 +468,9 @@ function AppContent() {
             />
           )}
           <div className="flex-1 flex flex-col min-h-screen min-w-0 overflow-x-hidden">
-            <Header user={user} token={token} onLogout={clearAuth} onMenuClick={() => setSidebarOpen(true)} installPromptEvent={deferredInstallPrompt} onInstallApp={handleInstallClick} />
+            <Header user={user} token={token} onSignOut={signOut} onMenuClick={() => setSidebarOpen(true)} installPromptEvent={deferredInstallPrompt} onInstallApp={handleInstallClick} />
             <main className="flex-1 min-h-0 overflow-y-auto">
-              <AppRoutes user={user} token={token} setAuth={setAuth} setUser={setUser} clearAuth={clearAuth} />
+              <AppRoutes user={user} token={token} setAuth={setAuth} setUser={setUser} signOut={signOut} />
             </main>
             {user && user.merchandisingLink && (
               <DraggableMerchandisingButton

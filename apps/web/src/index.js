@@ -8,6 +8,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
+import { saInitSentryBrowser, Sentry } from './lib/sentry.js';
+import DevSentryErrorButton from './components/DevSentryErrorButton.js';
 import { dakinisCopyrightNotice } from './constants/copyright';
 
 if (typeof document !== 'undefined') {
@@ -34,9 +36,21 @@ if (supabaseBase && typeof window !== 'undefined' && window.fetch) {
   };
 }
 
+saInitSentryBrowser();
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <Sentry.ErrorBoundary
+      fallback={
+        <div style={{ padding: '2rem', fontFamily: 'system-ui,sans-serif' }}>
+          <h1>Error inesperado</h1>
+          <p>Recarga la página.</p>
+        </div>
+      }
+    >
+      <App />
+      <DevSentryErrorButton />
+    </Sentry.ErrorBoundary>
   </React.StrictMode>
 ); 
