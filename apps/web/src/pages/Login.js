@@ -81,6 +81,14 @@ export default function Login({ setAuth }) {
   }, [t]);
 
   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const hinted = params.get('email');
+    if (hinted && !email.trim()) {
+      setEmail(hinted);
+    }
+  }, [location.search, email]);
+
+  useEffect(() => {
     const slug = getSlugFromLocation();
     if (slug && !username.trim()) {
       setUsername(slug.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 40));

@@ -58,6 +58,11 @@
     "streamModeProfileHint": "Modo stream activado — Email, usuario y otros datos sensibles están ocultos. Desactívalo en la cabecera para editar.",
     "streamModeHidden": "Oculto (modo stream activado)"
   },
+  "hubSso": {
+    "working": "Conectando tu cuenta Dakinis con StreamAutomator…",
+    "idpDisabled": "SSO del ecosistema no configurado (falta REACT_APP_DAKINIS_AUTH_URL).",
+    "goLogin": "Ir a iniciar sesión"
+  },
   "login": {
     "title": "Iniciar sesión",
     "createAccount": "Crear cuenta",

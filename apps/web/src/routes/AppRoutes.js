@@ -13,6 +13,7 @@ import Templates from '../features/app/pages/TemplatesPage';
 import MediaUpload from '../features/app/pages/MediaUploadPage';
 import Login from '../features/auth/pages/LoginPage';
 import AuthCallback from '../features/auth/pages/AuthCallbackPage';
+import HubSso from '../pages/HubSso';
 import AdminDashboard from '../features/admin/pages/AdminDashboardPage';
 import MessagesPage from '../features/app/pages/MessagesPage';
 import TodoList from '../features/app/pages/TodoListPage';
@@ -39,6 +40,7 @@ export function AppRoutes({ user, token, setAuth, setUser, signOut }) {
   return (
     <Routes>
       <Route path="/login" element={<Login setAuth={setAuth} />} />
+      <Route path="/auth/hub-sso" element={<HubSso setAuth={setAuth} />} />
       <Route path="/auth/callback" element={<AuthCallback setAuth={setAuth} />} />
       <Route path="/" element={!user ? <Landing /> : (user.isAdmin ? <Navigate to="/admin" replace /> : <Navigate to="/dashboard" replace />)} />
       <Route path="/pricing" element={<Pricing />} />
