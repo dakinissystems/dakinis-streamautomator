@@ -58,6 +58,11 @@
     "streamModeProfileHint": "Stream mode is on — email, username and other sensitive fields are hidden. Turn it off in the header to edit.",
     "streamModeHidden": "Hidden (stream mode is on)"
   },
+  "hubSso": {
+    "working": "Linking your Dakinis account to StreamAutomator…",
+    "idpDisabled": "Ecosystem SSO is not configured (missing REACT_APP_DAKINIS_AUTH_URL).",
+    "goLogin": "Go to sign in"
+  },
   "login": {
     "title": "Login",
     "createAccount": "Create account",

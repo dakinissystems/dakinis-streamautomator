@@ -8,22 +8,33 @@
 
 Config en repo: [`railway.json`](./railway.json).
 
-## Panel Railway — obligatorio tras deploy
+## Panel Railway (puerto)
 
-1. **Settings → Networking → Public Networking**
-2. **Quitar puerto fijo 5173.** Railway debe enrutar al **`PORT`** que inyecta el runtime (no al puerto de Vite dev).
-3. Si pide “Target port”, déjalo en automático o el que muestre el log:
+**No** fijes **5173** ni otro puerto en Networking. Railway inyecta `PORT` al contenedor.
+
+1. **Settings → Networking** — dominio `streamautomator.com` **sin** target port 5173 (automático / el del log).
+2. Tras cambiar networking, **redeploy**.
+3. En logs debe aparecer:
    ```
    [streamautomator-web] listening on http://0.0.0.0:XXXX
    ```
-4. **Redeploy** después de cambiar el puerto.
+## Dónde está el puerto en código (no cambiar a 5173 en prod)
+
+| Archivo | Qué hace |
+|---------|----------|
+| [`scripts/serve-prod.mjs`](./scripts/serve-prod.mjs) | `const port = Number(process.env.PORT \|\| 8080)` + `listen(port, '0.0.0.0')` — **esto es prod** |
+| [`package.json`](./package.json) | `"start": "node scripts/serve-prod.mjs"` |
+| [`railway.json`](./railway.json) | `startCommand`: `node scripts/serve-prod.mjs` |
+| `vite` / `npm run dev` | Solo local; Vite usa 5173 en dev — **no** es el start de Railway |
+
+No hace falta `PORT=5173` en variables Railway.
 
 ## Dominios
 
 | Dominio | Servicio |
 |---------|----------|
 | `streamautomator.com` | **Este frontend** (static) |
-| `api.dakinissystems.com/streamautomator/` | **API** (`streamautomator-api` / `dakinis-streamautomator-production`) |
+| `api.dakinissystems.com/streamautomator/` | **API** (`api.streamautomator.com` vía gateway) |
 
 El gateway **no** debe apuntar rutas `/streamautomator/api/*` al frontend.
 
