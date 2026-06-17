@@ -1,4 +1,4 @@
-# Términos y Condiciones — StreamAutomator
+﻿# Términos y Condiciones — StreamAutomator
 
 Última actualización: 2026-05-19
 
@@ -10,7 +10,7 @@
 | **Nombre comercial** | Dakinis Systems (StreamAutomator) |
 | **NIF** | 18513473Z |
 | **País** | España |
-| **Legal** | legal@dakinis-systems.com |
+| **Legal** | legal@streamautomator.com |
 
 Al usar el servicio aceptas estos Términos.
 
@@ -40,4 +40,4 @@ España.
 
 ## 8. Contacto
 
-legal@dakinis-systems.com
+legal@streamautomator.com

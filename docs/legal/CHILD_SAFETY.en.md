@@ -1,4 +1,4 @@
-# Child Safety Standards — StreamAutomator
+﻿# Child Safety Standards — StreamAutomator
 
 Last updated: 2026-05-19
 
@@ -12,4 +12,4 @@ The services are not directed to persons under 14 years of age.
 
 **Where legally required, reports may be escalated to competent authorities.**
 
-Report: safety@dakinis-systems.com · legal@dakinis-systems.com
+Report: legal@streamautomator.com · Privacy: privacy@streamautomator.com

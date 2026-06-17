@@ -1,4 +1,4 @@
-# Terms of Service — StreamAutomator
+﻿# Terms of Service — StreamAutomator
 
 Last updated: 2026-05-19
 
@@ -10,7 +10,7 @@ Last updated: 2026-05-19
 | **Trading name** | Dakinis Systems (StreamAutomator) |
 | **Tax ID (NIF)** | 18513473Z |
 | **Country** | Spain |
-| **Legal** | legal@dakinis-systems.com |
+| **Legal** | legal@streamautomator.com |
 
 By using the service you accept these Terms.
 
@@ -40,4 +40,4 @@ Spain.
 
 ## 8. Contact
 
-legal@dakinis-systems.com
+legal@streamautomator.com

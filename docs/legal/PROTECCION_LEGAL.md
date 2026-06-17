@@ -1,4 +1,4 @@
-# Protección legal — StreamAutomator
+﻿# Protección legal — StreamAutomator
 
 Última actualización: 2026-05-19
 
@@ -10,4 +10,4 @@ No constituye asesoría legal profesional.
 2. **Licencia:** Limitada, revocable y no exclusiva vía plataforma.
 3. **Restricciones:** Prohibida copia, ingeniería inversa, reventa o abuso de API.
 4. **Copyright:** © 2026 Christian David Villar Colodro / Dakinis Systems. Todos los derechos reservados.
-5. **Copyright / PI:** legal@dakinis-systems.com (asunto: Reclamación copyright / PI)
+5. **Copyright / PI:** legal@streamautomator.com (asunto: Reclamación copyright / PI)

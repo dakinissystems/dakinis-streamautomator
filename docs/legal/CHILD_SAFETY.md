@@ -1,4 +1,4 @@
-# Estándares de Seguridad Infantil — StreamAutomator
+﻿# Estándares de Seguridad Infantil — StreamAutomator
 
 Última actualización: 2026-05-19
 
@@ -12,4 +12,4 @@ Los servicios no están dirigidos a personas menores de 14 años.
 
 **Cuando la ley lo exija, los reportes pueden escalarse a las autoridades competentes.**
 
-Reportar: safety@dakinis-systems.com · legal@dakinis-systems.com
+Reportar: legal@streamautomator.com · Privacidad: privacy@streamautomator.com

@@ -1,4 +1,4 @@
-# Política de Privacidad — StreamAutomator
+﻿# Política de Privacidad — StreamAutomator
 
 Última actualización: 2026-05-19
 
@@ -12,8 +12,8 @@
 | **Nombre comercial** | Dakinis Systems (StreamAutomator) |
 | **NIF** | 18513473Z |
 | **País** | España |
-| **Privacidad** | privacy@dakinis-systems.com |
-| **Legal** | legal@dakinis-systems.com |
+| **Privacidad** | privacy@streamautomator.com |
+| **Legal** | legal@streamautomator.com |
 
 ## 2. Datos que tratamos
 
@@ -41,7 +41,7 @@ Cumplimos la [Política de datos de usuario de Google API Services](https://deve
 
 ## 6. Derechos y exportación
 
-Acceso, rectificación, supresión, oposición, limitación y portabilidad (formato estructurado): privacy@dakinis-systems.com
+Acceso, rectificación, supresión, oposición, limitación y portabilidad (formato estructurado): privacy@streamautomator.com
 
 ## 7. Menores
 
@@ -49,11 +49,11 @@ Los servicios no están dirigidos a personas menores de 14 años.
 
 ## 8. Eliminación de cuenta
 
-Ajustes en la app o privacy@dakinis-systems.com
+Ajustes en la app o privacy@streamautomator.com
 
 ## 9. Seguridad
 
-Vulnerabilidades: security@dakinis-systems.com o legal@dakinis-systems.com
+Vulnerabilidades: privacy@streamautomator.com o legal@streamautomator.com
 
 ## 10. Automatización e IA
 
