@@ -1,82 +1,64 @@
-# Privacy Policy — Dakinis StreamAutomator
-Last updated: 2026-05-08
+# Privacy Policy — StreamAutomator
 
-This policy explains how Dakinis StreamAutomator collects, uses, and protects personal data.
+Last updated: 2026-05-19
 
-1. Data controller
-Controller: Christian
-Contact: privacy@streamautomator.com
-Country/Jurisdiction: Spain
+**Public URL (OAuth / Google Play):** https://streamautomator.com/privacy
 
-2. Data we may collect
-- Account data: username, email (if applicable), and OAuth identifiers.
-- Content data: messages, files, and related metadata.
-- Connection and security data: IP address, access logs, session identifiers, and relevant security events.
-- User configuration data: preferences, settings, and permissions inside the app.
+## 1. Controller
 
-3. Purposes of processing
-- Create and manage accounts.
-- Provide real-time communication features of the platform.
-- Moderation, security, fraud prevention, and legal compliance.
-- Technical and operational improvements to the service.
+| Field | Details |
+|-------|---------|
+| **Operator / Controller** | Christian David Villar Colodro |
+| **Trading name** | Dakinis Systems (StreamAutomator) |
+| **Tax ID (NIF)** | 18513473Z |
+| **Country** | Spain |
+| **Privacy** | privacy@dakinis-systems.com |
+| **Legal** | legal@dakinis-systems.com |
 
-4. Legal basis
-We process data under the following legal grounds, as applicable:
-- performance of the contract (service provision)
-- legitimate interests (security, abuse prevention, service improvement)
-- compliance with legal obligations
-- consent when required
+## 2. Data we process
 
-5. Data retention
-We keep data while your account is active or as long as needed for operational, legal, or security purposes.
-We may keep limited/blocked records when there is a legal obligation or a dispute.
+- Account: username, email, profile.
+- OAuth: Google, Twitch, Discord, YouTube, and X when you connect those platforms.
+- Content: scheduled posts, events, and uploads.
+- Technical: logs, IP, security diagnostics.
 
-6. Data sharing
-We may share data with:
-- infrastructure providers (hosting, database, storage)
-- competent authorities when there is a legal requirement
-We do not sell personal data.
+## 3. Processors
 
-7. International transfers
-If international transfers occur, we apply appropriate safeguards under applicable law.
+We only share personal data with processors that provide adequate contractual and technical safeguards under the GDPR (hosting, database, Supabase where applicable). We do not sell personal data.
 
-8. Your rights (GDPR)
-Depending on the circumstances, you can exercise:
-- access
-- rectification
-- deletion
-- objection
-- restriction of processing
-- data portability
+## 4. Retention
 
-To exercise rights: use the DPO channel in `/legal/dpo` (DPO form).
-Identity verification may be required before executing requests.
+| Category | Indicative period |
+|----------|-------------------|
+| Account data | While the account remains active |
+| Security logs | Up to 12 months |
+| Support communications | Up to 24 months |
+| Billing | Per applicable tax obligations |
 
-9. Security
-We implement reasonable technical and organizational measures to protect personal data from unauthorized access, alteration, or loss.
+## 5. Google (login and YouTube)
 
-10. Minors
-The service is not directed to children under 14. If we detect minors’ data without a applicable legal basis, we may restrict or delete the account.
+We comply with the [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy). Minimum scopes: login `profile`, `email`; YouTube per enabled features. Revocation: https://myaccount.google.com/permissions
 
-11. Cookies and local storage
-The app uses local storage/cookies for session and preferences.
-For details: `/legal/cookies`.
+## 6. Rights and export
 
-12. EU actions (GDPR / DSA)
-If we operate with users in the EU:
-- we apply processes for GDPR rights management
-- we provide mechanisms to report illegal content
-- we publish moderation and transparency information where required
+Access, rectification, erasure, objection, restriction, and portability (structured format): privacy@dakinis-systems.com
 
-13. Updates
-We may update this policy. We will publish the current version with its update date.
+## 7. Minors
 
-14. Contact
-Privacy inquiries: privacy@akoenet.local
+The services are not directed to persons under 14 years of age.
 
-15. DPO and copyright notices
-- DPO / data protection: `/legal/dpo`
-- Copyright removal (DMCA): `/legal/dmca`
+## 8. Account deletion
 
-Note: This document does not constitute professional legal advice.
+In-app Settings or privacy@dakinis-systems.com
 
+## 9. Security
+
+Vulnerabilities: security@dakinis-systems.com or legal@dakinis-systems.com
+
+## 10. Automation and AI
+
+Some features may use automated systems to classify, route, or process information. They assist human decision-making.
+
+## 11. Cookies
+
+See cookie policy. No third-party analytics by default.
