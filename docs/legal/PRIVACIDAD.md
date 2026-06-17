@@ -2,56 +2,63 @@
 
 Última actualización: 2026-05-19
 
-**URL pública (OAuth / revisión Google):** https://streamautomator.com/privacy
+**URL pública (OAuth / Google Play):** https://streamautomator.com/privacy
 
 ## 1. Responsable
 
-Dakinis Systems (nombre comercial de Christian Villar) — España  
-Privacidad: privacy@streamautomator.com · Legal: legal@streamautomator.com
+| Campo | Dato |
+|-------|------|
+| **Operador / Responsable** | Christian David Villar Colodro |
+| **Nombre comercial** | Dakinis Systems (StreamAutomator) |
+| **NIF** | 18513473Z |
+| **País** | España |
+| **Privacidad** | privacy@dakinis-systems.com |
+| **Legal** | legal@dakinis-systems.com |
 
 ## 2. Datos que tratamos
 
 - Cuenta: usuario, email, perfil.
-- OAuth: tokens e identificadores de Google, Twitch, Discord, YouTube y X cuando conectas esas plataformas.
-- Contenido: publicaciones programadas, eventos y archivos que subes.
+- OAuth: Google, Twitch, Discord, YouTube y X cuando conectas esas plataformas.
+- Contenido: publicaciones programadas, eventos y archivos.
 - Técnicos: logs, IP, diagnóstico de seguridad.
 
-## 3. Google (login y YouTube)
+## 3. Encargados
 
-Si usas **inicio de sesión con Google** o **YouTube**, cumplimos la [Política de datos de usuario de Google API Services](https://developers.google.com/terms/api-services-user-data-policy).
+Solo compartimos datos personales con encargados que ofrecen garantías contractuales y técnicas adecuadas conforme al RGPD (hosting, base de datos, Supabase si aplica). No vendemos datos personales.
 
-**Scopes mínimos:**
+## 4. Conservación
 
-- Login: `profile`, `email`
-- YouTube: `youtube.upload`, `youtube.readonly` (solo para funciones de publicación/gestión acordadas)
+| Categoría | Plazo orientativo |
+|-----------|-------------------|
+| Datos de cuenta | Mientras la cuenta permanezca activa |
+| Logs de seguridad | Hasta 12 meses |
+| Comunicaciones de soporte | Hasta 24 meses |
+| Facturación | Según obligaciones fiscales |
 
-No vendemos datos de Google ni los usamos para publicidad comportamental. Puedes desconectar integraciones en Ajustes y revocar permisos en https://myaccount.google.com/permissions
+## 5. Google (login y YouTube)
 
-## 4. Otras plataformas
+Cumplimos la [Política de datos de usuario de Google API Services](https://developers.google.com/terms/api-services-user-data-policy). Scopes mínimos: login `profile`, `email`; YouTube según funciones activadas. Revocación: https://myaccount.google.com/permissions
 
-Twitch, Discord y X se tratan solo para las funciones que actives. Debes cumplir también sus términos.
+## 6. Derechos y exportación
 
-## 5. Encargados
+Acceso, rectificación, supresión, oposición, limitación y portabilidad (formato estructurado): privacy@dakinis-systems.com
 
-Hosting, base de datos y, si está configurado, Supabase para autenticación. No vendemos datos personales.
+## 7. Menores
 
-## 6. Conservación y seguridad
-
-Datos mientras la cuenta esté activa o sea necesario por ley. Medidas técnicas razonables (HTTPS, control de acceso).
-
-## 7. Derechos (RGPD)
-
-Acceso, rectificación, supresión, oposición, limitación y portabilidad: privacy@streamautomator.com
+Los servicios no están dirigidos a personas menores de 14 años.
 
 ## 8. Eliminación de cuenta
 
-- En la app: Ajustes → eliminar cuenta.
-- Por email: privacy@streamautomator.com
+Ajustes en la app o privacy@dakinis-systems.com
 
-## 9. Cookies
+## 9. Seguridad
 
-Ver política de cookies. No usamos analítica de terceros por defecto en el front.
+Vulnerabilidades: security@dakinis-systems.com o legal@dakinis-systems.com
 
-## 10. Cambios
+## 10. Automatización e IA
 
-Publicaremos la versión vigente con fecha de actualización.
+Algunas funciones pueden usar sistemas automatizados para clasificar, enrutar o procesar información. Asisten la toma de decisiones humana.
+
+## 11. Cookies
+
+Ver política de cookies. Sin analítica de terceros por defecto.

@@ -1,56 +1,43 @@
-# Términos y Condiciones de Uso — Dakinis StreamAutomator
-Última actualización: 2026-05-08
+# Términos y Condiciones — StreamAutomator
 
-Al crear una cuenta o usar el servicio, aceptas estos Términos.
+Última actualización: 2026-05-19
 
-1. Titular del servicio
-Titular: Christian
-Correo de contacto: legal@streamautomator.com
-País/Jurisdicción: España
+## 1. Operador
 
-2. Objeto del servicio
-Dakinis StreamAutomator ofrece una plataforma de automatización para creadores (planificación, notificaciones y publicación multi-plataforma).
+| Campo | Dato |
+|-------|------|
+| **Operador** | Christian David Villar Colodro |
+| **Nombre comercial** | Dakinis Systems (StreamAutomator) |
+| **NIF** | 18513473Z |
+| **País** | España |
+| **Legal** | legal@dakinis-systems.com |
 
-3. Elegibilidad y cuentas
-- Debes proporcionar información veraz.
-- Eres responsable de la seguridad de tu cuenta y credenciales.
-- No puedes ceder tu cuenta a terceros sin autorización.
+Al usar el servicio aceptas estos Términos.
 
-4. Conducta del usuario
-Queda prohibido:
-- publicar contenido ilegal, ofensivo o que vulnere derechos de terceros
-- acosar, amenazar, realizar spam o suplantación de identidad
-- intentar vulnerar la seguridad del servicio o eludir controles
-- usar bots o realizar scraping no autorizado
+## 2. Objeto
 
-5. Contenido del usuario
-El usuario conserva sus derechos sobre su contenido.
-Concedes una licencia limitada para alojar, mostrar y procesar el contenido dentro de la operación normal del servicio.
-Podemos eliminar contenido que incumpla estos Términos o la ley aplicable.
+Plataforma de automatización para creadores (planificación, notificaciones y publicación multi-plataforma).
 
-6. Moderación y sanciones
-Podemos aplicar medidas de moderación (por ejemplo, ocultación o eliminación de contenido y/o restricciones de cuenta) según la gravedad y la legalidad.
+## 3. Elegibilidad
 
-7. Suspensiones y terminación
-Podemos suspender o cerrar cuentas en caso de incumplimiento, riesgos de seguridad o requerimiento legal.
+Mayor de **14 años**; información veraz; seguridad de credenciales.
 
-8. Disponibilidad y cambios del servicio
-El servicio se ofrece “tal cual”, sin garantía de disponibilidad continua.
-Podemos modificar funciones, límites o condiciones cuando sea necesario.
+## 4. Conducta, contenido, moderación
 
-9. Limitación de responsabilidad
-En la máxima medida permitida por la ley, Dakinis StreamAutomator no será responsable por daños indirectos, lucro cesante o pérdida de datos derivados del uso del servicio.
+Ver políticas de moderación. Prohibido contenido ilegal, acoso, elusión de seguridad y scraping no autorizado.
 
-10. Privacidad
-El tratamiento de datos personales se regula en `/legal/privacidad`.
+## 5. Pagos
 
-11. Ley aplicable y jurisdicción
-Estos Términos se rigen por las leyes de España. Cualquier disputa se somete a los tribunales competentes salvo norma imperativa distinta.
+Cobro online con Stripe aplica a StreamAutomator.
 
-12. Cobros y pagos
-El cobro online con pasarela (por ejemplo, Stripe) aplica únicamente a Dakinis StreamAutomator.
-Otros productos del ecosistema Dakinis pueden operar con cobro por transferencia fuera de esta plataforma.
+## 6. Privacidad
 
-13. Contacto legal
-Para consultas legales o notificaciones: legal@streamautomator.com
+/legal/privacidad
 
+## 7. Ley aplicable
+
+España.
+
+## 8. Contacto
+
+legal@dakinis-systems.com
