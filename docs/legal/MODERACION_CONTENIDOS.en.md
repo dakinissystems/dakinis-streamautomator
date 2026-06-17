@@ -1,4 +1,4 @@
-# Content moderation — StreamAutomator
+﻿# Content moderation — StreamAutomator
 
 Last updated: 2026-05-19
 
@@ -10,5 +10,5 @@ DSA statement (EU Regulation 2022/2065), where applicable.
 2. Prohibited content per /legal/terminos.
 3. Human moderation, automated filters, and user reports.
 4. Consequences: removal, restrictions, suspension, or closure.
-5. Appeals: legal@dakinis-systems.com · Privacy: privacy@dakinis-systems.com
-6. Authorities: legal@dakinis-systems.com · Child safety: safety@dakinis-systems.com
+5. Appeals: legal@streamautomator.com · Privacy: privacy@streamautomator.com
+6. Authorities: legal@streamautomator.com · Child safety: legal@streamautomator.com
