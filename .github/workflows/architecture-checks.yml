@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: apps/web/package-lock.json
+          cache-dependency-path: package-lock.json
       - run: npm ci
       - run: npm run check:architecture
       - name: Production build
@@ -37,7 +37,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: apps/api/package-lock.json
+          cache-dependency-path: package-lock.json
       - run: npm ci
       - run: npm run check:architecture
       - run: npm run smoke:baseline
