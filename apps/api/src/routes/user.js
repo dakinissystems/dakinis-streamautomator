@@ -45,12 +45,6 @@ import { Tenant, Membership } from '../modules/tenants/infrastructure/models.js'
 import { ensureDefaultTenantForUser } from '../modules/tenants/application/tenantResolutionService.js';
 import logger from '../utils/logger.js';
 import { getBackendPublicUrl, getFrontendPublicUrl } from '../utils/publicUrls.js';
-import { verifyPlatformIdpAccessToken } from '../utils/platformIdpToken.js';
-import {
-  isPlatformAuthSubject,
-  loadOrProvisionStreamAutomatorUser,
-  resolveTenantNumericId,
-} from '../services/platformAuthBridge.js';
 
 /** OAuth/login redirects — set FRONTEND_URL / BACKEND_URL on Railway (or use RAILWAY_PUBLIC_DOMAIN for API). */
 const BACKEND_URL = getBackendPublicUrl();
@@ -1397,56 +1391,6 @@ router.post('/register', validateBody(registerSchema), async (req, res) => {
     } else {
       res.status(400).json({ error: 'User already exists or invalid data' });
     }
-  }
-});
-
-/**
- * Intercambia JWT del IdP Dakinis (platform/auth) por sesión StreamAutomator (JWT local).
- * Header: Authorization: Bearer <platform access token>
- */
-router.post('/auth/exchange', async (req, res) => {
-  const authHeader = req.headers.authorization;
-  const platformToken =
-    typeof authHeader === 'string' && authHeader.toLowerCase().startsWith('bearer ')
-      ? authHeader.slice(7).trim()
-      : '';
-  if (!platformToken) {
-    return res.status(401).json({ error: 'missing_platform_token' });
-  }
-  let payload;
-  try {
-    payload = verifyPlatformIdpAccessToken(platformToken, JWT_SECRET);
-  } catch {
-    return res.status(401).json({ error: 'invalid_platform_token' });
-  }
-  const sub = payload.sub ?? payload.id;
-  if (!isPlatformAuthSubject(sub)) {
-    return res.status(401).json({ error: 'not_platform_identity' });
-  }
-  try {
-    const tenantNumeric = await resolveTenantNumericId(payload, req);
-    const email = typeof payload.email === 'string' ? payload.email : '';
-    const platformRole = typeof payload.role === 'string' ? payload.role : 'user';
-    const user = await loadOrProvisionStreamAutomatorUser({
-      platformSub: String(sub),
-      email,
-      platformRole,
-      tenantNumericId: tenantNumeric,
-    });
-    if (!user || user.isDisabled) {
-      return res.status(401).json({ error: 'platform_user_not_resolved' });
-    }
-    const authData = await generateAuthData(user, { activeTenantId: tenantNumeric });
-    return res.json({
-      ...authData,
-      auth_source: 'platform_idp',
-    });
-  } catch (err) {
-    logger.error('auth/exchange failed', {
-      error: err.message,
-      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-    });
-    return res.status(500).json({ error: 'exchange_failed' });
   }
 });
 

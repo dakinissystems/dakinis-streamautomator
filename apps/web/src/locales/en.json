@@ -58,11 +58,6 @@
     "streamModeProfileHint": "Stream mode is on — email, username and other sensitive fields are hidden. Turn it off in the header to edit.",
     "streamModeHidden": "Hidden (stream mode is on)"
   },
-  "hubSso": {
-    "working": "Linking your Dakinis account to StreamAutomator…",
-    "idpDisabled": "Ecosystem SSO is not configured (missing REACT_APP_DAKINIS_AUTH_URL).",
-    "goLogin": "Go to sign in"
-  },
   "login": {
     "title": "Login",
     "createAccount": "Create account",
@@ -1280,7 +1275,30 @@
     "copyrightSuffix": ". All rights reserved.",
     "privacy": "Privacy",
     "terms": "Terms",
+    "cookies": "Cookies",
+    "accountDeletion": "Delete account",
+    "refunds": "Refunds",
     "legalNotice": "Legal notice"
+  },
+  "legal": {
+    "backToApp": "Back to app",
+    "lastUpdated": "Last updated",
+    "notFound": "Document not found"
+  },
+  "cookies": {
+    "title": "Cookie policy",
+    "backToApp": "Back to app",
+    "lastUpdated": "Last updated: May 2026",
+    "summaryTitle": "Summary",
+    "summaryBody": "StreamAutomator does not load Google Analytics, Meta Pixel, or advertising cookies by default.",
+    "necessaryTitle": "Necessary storage",
+    "necessaryIntro": "We use local storage / session cookies for:",
+    "necessaryAuth": "authentication token",
+    "necessaryUi": "interface preferences",
+    "necessaryNote": "No analytics consent banner is required because we do not use analytics cookies.",
+    "oauthTitle": "OAuth",
+    "oauthBody": "When signing in with Google, Twitch, or other platforms, you are redirected to their domain; their policies apply.",
+    "moreTitle": "More information"
   },
   "faq": {
     "title": "Frequently asked questions",
