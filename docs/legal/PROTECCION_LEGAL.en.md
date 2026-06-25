@@ -1,13 +1,27 @@
-﻿# Legal protection — StreamAutomator
+﻿# Legal notice and intellectual property protection — Dakinis StreamAutomator
 
-Last updated: 2026-05-19
+This document provides a legal basis to protect Dakinis StreamAutomator software, brand, and content.
+It does not constitute professional legal advice. Validate it with a lawyer in your jurisdiction before production.
 
-**Operator:** Christian David Villar Colodro · **Trading name:** Dakinis Systems · **Tax ID (NIF):** 18513473Z · **Country:** Spain
+1) Ownership and copyright
+All source code, architecture, design, texts, logos, and related assets associated with AkoeNet are owned by the respective rightsholder (or its licensors).
+You may not copy, distribute, reverse engineer, publish, or commercially exploit the software without written authorization.
 
-Not professional legal advice.
+2) Limited license (basic)
+A limited, revocable, non-exclusive license is granted to use Dakinis StreamAutomator through the platform.
 
-1. **Ownership:** StreamAutomator code, design, and assets belong to the owner or licensors.
-2. **License:** Limited, revocable, non-exclusive via the platform.
-3. **Restrictions:** No copying, reverse engineering, resale, or API abuse.
-4. **Copyright:** © 2026 Christian David Villar Colodro / Dakinis Systems. All rights reserved.
-5. **Copyright / IP:** legal@streamautomator.com (subject: Copyright / IP claim)
+3) Restrictions
+You may not:
+- create derivative services or resell access without permission
+- bypass security controls or technical measures
+- use large-scale scraping or API abuse
+
+4) Copyright notice
+Copyright (c) 2026 Dakinys Systems. All rights reserved.
+
+5) Copyright removal / DMCA
+If you believe content infringes your rights, you can submit a removal request through:
+- Form: `/legal/dmca`
+
+Contact: legal@streamautomator.com
+

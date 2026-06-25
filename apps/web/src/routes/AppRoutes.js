@@ -13,7 +13,6 @@ import Templates from '../features/app/pages/TemplatesPage';
 import MediaUpload from '../features/app/pages/MediaUploadPage';
 import Login from '../features/auth/pages/LoginPage';
 import AuthCallback from '../features/auth/pages/AuthCallbackPage';
-import HubSso from '../pages/HubSso';
 import AdminDashboard from '../features/admin/pages/AdminDashboardPage';
 import MessagesPage from '../features/app/pages/MessagesPage';
 import TodoList from '../features/app/pages/TodoListPage';
@@ -23,6 +22,8 @@ import StreamTimelinePage from '../features/app/pages/StreamTimelinePage';
 import Privacy from '../features/legal/pages/PrivacyPage';
 import Terms from '../features/legal/pages/TermsPage';
 import LegalNotice from '../features/legal/pages/LegalNoticePage';
+import Cookies from '../features/legal/pages/CookiesPage';
+import LegalStaticPage from '../features/legal/pages/LegalStaticPage';
 import FAQ from '../features/legal/pages/FAQPage';
 import Landing from '../features/marketing/pages/LandingPage';
 import Pricing from '../features/marketing/pages/PricingPage';
@@ -40,12 +41,18 @@ export function AppRoutes({ user, token, setAuth, setUser, signOut }) {
   return (
     <Routes>
       <Route path="/login" element={<Login setAuth={setAuth} />} />
-      <Route path="/auth/hub-sso" element={<HubSso setAuth={setAuth} />} />
       <Route path="/auth/callback" element={<AuthCallback setAuth={setAuth} />} />
       <Route path="/" element={!user ? <Landing /> : (user.isAdmin ? <Navigate to="/admin" replace /> : <Navigate to="/dashboard" replace />)} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />
+      <Route path="/cookies" element={<Cookies />} />
+      <Route path="/account-deletion" element={<Navigate to="/legal/account-deletion" replace />} />
+      <Route path="/moderation" element={<Navigate to="/legal/moderation" replace />} />
+      <Route path="/child-safety" element={<Navigate to="/legal/child-safety" replace />} />
+      <Route path="/copyright" element={<Navigate to="/legal/copyright" replace />} />
+      <Route path="/refunds" element={<Navigate to="/legal/refunds" replace />} />
+      <Route path="/legal/:slug" element={<LegalStaticPage />} />
       <Route path="/legal-notice" element={<LegalNotice />} />
       <Route path="/aviso-legal" element={<LegalNotice />} />
       <Route path="/faq" element={<FAQ />} />

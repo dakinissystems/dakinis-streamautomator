@@ -58,11 +58,6 @@
     "streamModeProfileHint": "Modo stream activado — Email, usuario y otros datos sensibles están ocultos. Desactívalo en la cabecera para editar.",
     "streamModeHidden": "Oculto (modo stream activado)"
   },
-  "hubSso": {
-    "working": "Conectando tu cuenta Dakinis con StreamAutomator…",
-    "idpDisabled": "SSO del ecosistema no configurado (falta REACT_APP_DAKINIS_AUTH_URL).",
-    "goLogin": "Ir a iniciar sesión"
-  },
   "login": {
     "title": "Iniciar sesión",
     "createAccount": "Crear cuenta",
@@ -1280,7 +1275,30 @@
     "copyrightSuffix": ". Todos los derechos reservados.",
     "privacy": "Privacidad",
     "terms": "Términos",
+    "cookies": "Cookies",
+    "accountDeletion": "Borrar cuenta",
+    "refunds": "Reembolsos",
     "legalNotice": "Aviso legal"
+  },
+  "legal": {
+    "backToApp": "Volver a la app",
+    "lastUpdated": "Última actualización",
+    "notFound": "Documento no encontrado"
+  },
+  "cookies": {
+    "title": "Política de cookies",
+    "backToApp": "Volver a la app",
+    "lastUpdated": "Última actualización: mayo 2026",
+    "summaryTitle": "Resumen",
+    "summaryBody": "StreamAutomator no carga por defecto Google Analytics, Meta Pixel ni cookies de publicidad.",
+    "necessaryTitle": "Almacenamiento necesario",
+    "necessaryIntro": "Usamos almacenamiento local / cookies de sesión para:",
+    "necessaryAuth": "token de autenticación",
+    "necessaryUi": "preferencias de interfaz",
+    "necessaryNote": "No requiere banner de consentimiento para analítica porque no la usamos.",
+    "oauthTitle": "OAuth",
+    "oauthBody": "Al iniciar sesión con Google, Twitch u otras plataformas, serás redirigido a su dominio; aplican sus políticas.",
+    "moreTitle": "Más información"
   },
   "faq": {
     "title": "Preguntas frecuentes",

@@ -1,15 +1,24 @@
-﻿# Child Safety Standards — StreamAutomator
+﻿# Child Safety Standards
+Last updated: 2026-05-08
 
-Last updated: 2026-05-19
+Dakinis StreamAutomator has a zero-tolerance policy against child sexual exploitation and abuse (CSAE).
 
-**Operator:** Christian David Villar Colodro · Dakinis Systems · Tax ID (NIF) 18513473Z · Spain
+We strictly prohibit any content, conduct, or activity related to child sexual abuse material (CSAM), grooming, exploitation, trafficking, or any form of abuse involving minors.
 
-Zero tolerance for CSAE/CSAM, grooming, and abuse involving minors.
+Our safety standards include:
+- Reporting tools for users to report inappropriate content and abusive conduct.
+- Content moderation and account review based on severity.
+- Immediate removal or restriction of illegal content when applicable.
+- Suspension or permanent closure of infringing accounts when appropriate.
+- Cooperation with competent authorities when required by law.
+- Compliance with applicable regional and international child-safety regulations.
 
-The services are not directed to persons under 14 years of age.
+How to report
+Users can report child safety issues from the app (when available) or by contacting our safety team:
 
-**Reports related to child safety are prioritized and may lead to immediate account suspension while reviewed.**
+Email: dakinissystems@gmail.com
 
-**Where legally required, reports may be escalated to competent authorities.**
+Dakinis StreamAutomator is committed to maintaining a safe platform and protecting minors from abuse and exploitation.
 
-Report: legal@streamautomator.com · Privacy: privacy@streamautomator.com
+Note: This document does not constitute professional legal advice.
+
