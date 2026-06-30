@@ -3,8 +3,10 @@
  *
  * When the user saves the same webhook URL as the host default (AKOENET_SCHEDULER_WEBHOOK_URL),
  * SCHEDULER_WEBHOOK_SECRET from the environment must win over a stale per-user secret in the DB
- * (otherwise updating Render env does nothing until the user clears/re-saves the secret).
+ * (otherwise updating host env does nothing until the user clears/re-saves the secret).
  */
+
+import { normalizeAkoenetWebhookUrl } from './akoenetWebhookUrl.js';
 
 function webhookUrlsEquivalent(a, b) {
   const x = String(a || '').trim();
@@ -23,8 +25,8 @@ function webhookUrlsEquivalent(a, b) {
 }
 
 export function resolveAkoenetWebhookAndSecret(user) {
-  const userUrl = (user?.akoenetWebhookUrl || '').trim();
-  const envUrl = (process.env.AKOENET_SCHEDULER_WEBHOOK_URL || '').trim();
+  const userUrl = normalizeAkoenetWebhookUrl(user?.akoenetWebhookUrl || '');
+  const envUrl = normalizeAkoenetWebhookUrl(process.env.AKOENET_SCHEDULER_WEBHOOK_URL || '');
   const url = userUrl || envUrl;
 
   const userSecret = (user?.akoenetWebhookSecret || '').trim();

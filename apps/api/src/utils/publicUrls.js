@@ -1,7 +1,6 @@
 /**
  * Public URLs for OAuth redirect_uri and post-login redirects.
- * In production, never fall back to localhost when env is missing (Railway/Render).
- */
+ * In production, never fall back to localhost when env is missing (Railway / hosted deploy). */
 
 function trimUrl(url = '') {
   return String(url || '').trim().replace(/\/$/, '');

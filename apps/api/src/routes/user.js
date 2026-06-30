@@ -45,6 +45,7 @@ import { Tenant, Membership } from '../modules/tenants/infrastructure/models.js'
 import { ensureDefaultTenantForUser } from '../modules/tenants/application/tenantResolutionService.js';
 import logger from '../utils/logger.js';
 import { getBackendPublicUrl, getFrontendPublicUrl } from '../utils/publicUrls.js';
+import { normalizeAkoenetWebhookUrl } from '../utils/akoenetWebhookUrl.js';
 
 /** OAuth/login redirects — set FRONTEND_URL / BACKEND_URL on Railway (or use RAILWAY_PUBLIC_DOMAIN for API). */
 const BACKEND_URL = getBackendPublicUrl();
@@ -1104,7 +1105,7 @@ export const discordLinkCallback = async (req, res) => {
   }
 };
 
-// Discord link routes (must be registered so /api/user/* is handled by this router on Render)
+// Discord link routes (must be registered so /api/user/* is handled by this router in production)
 router.get('/auth/discord/link', discordLinkStart);
 router.get('/auth/discord/link/callback', discordLinkCallback);
 
@@ -3084,7 +3085,9 @@ router.put('/profile', requireAuth, validateBody(updateProfileSchema), auditLog(
     if (streamGoalType !== undefined && !user.streamGoalType) user.streamGoalTarget = null;
     if (discordAnnounceWebhookUrl !== undefined) user.discordAnnounceWebhookUrl = discordAnnounceWebhookUrl && String(discordAnnounceWebhookUrl).trim() ? String(discordAnnounceWebhookUrl).trim() : null;
     if (akoenetWebhookUrl !== undefined) {
-      const u = akoenetWebhookUrl && String(akoenetWebhookUrl).trim() ? String(akoenetWebhookUrl).trim() : null;
+      const u = akoenetWebhookUrl && String(akoenetWebhookUrl).trim()
+        ? normalizeAkoenetWebhookUrl(String(akoenetWebhookUrl).trim())
+        : null;
       user.akoenetWebhookUrl = u;
       if (!u) {
         user.akoenetWebhookSecret = null;
@@ -3337,7 +3340,7 @@ router.post('/admin/license-config', requireAdmin, async (req, res) => {
 
 const DEFAULT_FIXED_MONTHLY_COSTS = [
   { label: 'Cursor', amount: 20, currency: 'EUR', type: 'monthly' },
-  { label: 'Render', amount: 7, currency: 'EUR', type: 'monthly' },
+  { label: 'Railway', amount: 7, currency: 'EUR', type: 'monthly' },
   { label: 'Upstash Redis', amount: 0.38, currency: 'USD', type: 'monthly' },
   { label: 'Dominio', amount: 12, currency: 'EUR', type: 'annual', effectiveFrom: null },
 ];
@@ -3385,7 +3388,7 @@ export async function updateFixedCostsAdmin(req, res) {
       config = await SystemConfig.create({
         key: 'fixedMonthlyCosts',
         value: normalized,
-        description: 'Fixed monthly costs for admin control (e.g. Cursor, Render)',
+        description: 'Fixed monthly costs for admin control (e.g. Cursor, Railway)',
       });
     }
     res.json({ fixedCosts: config.value, message: 'Fixed costs updated' });

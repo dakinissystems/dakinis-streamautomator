@@ -82,7 +82,7 @@ const ENABLE_PROMETHEUS_METRICS = process.env.ENABLE_PROMETHEUS_METRICS === 'tru
 const app = express();
 const nodeEnv = process.env.NODE_ENV || 'development';
 
-// Trust proxy when behind reverse proxy (Render, Nginx, etc.) so rate-limit and IP work correctly
+// Trust proxy when behind reverse proxy (Railway, Nginx, etc.) so rate-limit and IP work correctly
 app.set('trust proxy', 1);
 
 // Copyright and Legal Protection Headers (includes commercial brand Dakinis Systems)
@@ -93,14 +93,12 @@ app.use((req, res, next) => {
 });
 const jwtSecret = process.env.JWT_SECRET || 'dev-jwt-secret';
 if (process.env.NODE_ENV === 'production' && (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'dev-jwt-secret')) {
-  logger.error('Fatal: set JWT_SECRET in production (Render Environment).');
+  logger.error('Fatal: set JWT_SECRET in production (host environment variables).');
   process.exit(1);
 }
 
 // CORS: allow FRONTEND_URL (single) or FRONTEND_URLS (comma-separated). Default common dev origins.
-// If you use a custom domain (e.g. streamautomator.com), set FRONTEND_URLS to include your domains:
-//   FRONTEND_URLS=https://streamautomator.com,https://stream-schedule-v1.onrender.com
-// so requests from the custom domain are allowed. FRONTEND_URL is still used for OAuth redirects.
+// If you use a custom domain (e.g. streamautomator.com), set FRONTEND_URLS to include your domains.
 function isLocalDevBrowserOrigin(origin) {
   try {
     const u = new URL(origin);
@@ -136,11 +134,8 @@ const corsOriginConfig = (() => {
     if (urls.includes(origin)) return cb(null, origin);
     // Dev: any localhost / 127.0.0.1 port (CRA, Vite, alternate ports) so ACAO is always set when Origin is local
     if (!isProduction && isLocalDevBrowserOrigin(origin)) return cb(null, origin);
-    // Production fallback: Render + dominios Dakinis / StreamAutomator (definir FRONTEND_URLS para lista cerrada)
+    // Production fallback: known public domains (prefer FRONTEND_URLS for a closed list)
     if (isProduction) {
-      if (origin === 'https://stream-schedule-v1.onrender.com' || /^https:\/\/[\w-]+\.onrender\.com$/.test(origin)) {
-        return cb(null, origin);
-      }
       const prodDefaults = [
         'https://streamautomator.com',
         'https://www.streamautomator.com',
@@ -261,7 +256,7 @@ app.get('/api/admin/features', requireAdmin, (req, res) => {
 
 const DEFAULT_FIXED_MONTHLY_COSTS = [
   { label: 'Cursor', amount: 20, currency: 'EUR', type: 'monthly' },
-  { label: 'Render', amount: 7, currency: 'EUR', type: 'monthly' },
+  { label: 'Railway', amount: 7, currency: 'EUR', type: 'monthly' },
   { label: 'Upstash Redis', amount: 0.38, currency: 'USD', type: 'monthly' },
   { label: 'Dominio', amount: 12, currency: 'EUR', type: 'annual', effectiveFrom: null },
 ];
@@ -371,7 +366,7 @@ app.post('/api/user/admin/fixed-costs', requireAdmin, async (req, res) => {
       config = await SystemConfig.create({
         key: 'fixedMonthlyCosts',
         value: normalized,
-        description: 'Fixed monthly costs for admin control (e.g. Cursor, Render)',
+        description: 'Fixed monthly costs for admin control (e.g. Cursor, Railway)',
       });
     }
     res.json({ fixedCosts: config.value, message: 'Fixed costs updated' });
