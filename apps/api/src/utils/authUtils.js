@@ -6,6 +6,7 @@
 
 import jwt from 'jsonwebtoken';
 import { buildLicenseSummary } from './licenseUtils.js';
+import { normalizeAkoenetWebhookUrl } from './akoenetWebhookUrl.js';
 import {
   getStreamautomatorJwtAudience,
   getStreamautomatorJwtIssuer,
@@ -115,7 +116,7 @@ export function generateToken(user, tenantId = null) {
  */
 /** True when server .env provides AkoeNet webhook + secret fallback (GET /akoenet/guilds works without per-user URL). */
 export function isAkoenetGlobalWebhookConfigured() {
-  const url = String(process.env.AKOENET_SCHEDULER_WEBHOOK_URL || '').trim();
+  const url = normalizeAkoenetWebhookUrl(process.env.AKOENET_SCHEDULER_WEBHOOK_URL || '');
   const secret = String(process.env.SCHEDULER_WEBHOOK_SECRET || '').trim();
   return !!(url && secret);
 }
@@ -147,7 +148,7 @@ export function buildUserResponse(user, extras = {}) {
     discordClipsChannelId: userPlain.discordClipsChannelId || null,
     publicPageBannerUrl: userPlain.publicPageBannerUrl || null,
     publicPageBannerPosition: userPlain.publicPageBannerPosition || 'top',
-    akoenetWebhookUrl: userPlain.akoenetWebhookUrl || null,
+    akoenetWebhookUrl: normalizeAkoenetWebhookUrl(userPlain.akoenetWebhookUrl || '') || null,
     akoenetAnnounceChannelId: userPlain.akoenetAnnounceChannelId || null,
     akoenetServerId: userPlain.akoenetServerId || null,
     akoenetWebhookSecretSet: !!(userPlain.akoenetWebhookSecret && String(userPlain.akoenetWebhookSecret).trim()),

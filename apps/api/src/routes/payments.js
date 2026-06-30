@@ -22,7 +22,7 @@ const FRONTEND_URL_DEFAULT = 'http://localhost:3000';
 function getFrontendUrl() {
   const url = process.env.FRONTEND_URL || FRONTEND_URL_DEFAULT;
   if (process.env.NODE_ENV === 'production' && url.includes('localhost')) {
-    logger.warn('FRONTEND_URL is localhost in production. Set FRONTEND_URL in Render to your frontend URL (e.g. https://streamautomator.com) so Stripe redirects correctly.');
+    logger.warn('FRONTEND_URL is localhost in production. Set FRONTEND_URL to your frontend URL (e.g. https://streamautomator.com) so Stripe redirects correctly.');
   }
   return url.replace(/\/$/, ''); // strip trailing slash
 }

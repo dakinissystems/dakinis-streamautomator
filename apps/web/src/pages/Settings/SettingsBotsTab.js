@@ -11,6 +11,7 @@ import { devCatchLog } from '../../utils/devCatchLog';
 import toast from 'react-hot-toast';
 import { useStreamMode } from '../../contexts/StreamModeContext';
 import { getPublicFrontendOrigin, getPublicStreamerShareUrl, getPublicEmbedStreamerShareUrl } from '../../shared/config/publicUrls';
+import { getDefaultAkoenetSchedulerWebhookUrl, isLegacyAkoenetHost, normalizeAkoenetWebhookUrl } from '../../shared/config/akoenetIntegration';
 import { apiClient } from '../../shared/api/client';
 
 const MASK = '••••••••••••••••';
@@ -33,6 +34,7 @@ function mapAkoenetGuildsLoadError(err, t) {
 const API_BASE = (process.env.REACT_APP_API_URL || '').replace(/\/$/, '') || (typeof window !== 'undefined' ? window.location.origin.replace(/\/$/, '') : '');
 const NIGHTBOT_TODO_URL = API_BASE ? `${API_BASE}/api/nightbot/todo` : '';
 const FRONTEND_ORIGIN = getPublicFrontendOrigin();
+const DEFAULT_AKOENET_WEBHOOK_URL = getDefaultAkoenetSchedulerWebhookUrl();
 
 function CopyButton({ text, label, copiedMessage = 'Copied', className = '' }) {
   const [copied, setCopied] = useState(false);
@@ -115,7 +117,8 @@ export default function SettingsBotsTab({ user, token, t, setUser }) {
   }, [token]);
 
   useEffect(() => {
-    setAkoenetUrl(user?.akoenetWebhookUrl || '');
+    const raw = user?.akoenetWebhookUrl || '';
+    setAkoenetUrl(raw ? normalizeAkoenetWebhookUrl(raw) : '');
     setAkoenetChannelId(user?.akoenetAnnounceChannelId || '');
     setAkoenetServerId(user?.akoenetServerId || '');
     setAkoenetSendClips(user?.akoenetSendClips === true);
@@ -205,6 +208,8 @@ export default function SettingsBotsTab({ user, token, t, setUser }) {
     guildInList,
     akoenetGuilds,
   ]);
+
+  const akoenetLegacyUrl = !streamMode && !!akoenetUrl && isLegacyAkoenetHost(akoenetUrl);
 
   const handleSaveAkoeNet = async (clearSecret = false) => {
     if (!token) return;
@@ -431,6 +436,21 @@ export default function SettingsBotsTab({ user, token, t, setUser }) {
         </p>
         {!streamMode && (
         <div className="space-y-4 max-w-xl">
+          {akoenetLegacyUrl && (
+            <div className="flex flex-col gap-2 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50/80 dark:bg-amber-950/30 px-3 py-2 text-sm text-amber-900 dark:text-amber-100">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span>{t('bots.akoenetLegacyRenderUrl') || 'This webhook still points to the old Render host. Update it to the production AkoeNet API.'}</span>
+              </div>
+              <button
+                type="button"
+                className="self-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium"
+                onClick={() => setAkoenetUrl(DEFAULT_AKOENET_WEBHOOK_URL)}
+              >
+                {t('bots.akoenetUseProductionUrl') || 'Use production URL'}
+              </button>
+            </div>
+          )}
           {!hideAkoeNetWebhookFieldsInMain && (
             <>
               <div>
@@ -445,7 +465,7 @@ export default function SettingsBotsTab({ user, token, t, setUser }) {
                   onChange={(e) => !streamMode && setAkoenetUrl(e.target.value)}
                   readOnly={streamMode}
                   className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
-                  placeholder="http://localhost:5173/integrations/scheduler/webhooks/stream-scheduled"
+                  placeholder={DEFAULT_AKOENET_WEBHOOK_URL}
                 />
               </div>
               <div>
@@ -627,7 +647,7 @@ export default function SettingsBotsTab({ user, token, t, setUser }) {
                     value={akoenetUrl}
                     onChange={(e) => setAkoenetUrl(e.target.value)}
                     className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm"
-                    placeholder="https://…/integrations/scheduler/webhooks/stream-scheduled"
+                    placeholder={DEFAULT_AKOENET_WEBHOOK_URL}
                   />
                 </div>
                 <div>

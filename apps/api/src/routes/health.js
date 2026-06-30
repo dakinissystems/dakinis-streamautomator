@@ -1,6 +1,6 @@
 /**
  * Health Check Endpoint
- * - GET /api/health/live  → 200 OK only (for Render / load balancers).
+ * - GET /api/health/live  → 200 OK only (for load balancers / Railway).
  * - GET /api/health/ready → DB + Redis check; 200 if both OK, else 503.
  * - GET /api/health       → Full status: status, redis, db, dbResponseTimeMs, memoryUsageMb, queue, uptime.
  * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
@@ -35,7 +35,7 @@ async function getQueueStatsCached() {
 
 /**
  * GET /api/health/live
- * Liveness: process is up. Returns 200 only (for Render, K8s liveness).
+ * Liveness: process is up. Returns 200 only (for Railway, K8s liveness).
  */
 router.get('/live', (req, res) => {
   res.status(200).json({ status: 'ok' });

@@ -172,7 +172,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
       })));
     } catch (err) {
       if (err.response?.status === 404) {
-        setFixedCosts([{ label: 'Cursor', amount: 20, currency: 'EUR' }, { label: 'Render', amount: 7, currency: 'EUR' }, { label: 'Upstash Redis', amount: 0.38, currency: 'USD' }]);
+        setFixedCosts([{ label: 'Cursor', amount: 20, currency: 'EUR' }, { label: 'Railway', amount: 7, currency: 'EUR' }, { label: 'Upstash Redis', amount: 0.38, currency: 'USD' }]);
       } else {
         maybeShowNetworkError(err);
         if (!isNetworkError(err)) toast.error(err.response?.data?.error || t('admin.fixedCostsLoadError'));
@@ -375,7 +375,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
       setPaymentsListError(isNetworkError(err)
         ? (t('admin.networkError') || 'Revisa tu conexión y recarga si la red cambió.')
         : err.response?.status === 404
-          ? 'Listado de pagos no disponible. Despliega la última versión del backend (stream-schedule-api) en Render.'
+          ? 'Listado de pagos no disponible. Despliega la última versión del backend en Railway.'
           : err.response?.data?.error || 'Error al cargar pagos.');
     } finally {
       setPaymentsLoading(false);
@@ -467,7 +467,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
         accountingSectionLabel: t('admin.pdfAccountingSection'),
         noteText: t('admin.pdfNote'),
         fixedCosts: (() => {
-          const list = fixedCosts.length > 0 ? fixedCosts : [{ label: 'Cursor', amount: 20, currency: 'EUR', type: 'monthly' }, { label: 'Render', amount: 7, currency: 'EUR', type: 'monthly' }, { label: 'Upstash Redis', amount: 0.38, currency: 'USD', type: 'monthly' }, { label: 'Dominio', amount: 12, currency: 'EUR', type: 'annual', effectiveFrom: null }];
+          const list = fixedCosts.length > 0 ? fixedCosts : [{ label: 'Cursor', amount: 20, currency: 'EUR', type: 'monthly' }, { label: 'Railway', amount: 7, currency: 'EUR', type: 'monthly' }, { label: 'Upstash Redis', amount: 0.38, currency: 'USD', type: 'monthly' }, { label: 'Dominio', amount: 12, currency: 'EUR', type: 'annual', effectiveFrom: null }];
           const reportMonth = new Date().toISOString().slice(0, 7);
           return list
             .filter((x) => !x.effectiveFrom || x.effectiveFrom.slice(0, 7) <= reportMonth)
@@ -2310,7 +2310,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
           {t('admin.alertsDescription') || 'Webhooks de Discord para avisos automáticos (Worker, Redis, DB lenta, cola bloqueada). #dev-internal = técnico; #status = público.'}
         </p>
         <p className="text-sm text-amber-700 dark:text-amber-400 mb-4 px-3 py-2 rounded border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20">
-          {t('admin.alertWebhookSecurity') || 'Seguridad: no compartas la URL del webhook. En producción (Render) usa variables de entorno DISCORD_DEV_WEBHOOK y DISCORD_STATUS_WEBHOOK.'}
+          {t('admin.alertWebhookSecurity') || 'Seguridad: no compartas la URL del webhook. En producción usa variables de entorno DISCORD_DEV_WEBHOOK y DISCORD_STATUS_WEBHOOK.'}
         </p>
         {alertConfigLoading ? (
           <p className="text-gray-500 dark:text-gray-400">{t('admin.loading') || 'Cargando...'}</p>
