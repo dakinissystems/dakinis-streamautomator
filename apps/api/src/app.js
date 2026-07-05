@@ -10,6 +10,7 @@ import dotenv from 'dotenv';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import passport from 'passport';
+import { hubSsoHandler } from './routes/hub-sso.js';
 import userRoutes, {
   googleLoginHandler,
   discordAuth,
@@ -209,6 +210,9 @@ app.get('/api/user/auth/twitter/link', twitterLinkStart);
 app.get('/api/user/auth/twitter/link/callback', twitterLinkCallback);
 app.get('/api/user/auth/slack/link', slackLinkStart);
 app.get('/api/user/auth/slack/link/callback', slackLinkCallback);
+
+// Hub SSO (Dakinis Hub → product) — before authenticateToken
+app.post('/api/auth/hub-sso', authLimiter, hubSsoHandler);
 
 // Public endpoint: Get enabled platforms (no auth required)
 app.get('/api/platforms/enabled', async (req, res) => {
