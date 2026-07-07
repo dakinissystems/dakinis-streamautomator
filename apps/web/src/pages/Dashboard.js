@@ -763,14 +763,14 @@ const Dashboard = ({ user, token, ...props }) => {
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
               <div className="flex space-x-2">
-                <button
-                  onClick={() => navigate('/settings')}
+                <button type="button"
+                  onClick={() = navigate('/settings')}
                   className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                 >
                   <Settings className="w-5 h-5" />
                 </button>
-                <button
-                  onClick={() => navigate('/profile')}
+                <button type="button"
+                  onClick={() = navigate('/profile')}
                   className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                 >
                   <User className="w-5 h-5" />
@@ -829,11 +829,11 @@ const Dashboard = ({ user, token, ...props }) => {
                           {twitchStats?.subscriptions?.total ?? 0}
                         </p>
                       </div>
-                      <button
+                      <button type="button"
                         onClick={handleDownloadSubs}
                         className="self-start shrink-0 p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                         title={t('dashboard.downloadSubs')}
-                      >
+                      
                         <Download className="w-4 h-4" />
                       </button>
                     </div>
@@ -850,14 +850,14 @@ const Dashboard = ({ user, token, ...props }) => {
                           {twitchStats?.bits?.total ?? 0}
                         </p>
                         <div className="mt-2 flex flex-wrap gap-2">
-                          <button
-                            onClick={() => setBitsFormat('chronological')}
+                          <button type="button"
+                            onClick={() = setBitsFormat('chronological')}
                             className={`shrink-0 text-xs px-2 py-1 rounded whitespace-nowrap ${bitsFormat === 'chronological' ? 'bg-accent text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'}`}
                           >
                             {t('dashboard.chronological')}
                           </button>
-                          <button
-                            onClick={() => setBitsFormat('total')}
+                          <button type="button"
+                            onClick={() = setBitsFormat('total')}
                             className={`shrink-0 text-xs px-2 py-1 rounded whitespace-nowrap ${bitsFormat === 'total' ? 'bg-accent text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'}`}
                           >
                             {t('dashboard.total')}
@@ -873,18 +873,18 @@ const Dashboard = ({ user, token, ...props }) => {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button
-                          onClick={() => fetchBitsDetails(bitsFormat)}
+                        <button type="button"
+                          onClick={() = fetchBitsDetails(bitsFormat)}
                           className="self-start shrink-0 p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                           title={t('common.refresh') || 'Refresh'}
                         >
                           <RefreshCw className={`w-4 h-4 ${bitsDetailsLoading ? 'animate-spin' : ''}`} />
                         </button>
-                        <button
+                        <button type="button"
                           onClick={handleCopyBitsList}
                           className="self-start shrink-0 p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                           title={t('dashboard.copySchedule') || 'Copy'}
-                        >
+                        
                           <Copy className="w-4 h-4" />
                         </button>
                       </div>
@@ -927,8 +927,8 @@ const Dashboard = ({ user, token, ...props }) => {
                                 </p>
                                 {bitsFormat === 'chronological' ? (
                                   <ul className="space-y-1 max-h-36 overflow-auto text-xs text-gray-600 dark:text-gray-300">
-                                    {selectedBitsUserData.events.map((event, index) => (
-                                      <li key={`${selectedBitsUserData.user}-${index}`} className="flex justify-between">
+                                    {selectedBitsUserData.events.map((event) => (
+                                      <li key={`${selectedBitsUserData.user}-${event.amount}-${event.date?.getTime?.() ?? event.date}`} className="flex justify-between">
                                         <span>+{event.amount}</span>
                                         <span>{event.date ? event.date.toLocaleString() : '-'}</span>
                                       </li>
@@ -960,11 +960,11 @@ const Dashboard = ({ user, token, ...props }) => {
                           {twitchStats?.donations?.total ?? 0}
                         </p>
                       </div>
-                      <button
+                      <button type="button"
                         onClick={handleDownloadDonations}
                         className="self-start shrink-0 p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                         title={t('dashboard.downloadDonations')}
-                      >
+                      
                         <Download className="w-4 h-4" />
                       </button>
                     </div>
@@ -1146,18 +1146,18 @@ const Dashboard = ({ user, token, ...props }) => {
               filters={filters}
             />
             <div className="flex flex-wrap gap-2 mt-2">
-              <button
+              <button type="button"
                 onClick={handleExportData}
                 className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2 text-sm"
-              >
+              
                 <Download className="w-4 h-4 flex-shrink-0" />
                 <span className="hidden sm:inline">Export</span>
               </button>
-              <button
+              <button type="button"
                 onClick={fetchContents}
                 className="p-2 sm:px-3 sm:py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                 title="Refresh"
-              >
+              
                 <RefreshCw className="w-4 h-4" />
               </button>
             </div>
@@ -1209,8 +1209,8 @@ const Dashboard = ({ user, token, ...props }) => {
 
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100">{t('dashboard.scheduledContent')}</h2>
-          <button
-            onClick={() => navigate('/schedule')}
+          <button type="button"
+            onClick={() = navigate('/schedule')}
             className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 w-full sm:w-auto"
           >
             <Plus className="w-4 h-4 flex-shrink-0" />
@@ -1226,8 +1226,8 @@ const Dashboard = ({ user, token, ...props }) => {
                   <CalendarIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">{t('dashboard.noContentForDay')}</h3>
               <p className="text-gray-600 mb-4">{t('dashboard.startByScheduling')}</p>
-              <button
-                onClick={() => navigate('/schedule')}
+              <button type="button"
+                onClick={() = navigate('/schedule')}
                 className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg"
               >
                 {t('dashboard.createContentButton')}
@@ -1293,8 +1293,8 @@ const Dashboard = ({ user, token, ...props }) => {
                       </td>
                           <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex flex-wrap gap-1 sm:space-x-2">
-                              <button
-                                onClick={() => {
+                              <button type="button"
+                                onClick={() = {
                                   setSelectedContent(content);
                                   setShowContentModal(true);
                                 }}
@@ -1303,31 +1303,31 @@ const Dashboard = ({ user, token, ...props }) => {
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
-                              <button
-                                onClick={() => handleCopyPostToClipboard(content)}
+                              <button type="button"
+                                onClick={() = handleCopyPostToClipboard(content)}
                                 className="p-1 text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-100 transition-colors"
                                 title={t('dashboard.copyPost') || 'Copy post (paste in Schedule)'}
                               >
                                 <Clipboard className="w-4 h-4" />
                               </button>
-                              <button
-                                onClick={() => handleDuplicateContent(content)}
+                              <button type="button"
+                                onClick={() = handleDuplicateContent(content)}
                                 className="p-1 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 transition-colors"
                                 title={t('dashboard.duplicate') || 'Duplicate'}
                               >
                                 <Copy className="w-4 h-4" />
                               </button>
                               {content.status === 'scheduled' && (
-                                <button
-                                  onClick={() => handleCancelContent(content.id)}
+                                <button type="button"
+                                  onClick={() = handleCancelContent(content.id)}
                                   className="p-1 text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300 transition-colors"
                                   title={t('dashboard.cancelPublication') || 'Cancel publication'}
                                 >
                                   <XCircle className="w-4 h-4" />
                                 </button>
                               )}
-                              <button
-                                onClick={() => handleDeleteContent(content.id)}
+                              <button type="button"
+                                onClick={() = handleDeleteContent(content.id)}
                                 className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors"
                                 title={t('common.delete')}
                               >
@@ -1349,8 +1349,8 @@ const Dashboard = ({ user, token, ...props }) => {
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 sm:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl">
               <div className="flex justify-between items-start mb-4">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{selectedContent.title}</h2>
-                <button
-                  onClick={() => setShowContentModal(false)}
+                <button type="button"
+                  onClick={() = setShowContentModal(false)}
                   className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   <X className="w-6 h-6" />
@@ -1447,7 +1447,7 @@ const Dashboard = ({ user, token, ...props }) => {
                           const name = typeof file === 'object' && file.fileName ? file.fileName : (url ? url.split('/').pop() || t('dashboard.file') : t('dashboard.file'));
                           const duration = typeof file === 'object' && file.durationSeconds != null ? formatDuration(file.durationSeconds) : null;
                           return (
-                            <li key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <li key={url || name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                               <div className="flex items-center gap-3 min-w-0">
                                 {type === 'video' ? (
                                   <Video className="w-5 h-5 text-purple-500 flex-shrink-0" />
@@ -1472,36 +1472,36 @@ const Dashboard = ({ user, token, ...props }) => {
               </div>
               
               <div className="flex flex-wrap gap-2 justify-end mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <button
-                  onClick={() => handleCopyPostToClipboard(selectedContent)}
+                <button type="button"
+                  onClick={() = handleCopyPostToClipboard(selectedContent)}
                   className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm flex items-center gap-2"
                 >
                   <Clipboard className="w-4 h-4" />
                   {t('dashboard.copyPost') || 'Copy post'}
                 </button>
-                <button
-                  onClick={() => handleDuplicateContent(selectedContent)}
+                <button type="button"
+                  onClick={() = handleDuplicateContent(selectedContent)}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
                 >
                   {t('dashboard.duplicate') || 'Duplicate'}
                 </button>
                 {selectedContent.status === 'scheduled' && (
-                  <button
-                    onClick={() => handleCancelContent(selectedContent.id)}
+                  <button type="button"
+                    onClick={() = handleCancelContent(selectedContent.id)}
                     className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 text-sm flex items-center gap-2"
                   >
                     <XCircle className="w-4 h-4" />
                     {t('dashboard.cancelPublication') || 'Cancel publication'}
                   </button>
                 )}
-                <button
-                  onClick={() => handleDeleteContent(selectedContent.id)}
+                <button type="button"
+                  onClick={() = handleDeleteContent(selectedContent.id)}
                   className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
                 >
                   {t('common.delete')}
                 </button>
-                <button
-                  onClick={() => setShowContentModal(false)}
+                <button type="button"
+                  onClick={() = setShowContentModal(false)}
                   className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
                 >
                   {t('common.close')}

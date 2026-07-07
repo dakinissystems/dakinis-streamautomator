@@ -85,8 +85,8 @@ export default function ContactAdmin({ token }) {
 
   if (!showForm) {
     return (
-      <button
-        onClick={() => setShowForm(true)}
+      <button type="button"
+        onClick={() = setShowForm(true)}
         className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
       >
         <MessageSquare className="w-5 h-5" />
@@ -102,8 +102,8 @@ export default function ContactAdmin({ token }) {
           <MessageSquare className="w-5 h-5" />
           {t('messages.contactAdmin') || 'Contact Administrator'}
         </h3>
-        <button
-          onClick={() => setShowForm(false)}
+        <button type="button"
+          onClick={() = setShowForm(false)}
           className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
         >
           ✕
@@ -146,10 +146,11 @@ export default function ContactAdmin({ token }) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label htmlFor="contact-admin-subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             {t('messages.subject') || 'Subject'} *
           </label>
           <input
+            id="contact-admin-subject"
             type="text"
             value={formData.subject}
             onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
@@ -161,10 +162,11 @@ export default function ContactAdmin({ token }) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label htmlFor="contact-admin-message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             {t('messages.message') || 'Message'} *
           </label>
           <textarea
+            id="contact-admin-message"
             value={formData.content}
             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
             rows={6}
@@ -202,8 +204,8 @@ export default function ContactAdmin({ token }) {
           
           {attachments.length > 0 && (
             <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {attachments.map((file, index) => (
-                <div key={index} className="relative group">
+              {attachments.map((file) => (
+                <div key={`${file.name}-${file.size}-${file.lastModified}`} className="relative group">
                   <img
                     src={URL.createObjectURL(file)}
                     alt={`Preview ${index + 1}`}

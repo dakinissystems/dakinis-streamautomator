@@ -56,9 +56,8 @@ function SingleBanner({ banner, onDismiss }) {
   );
 
   return (
-    <div
+    <header
       className={`flex items-center gap-3 px-4 py-2.5 rounded-lg border ${style}`}
-      role="banner"
     >
       {banner.imageUrl && (
         <img
@@ -90,12 +89,12 @@ function SingleBanner({ banner, onDismiss }) {
           <X className="w-4 h-4" />
         </button>
       )}
-    </div>
+    </header>
   );
 }
 
 export default function HeaderBanners() {
-  const [banners, setBanners] = useState([]);
+  const [banners, setBanners] = useState(() => getBannersConfig());
   const [dismissed, setDismissed] = useState(() => {
     try {
       const s = sessionStorage.getItem(STORAGE_KEY);
@@ -107,10 +106,6 @@ export default function HeaderBanners() {
   });
 
   const refreshBanners = () => setBanners(getBannersConfig());
-
-  useEffect(() => {
-    refreshBanners();
-  }, []);
 
   useEffect(() => {
     const handler = () => refreshBanners();

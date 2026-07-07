@@ -265,6 +265,7 @@ export default function SettingsProfileTab({
                   type="button"
                   role="switch"
                   aria-checked={profileData[key]}
+                  aria-label={label}
                   onClick={() => setProfileData(prev => ({ ...prev, [key]: !prev[key] }))}
                   className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                     profileData[key] ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'

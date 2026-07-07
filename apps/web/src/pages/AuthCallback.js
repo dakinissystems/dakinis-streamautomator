@@ -10,21 +10,29 @@ import {
 } from '../features/auth/api';
 import { useLanguage } from '../contexts/LanguageContext';
 
+function consumePostLoginRedirect() {
+  if (typeof sessionStorage === 'undefined') return null;
+  const raw = sessionStorage.getItem('postLoginRedirect');
+  sessionStorage.removeItem('postLoginRedirect');
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return null;
+  return raw;
+}
+
+function consumeOAuthReturnTo() {
+  if (typeof sessionStorage === 'undefined') return null;
+  const raw = sessionStorage.getItem('oauthReturnTo');
+  sessionStorage.removeItem('oauthReturnTo');
+  return raw === 'discord' ? 'discord' : null;
+}
+
 export default function AuthCallback({ setAuth }) {
   const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const handledRef = useRef(false);
 
-  const consumePostLoginRedirect = () => {
-    if (typeof sessionStorage === 'undefined') return null;
-    const raw = sessionStorage.getItem('postLoginRedirect');
-    sessionStorage.removeItem('postLoginRedirect');
-    if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return null;
-    return raw;
-  };
-
   useEffect(() => {
+    let timeoutId = null;
     const run = async () => {
       // Prevent double run (e.g. React Strict Mode): second run often sees hash already cleared
       if (handledRef.current) return;
@@ -105,10 +113,10 @@ export default function AuthCallback({ setAuth }) {
         return;
       }
 
-      // 2) Backend Passport OAuth callback: token and user in query (?token=...&user=...&returnTo=discord)
+      // 2) Backend Passport OAuth callback: token and user in query (?token=...&user=...)
       const token = searchParams.get('token');
       const userParam = searchParams.get('user');
-      const returnTo = searchParams.get('returnTo');
+      const returnTo = consumeOAuthReturnTo();
       const error = searchParams.get('error');
       const reason = searchParams.get('reason');
 
@@ -131,7 +139,7 @@ export default function AuthCallback({ setAuth }) {
           window.history.replaceState(null, '', window.location.pathname);
           
           // Use setTimeout to ensure state is set before navigation
-          setTimeout(() => {
+          timeoutId = setTimeout(() => {
             if (returnTo === 'discord') {
               navigate('/schedule', { replace: true });
               return;
@@ -156,6 +164,9 @@ export default function AuthCallback({ setAuth }) {
     };
 
     run();
+    return () => {
+      if (timeoutId != null) clearTimeout(timeoutId);
+    };
   }, [searchParams, setAuth, navigate, t]);
 
   return (

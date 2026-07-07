@@ -513,8 +513,8 @@ const Schedule = ({ user, token }) => {
             <div className="flex flex-col space-y-2">
               <p className="font-medium">💡 {t('schedule.saveTemplatePrompt')}</p>
               <div className="flex space-x-2">
-                <button
-                  onClick={() => {
+                <button type="button"
+                  onClick={() = {
                     setTemplateName(`${formData.title} Template`);
                     toast.dismiss(toastInstance.id);
                     setTimeout(() => {
@@ -525,8 +525,8 @@ const Schedule = ({ user, token }) => {
                 >
                   {t('schedule.saveTemplateButton')}
                 </button>
-                <button
-                  onClick={() => toast.dismiss(toastInstance.id)}
+                <button type="button"
+                  onClick={() = toast.dismiss(toastInstance.id)}
                   className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
                 >
                   {t('schedule.maybeLater')}
@@ -562,7 +562,10 @@ const Schedule = ({ user, token }) => {
       let errorMessage = data?.error || error.message || t('schedule.scheduleError');
       
       if (Array.isArray(details) && details.length > 0) {
-        const messages = details.map((d) => (d && typeof d.message === 'string' ? d.message : (d?.field ? `${d.field}: invalid` : '')).trim()).filter(Boolean);
+        const messages = details.flatMap((d) => {
+          const message = (d && typeof d.message === 'string' ? d.message : (d?.field ? `${d.field}: invalid` : '')).trim();
+          return message ? [message] : [];
+        });
         if (messages.length > 0) errorMessage = messages.join('. ');
         const errs = {};
         details.forEach((d) => {
@@ -1156,7 +1159,7 @@ const Schedule = ({ user, token }) => {
                           const isVideo = typeof item === 'object' && item.type === 'video';
                           return (
                           <div
-                            key={index}
+                            key={url}
                             className="relative group"
                           >
                             <div className="w-16 h-16 rounded border-2 border-blue-500 bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
@@ -1409,8 +1412,9 @@ const Schedule = ({ user, token }) => {
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{t('schedule.date')}</label>
+                      <label htmlFor="event-scheduled-for" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{t('schedule.date')}</label>
                       <input
+                        id="event-scheduled-for"
                         type="date"
                         value={formData.scheduledFor || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, scheduledFor: e.target.value }))}
@@ -1418,8 +1422,9 @@ const Schedule = ({ user, token }) => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{t('schedule.time')}</label>
+                      <label htmlFor="event-scheduled-time" className="block text-xs text-gray-600 dark:text-gray-400 mb-1">{t('schedule.time')}</label>
                       <input
+                        id="event-scheduled-time"
                         type="time"
                         value={formData.scheduledTime || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, scheduledTime: e.target.value }))}
@@ -1449,7 +1454,7 @@ const Schedule = ({ user, token }) => {
                 </div>
 
                 {formData.eventDates.map((eventDate, index) => (
-                  <div key={index} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900/50 space-y-4">
+                  <div key={eventDate.id || `${eventDate.date}-${eventDate.time}`} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900/50 space-y-4">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         {t('schedule.eventDate') || 'Event'} #{index + 1}
@@ -1472,7 +1477,7 @@ const Schedule = ({ user, token }) => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label htmlFor={`event-date-${index}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           {t('schedule.eventStart')} – {t('schedule.date')} <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
@@ -1493,7 +1498,7 @@ const Schedule = ({ user, token }) => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label htmlFor={`event-time-${index}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           {t('schedule.eventStart')} – {t('schedule.time')} <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
@@ -1514,7 +1519,7 @@ const Schedule = ({ user, token }) => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label htmlFor={`event-end-date-${index}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           {t('schedule.eventEnd')} – {t('schedule.eventEndDate')} <span className="text-gray-400 text-xs">({t('schedule.optional')})</span>
                         </label>
                         <div className="relative">
@@ -1536,7 +1541,7 @@ const Schedule = ({ user, token }) => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label htmlFor={`event-end-time-${index}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           {t('schedule.eventEnd')} – {t('schedule.eventEndTime')} <span className="text-gray-400 text-xs">({t('schedule.optional')})</span>
                         </label>
                         <div className="relative">
@@ -1707,11 +1712,13 @@ const Schedule = ({ user, token }) => {
                   {t('schedule.recurringDescription')}
                 </p>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
+              <label htmlFor="recurrenceEnabled" className="relative inline-flex items-center cursor-pointer">
+                <span className="sr-only">{t('schedule.recurringSchedule')}</span>
                 <input
                   id="recurrenceEnabled"
                   name="recurrenceEnabled"
                   type="checkbox"
+                  aria-label={t('schedule.recurringSchedule')}
                   checked={formData.recurrence.enabled}
                   onChange={(e) => {
                     setFormData(prev => ({
@@ -1788,6 +1795,7 @@ const Schedule = ({ user, token }) => {
                 id="templateName"
                 name="templateName"
                 type="text"
+                aria-label={t('schedule.templateName')}
                 placeholder={t('schedule.templateName')}
                 value={templateName}
                 onChange={(e) => setTemplateName(e.target.value)}

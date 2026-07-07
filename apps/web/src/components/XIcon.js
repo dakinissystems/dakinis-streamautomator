@@ -1,6 +1,8 @@
 import React from 'react';
 
-export default function XIcon({ className = '', size = 16, style = {}, ...props }) {
+const EMPTY_STYLE = {};
+
+export default function XIcon({ className = '', size = 16, style = EMPTY_STYLE, ...props }) {
   const mergedStyle = {
     width: size,
     height: size,

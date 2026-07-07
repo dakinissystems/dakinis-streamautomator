@@ -19,7 +19,7 @@ export default function FAQ() {
     const q = t(`faq.q${i}`);
     const a = t(`faq.a${i}`);
     if (q && q !== `faq.q${i}` && a && a !== `faq.a${i}`) {
-      items.push({ q, a });
+      items.push({ id: `faq-${i}`, q, a });
     }
   }
 
@@ -45,9 +45,9 @@ export default function FAQ() {
         </p>
 
         <div className="space-y-6">
-          {items.map((item, index) => (
+          {items.map((item) => (
             <section
-              key={index}
+              key={item.id}
               className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800"
             >
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">

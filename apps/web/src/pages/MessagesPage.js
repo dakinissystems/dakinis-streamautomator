@@ -5,6 +5,10 @@ import { getNotifications, markNotificationRead } from '../features/messaging/ap
 import { useLanguage } from '../contexts/LanguageContext';
 import { devCatchLog } from '../utils/devCatchLog';
 
+function formatMessagesPageDate(d) {
+  return d ? new Date(d).toLocaleString() : '';
+}
+
 /**
  * Centro de mensajes: conversaciones con soporte (MyMessages) + notificaciones del admin.
  */
@@ -32,7 +36,7 @@ export default function MessagesPage({ token }) {
     }
   };
 
-  const formatDate = (d) => (d ? new Date(d).toLocaleString() : '');
+  const formatDate = formatMessagesPageDate;
 
   return (
     <div className="max-w-4xl mx-auto px-3 sm:px-6 py-6 space-y-8 min-w-0">

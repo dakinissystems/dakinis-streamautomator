@@ -3,9 +3,9 @@
  * Used for HTML meta, runtime attribution, and UI fallbacks.
  */
 
-export const COPYRIGHT_BRAND_NAME = 'Dakinis Systems';
-export const COPYRIGHT_LEGAL_HOLDER = 'Dakinis Systems';
-export const COPYRIGHT_YEAR_START = 2024;
+const COPYRIGHT_BRAND_NAME = 'Dakinis Systems';
+const COPYRIGHT_LEGAL_HOLDER = 'Dakinis Systems';
+const COPYRIGHT_YEAR_START = 2024;
 
 /**
  * Display year for footers (© YYYY); same rule as backend year span end.

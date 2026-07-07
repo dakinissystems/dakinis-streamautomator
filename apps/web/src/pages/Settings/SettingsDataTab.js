@@ -15,11 +15,11 @@ export default function SettingsDataTab({ loading, onExport, onDeleteAccount, t 
               <p className="text-sm text-blue-800 dark:text-blue-200 mb-4">
                 Download all your content, settings, and account data in JSON format.
               </p>
-              <button
+              <button type="button"
                 onClick={onExport}
                 disabled={loading}
                 className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 min-h-[44px]"
-              >
+              
                 {loading ? t('settings.exporting') : t('settings.exportData')}
               </button>
             </div>
@@ -34,11 +34,11 @@ export default function SettingsDataTab({ loading, onExport, onDeleteAccount, t 
               <p className="text-sm text-red-800 dark:text-red-200 mb-4">
                 Once you delete your account, there is no going back. Please be certain.
               </p>
-              <button
+              <button type="button"
                 onClick={onDeleteAccount}
                 disabled={loading}
                 className="w-full sm:w-auto px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 min-h-[44px]"
-              >
+              
                 {loading ? t('settings.deleting') : t('settings.deleteAccount')}
               </button>
             </div>

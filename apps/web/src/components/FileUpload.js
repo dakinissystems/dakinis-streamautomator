@@ -4,7 +4,7 @@
  * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Upload, Image, Video, Loader2 } from 'lucide-react';
 import { handleUpload, getUploadStats } from '../utils/uploadHelper';
 import { formatDateTime } from '../utils/dateUtils';
@@ -12,27 +12,26 @@ import { useLanguage } from '../contexts/LanguageContext';
 import toast from 'react-hot-toast';
 import { devCatchLog } from '../utils/devCatchLog';
 
-export default function FileUpload({ user, onUploadComplete }) {
+function getVideoDuration(file) {
+  return new Promise((resolve) => {
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.onloadedmetadata = () => {
+      window.URL.revokeObjectURL(video.src);
+      resolve(Math.round(video.duration) || 0);
+    };
+    video.onerror = () => resolve(0);
+    video.src = URL.createObjectURL(file);
+  });
+}
+
+export default function FileUpload({ user, onUploadComplete, uploadStats }) {
   const { t } = useLanguage();
   const [uploading, setUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState([]);
-  const [uploadStats, setUploadStats] = useState(null);
 
   // Determine if user is trial
   const isTrialUser = user?.licenseType === 'trial';
-
-  const getVideoDuration = (file) => {
-    return new Promise((resolve) => {
-      const video = document.createElement('video');
-      video.preload = 'metadata';
-      video.onloadedmetadata = () => {
-        window.URL.revokeObjectURL(video.src);
-        resolve(Math.round(video.duration) || 0);
-      };
-      video.onerror = () => resolve(0);
-      video.src = URL.createObjectURL(file);
-    });
-  };
 
   const handleFileSelect = async (event) => {
     const file = event.target.files[0];
@@ -99,8 +98,7 @@ export default function FileUpload({ user, onUploadComplete }) {
       // Update stats after successful upload
       if (userId) {
         try {
-          const stats = await getUploadStats(userId);
-          setUploadStats(stats);
+          await getUploadStats(userId);
         } catch (error) {
           devCatchLog('FileUpload.refreshStatsAfterUpload', error);
         }
@@ -119,24 +117,6 @@ export default function FileUpload({ user, onUploadComplete }) {
       event.target.value = '';
     }
   };
-
-  // Load stats on mount
-  useEffect(() => {
-    const loadStats = async () => {
-      if (user?.id) {
-        try {
-          const stats = await getUploadStats(user.id.toString());
-          if (stats && !stats.error) {
-            setUploadStats(stats);
-          }
-        } catch (error) {
-          // Set empty stats to prevent errors
-          setUploadStats({ uploads: [], totalUploads24h: 0, isTrialUser: false });
-        }
-      }
-    };
-    loadStats();
-  }, [user]);
 
   return (
     <div className="space-y-4">
@@ -190,9 +170,9 @@ export default function FileUpload({ user, onUploadComplete }) {
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
             {t('media.uploadedFilesList')}
           </h3>
-          {uploadedFiles.map((file, index) => (
+          {uploadedFiles.map((file) => (
             <div
-              key={index}
+              key={file.url || file.path || `${file.fileName}-${file.bucket}`}
               className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
             >
               <div className="flex items-center space-x-3">

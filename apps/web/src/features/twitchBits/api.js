@@ -5,7 +5,7 @@ export async function getTwitchDashboardStats() {
   return res.data;
 }
 
-export async function getTwitchSubs() {
+async function getTwitchSubs() {
   const res = await apiClient.get('/user/twitch-subs');
   return res.data;
 }
@@ -15,7 +15,7 @@ export async function getTwitchBits(format = 'chronological') {
   return res.data;
 }
 
-export async function getTwitchDonations() {
+async function getTwitchDonations() {
   const res = await apiClient.get('/user/twitch-donations');
   return res.data;
 }

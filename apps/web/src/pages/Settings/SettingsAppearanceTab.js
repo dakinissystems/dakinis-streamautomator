@@ -146,9 +146,9 @@ export default function SettingsAppearanceTab({
           <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4">{tt('settings.theme', 'theme')}</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {themes.map((theme) => (
-              <button
+              <button type="button"
                 key={theme.id}
-                onClick={() => setThemeSettings(prev => ({ ...prev, theme: theme.id }))}
+                onClick={() = setThemeSettings(prev => ({ ...prev, theme: theme.id }))}
                 className={`p-4 border-2 rounded-lg text-left transition-all ${
                   themeSettings.theme === theme.id ? 'border-accent bg-gray-50 dark:bg-gray-800' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
@@ -166,8 +166,9 @@ export default function SettingsAppearanceTab({
             {accentColors.map((color) => {
               const isSelected = (config.assignments?.accent || themeSettings.accentColor) === color.id;
               return (
-                <button
+                <button type="button"
                   key={color.id}
+                  aria-label={color.name || color.id}
                   onClick={() => setThemeSettings(prev => ({ ...prev, accentColor: color.id }))}
                   className={`w-10 h-10 rounded-full ${color.color} border-2 transition-all ${
                     isSelected ? 'border-accent ring-2 ring-accent ring-offset-2 dark:ring-offset-gray-800 scale-110' : 'border-white dark:border-gray-700 hover:scale-105'
@@ -205,6 +206,7 @@ export default function SettingsAppearanceTab({
                 <div key={swatch.id} className="flex items-center gap-1.5 group">
                   <input
                     type="color"
+                    aria-label={swatch.name || swatch.hex || tt('appearance.pickColor', 'pickColor')}
                     value={swatch.hex}
                     onChange={(e) => {
                       setConfig({
@@ -217,6 +219,7 @@ export default function SettingsAppearanceTab({
                   />
                   <input
                     type="text"
+                    aria-label={tt('appearance.colorName', 'colorName')}
                     value={swatch.name || ''}
                     onChange={(e) => {
                       setConfig({
@@ -240,6 +243,7 @@ export default function SettingsAppearanceTab({
               <div className="flex items-center gap-2 flex-wrap">
                 <input
                   type="color"
+                  aria-label={tt('appearance.pickColor', 'pickColor')}
                   value={newColorHex}
                   onChange={(e) => setNewColorHex(e.target.value)}
                   className="w-9 h-9 rounded-full border-2 border-gray-300 dark:border-gray-600 cursor-pointer shrink-0"
@@ -247,6 +251,7 @@ export default function SettingsAppearanceTab({
                 />
                 <input
                   type="text"
+                  aria-label={tt('appearance.newColorName', 'newColorName')}
                   value={newColorName}
                   onChange={(e) => setNewColorName(e.target.value)}
                   placeholder={tt('appearance.newColorName', 'newColorName')}
@@ -278,6 +283,7 @@ export default function SettingsAppearanceTab({
                     </p>
                   </div>
                   <select
+                    aria-label={partLabel(part)}
                     value={config.assignments?.[part.id] || 'blue'}
                     onChange={(e) => handlePartAssignment(part.id, e.target.value)}
                     className="text-sm px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 min-w-[120px]"
@@ -309,7 +315,8 @@ export default function SettingsAppearanceTab({
               <p className="text-sm text-gray-600 dark:text-gray-400">{tt('settings.compactModeDesc', 'compactModeDesc')}</p>
             </div>
           </div>
-          <button
+          <button type="button"
+            aria-label={tt('settings.compactMode', 'compactMode')}
             onClick={() => setThemeSettings(prev => ({ ...prev, compactMode: !prev.compactMode }))}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${themeSettings.compactMode ? 'bg-accent' : 'bg-gray-200 dark:bg-gray-600'}`}
           >
@@ -325,6 +332,7 @@ export default function SettingsAppearanceTab({
               <div key={id} className="flex items-center gap-2">
                 <input
                   type="color"
+                  aria-label={`${id} platform color`}
                   value={platformColors[id] || DEFAULT_PLATFORM_COLORS[id]}
                   onChange={(e) => {
                     const next = setPlatformColors({ [id]: e.target.value });
@@ -353,7 +361,7 @@ export default function SettingsAppearanceTab({
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{t('settings.headerBannerHelp') || 'Banner shown below the top bar. Optional image URL. Leave text empty to hide.'}</p>
           <div className="space-y-4">
             {bannerConfig.map((banner, index) => (
-              <div key={index} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 space-y-3">
+              <div key={`banner-${banner.imageUrl}-${banner.text}`} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.banner') || 'Banner'} {bannerConfig.length > 1 ? index + 1 : ''}</span>
                   {bannerConfig.length > 1 && (
@@ -364,8 +372,9 @@ export default function SettingsAppearanceTab({
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{t('settings.bannerTextEn') || 'Text (EN)'}</label>
+                    <label htmlFor={`banner-text-en-${index}`} className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{t('settings.bannerTextEn') || 'Text (EN)'}</label>
                     <input
+                      id={`banner-text-en-${index}`}
                       type="text"
                       value={banner.text || ''}
                       onChange={(e) => setBannerConfig(prev => prev.map((b, i) => i === index ? { ...b, text: e.target.value } : b))}
@@ -374,8 +383,9 @@ export default function SettingsAppearanceTab({
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{t('settings.bannerTextEs') || 'Text (ES)'}</label>
+                    <label htmlFor={`banner-text-es-${index}`} className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{t('settings.bannerTextEs') || 'Text (ES)'}</label>
                     <input
+                      id={`banner-text-es-${index}`}
                       type="text"
                       value={banner.textEs || ''}
                       onChange={(e) => setBannerConfig(prev => prev.map((b, i) => i === index ? { ...b, textEs: e.target.value } : b))}
@@ -385,9 +395,10 @@ export default function SettingsAppearanceTab({
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{t('settings.bannerImageUrl') || 'Image (optional)'}</label>
+                  <label htmlFor={`banner-image-url-${index}`} className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{t('settings.bannerImageUrl') || 'Image (optional)'}</label>
                   <div className="flex flex-wrap gap-2 items-center">
                     <input
+                      id={`banner-image-url-${index}`}
                       type="url"
                       value={banner.imageUrl || ''}
                       onChange={(e) => setBannerConfig(prev => prev.map((b, i) => i === index ? { ...b, imageUrl: e.target.value || undefined } : b))}
@@ -411,6 +422,7 @@ export default function SettingsAppearanceTab({
                     ref={bannerImageInputRef}
                     type="file"
                     accept="image/*"
+                    aria-label={t('settings.bannerUploadImage') || 'Upload'}
                     className="hidden"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
@@ -423,12 +435,12 @@ export default function SettingsAppearanceTab({
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{t('settings.bannerLinkUrl') || 'Link URL (optional)'}</label>
-                    <input type="url" value={banner.url || ''} onChange={(e) => setBannerConfig(prev => prev.map((b, i) => i === index ? { ...b, url: e.target.value || undefined } : b))} placeholder="https://..." className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm" />
+                    <label htmlFor={`banner-link-url-${index}`} className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{t('settings.bannerLinkUrl') || 'Link URL (optional)'}</label>
+                    <input id={`banner-link-url-${index}`} type="url" value={banner.url || ''} onChange={(e) => setBannerConfig(prev => prev.map((b, i) => i === index ? { ...b, url: e.target.value || undefined } : b))} placeholder="https://..." className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm" />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{t('settings.bannerStyle') || 'Style'}</label>
-                    <select value={banner.style || 'neutral'} onChange={(e) => setBannerConfig(prev => prev.map((b, i) => i === index ? { ...b, style: e.target.value } : b))} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
+                    <label htmlFor={`banner-style-${index}`} className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{t('settings.bannerStyle') || 'Style'}</label>
+                    <select id={`banner-style-${index}`} value={banner.style || 'neutral'} onChange={(e) => setBannerConfig(prev => prev.map((b, i) => i === index ? { ...b, style: e.target.value } : b))} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
                       <option value="info">Info (blue)</option>
                       <option value="success">Success (green)</option>
                       <option value="warning">Warning (amber)</option>
@@ -495,8 +507,8 @@ export default function SettingsAppearanceTab({
                   <p className="text-sm text-gray-500 dark:text-gray-400">{t('settings.bannerNoImagesInMedia') || 'No images in Media. Upload images in the Media section first.'}</p>
                 ) : (
                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                    {bannerMediaList.map((item, i) => (
-                      <button key={i} type="button" onClick={() => { setBannerConfig(prev => prev.map((b, j) => j === bannerMediaPickerFor ? { ...b, imageUrl: item.url } : b)); setBannerMediaPickerFor(null); }} className="aspect-square rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-accent overflow-hidden focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2">
+                    {bannerMediaList.map((item) => (
+                      <button key={item.url} type="button" aria-label={item.name || item.url || (t('settings.bannerChooseFromMedia') || 'Choose from Media')} onClick={() => { setBannerConfig(prev => prev.map((b, j) => j === bannerMediaPickerFor ? { ...b, imageUrl: item.url } : b)); setBannerMediaPickerFor(null); }} className="aspect-square rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-accent overflow-hidden focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2">
                         <img src={item.url} alt="" className="w-full h-full object-cover" />
                       </button>
                     ))}

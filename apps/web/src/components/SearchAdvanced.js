@@ -15,7 +15,9 @@ const PLATFORM_LABELS = {
   youtube: 'YouTube'
 };
 
-export function SearchAdvanced({ onSearch, onFilterChange, filters = {} }) {
+const EMPTY_FILTERS = {};
+
+export function SearchAdvanced({ onSearch, onFilterChange, filters = EMPTY_FILTERS }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [enabledPlatforms, setEnabledPlatforms] = useState(['twitch', 'twitter', 'instagram', 'discord', 'youtube']);
@@ -56,6 +58,7 @@ export function SearchAdvanced({ onSearch, onFilterChange, filters = {} }) {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
             type="text"
+            aria-label="Search content..."
             placeholder="Search content..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -87,10 +90,11 @@ export function SearchAdvanced({ onSearch, onFilterChange, filters = {} }) {
       {showFilters && (
         <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="search-advanced-status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Status
             </label>
             <select
+              id="search-advanced-status"
               value={filters.status || 'all'}
               onChange={(e) => handleFilterChange('status', e.target.value === 'all' ? null : e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
@@ -103,10 +107,11 @@ export function SearchAdvanced({ onSearch, onFilterChange, filters = {} }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="search-advanced-platform" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Platform
             </label>
             <select
+              id="search-advanced-platform"
               value={filters.platform || 'all'}
               onChange={(e) => handleFilterChange('platform', e.target.value === 'all' ? null : e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
@@ -121,10 +126,11 @@ export function SearchAdvanced({ onSearch, onFilterChange, filters = {} }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label htmlFor="search-advanced-date-range" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Date Range
             </label>
             <select
+              id="search-advanced-date-range"
               value={filters.dateRange || 'all'}
               onChange={(e) => handleFilterChange('dateRange', e.target.value === 'all' ? null : e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"

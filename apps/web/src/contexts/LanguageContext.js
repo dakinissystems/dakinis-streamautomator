@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import esTranslations from '../locales/es.json';
 import enTranslations from '../locales/en.json';
 
@@ -49,27 +49,32 @@ export function LanguageProvider({ children }) {
     localStorage.setItem('app_language', language);
   }, [language]);
 
-  const t = (key, params = {}) => {
+  const t = useCallback((key, params = {}) => {
     const raw = lookupTranslation(language, key);
     if (raw === undefined) return humanizeMissingKey(key);
     if (typeof raw !== 'string') return humanizeMissingKey(key);
 
     return applyParams(raw, params);
-  };
+  }, [language]);
 
   /** Returns fallback only when the key is missing from the active locale (works even though t() no longer returns raw keys). */
-  const tSafe = (key, fallback) => {
+  const tSafe = useCallback((key, fallback) => {
     const raw = lookupTranslation(language, key);
     if (raw === undefined || typeof raw !== 'string') return fallback;
     return applyParams(raw, {});
-  };
+  }, [language]);
 
-  const toggleLanguage = () => {
+  const toggleLanguage = useCallback(() => {
     setLanguage(prev => prev === 'es' ? 'en' : 'es');
-  };
+  }, []);
+
+  const value = useMemo(
+    () => ({ language, setLanguage, t, tSafe, toggleLanguage }),
+    [language, t, tSafe, toggleLanguage]
+  );
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, tSafe, toggleLanguage }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );

@@ -20,7 +20,8 @@ export default function SettingsNotificationsTab({ notificationSettings, setNoti
                 </p>
               </div>
             </div>
-            <button
+            <button type="button"
+              aria-label={key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
               onClick={() => setNotificationSettings(prev => ({ ...prev, [key]: !value }))}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                 value ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'

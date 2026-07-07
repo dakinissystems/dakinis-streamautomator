@@ -1,31 +1,25 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Building2, Check, Loader2 } from 'lucide-react';
 import { getWorkspaceTenants, switchActiveWorkspaceTenant } from '../../features/account/api';
 import { devCatchLog } from '../../utils/devCatchLog';
+import { useExternalPoll } from '../../hooks/useExternalPoll';
 
 export default function SettingsWorkspaceTab({ user, setUser, setAuth, t }) {
-  const [loading, setLoading] = useState(true);
   const [switchingId, setSwitchingId] = useState(null);
-  const [payload, setPayload] = useState(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const poll = useExternalPoll('settings-workspace-tenants', async () => {
     try {
-      const data = await getWorkspaceTenants();
-      setPayload(data);
+      return await getWorkspaceTenants();
     } catch (e) {
       devCatchLog('SettingsWorkspaceTab.load', e);
       toast.error(t('settings.workspaceLoadError'));
-      setPayload(null);
-    } finally {
-      setLoading(false);
+      return null;
     }
-  }, [t]);
+  }, 0);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  const loading = poll.status === 'idle' || poll.status === 'loading';
+  const payload = poll.status === 'ready' ? poll.data : null;
 
   const activeId =
     payload?.activeTenantId != null && Number.isFinite(Number(payload.activeTenantId))
@@ -50,11 +44,9 @@ export default function SettingsWorkspaceTab({ user, setUser, setAuth, t }) {
         setUser({ ...user, ...data.user, tenantId: tid });
       }
       toast.success(t('settings.workspaceSwitched'));
-      await load();
     } catch (e) {
       devCatchLog('SettingsWorkspaceTab.switch', e);
-      const msg = e.response?.data?.error || e.message;
-      toast.error(msg || t('settings.workspaceSwitchError'));
+      toast.error(t('settings.workspaceSwitchError'));
     } finally {
       setSwitchingId(null);
     }
@@ -63,56 +55,44 @@ export default function SettingsWorkspaceTab({ user, setUser, setAuth, t }) {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
-          <Building2 className="w-5 h-5" aria-hidden />
-          {t('settings.workspace')}
-        </h3>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{t('settings.workspaceDescription')}</p>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+          <Building2 className="w-5 h-5" />
+          {t('settings.workspaceTitle') || 'Workspace'}
+        </h2>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+          {t('settings.workspaceHelp') || 'Switch between organizations linked to your account.'}
+        </p>
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+        <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <span>{t('settings.workspaceLoading')}</span>
+          {t('common.loading')}
         </div>
       ) : !payload?.tenants?.length ? (
-        <p className="text-sm text-gray-600 dark:text-gray-400">{t('settings.workspaceNoTenants')}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{t('settings.workspaceEmpty') || 'No workspaces available.'}</p>
       ) : (
-        <ul className="space-y-3">
-          {payload.tenants.map((row) => {
-            const tenant = row.tenant;
-            if (!tenant) return null;
+        <ul className="space-y-2">
+          {payload.tenants.map((tenant) => {
             const tid = Number(tenant.id);
-            const isActive = activeId !== null && tid === activeId;
-            const busy = switchingId === tid;
+            const isActive = activeId === tid;
             return (
               <li
-                key={tid}
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/40"
+                key={tenant.id}
+                className="flex items-center justify-between gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40"
               >
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-gray-900 dark:text-gray-100 truncate">{tenant.name}</span>
-                    {isActive && (
-                      <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/40 px-2 py-0.5 rounded-full">
-                        <Check className="w-3.5 h-3.5" aria-hidden />
-                        {t('settings.workspaceActive')}
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 break-all">
-                    {tenant.slug} · {t('settings.workspacePlan')}: {tenant.plan || 'free'} · {t('settings.workspaceRole')}:{' '}
-                    {row.role || 'member'}
-                  </div>
+                  <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{tenant.name || tenant.slug || `Tenant ${tenant.id}`}</p>
+                  {tenant.slug && <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{tenant.slug}</p>}
                 </div>
                 <button
                   type="button"
-                  disabled={busy || isActive}
+                  disabled={isActive || switchingId === tid}
                   onClick={() => handleSwitch(tid)}
-                  className="flex-shrink-0 px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg bg-accent text-white disabled:opacity-50"
                 >
-                  {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                  {isActive ? t('settings.workspaceCurrent') : t('settings.workspaceSwitch')}
+                  {switchingId === tid ? <Loader2 className="w-4 h-4 animate-spin" /> : isActive ? <Check className="w-4 h-4" /> : null}
+                  {isActive ? (t('settings.workspaceActive') || 'Active') : (t('settings.workspaceSwitch') || 'Switch')}
                 </button>
               </li>
             );

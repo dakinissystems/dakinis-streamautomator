@@ -83,6 +83,7 @@ export default function TodoList({ token }) {
       <form onSubmit={handleAdd} className="flex gap-2 mb-6">
         <input
           type="text"
+          aria-label={t('todo.placeholder') || 'What do you need to do?'}
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
           placeholder={t('todo.placeholder') || 'What do you need to do?'}

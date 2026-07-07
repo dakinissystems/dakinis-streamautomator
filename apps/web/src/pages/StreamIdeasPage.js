@@ -140,7 +140,7 @@ export default function StreamIdeasPage({ token }) {
               <button
                 type="button"
                 onClick={() => handleDelete(item.id)}
-                className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0"
+                className="p-1.5 rounded-md text-red-200 hover:text-white hover:bg-red-800/40 dark:text-red-200 dark:hover:bg-red-900/40 flex-shrink-0"
                 title={t('streamIdeas.delete') || 'Delete'}
                 aria-label={t('streamIdeas.delete') || 'Delete'}
               >

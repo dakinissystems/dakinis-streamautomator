@@ -135,7 +135,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
 
   useEffect(() => {
     if (token) fetchPaymentsList(paymentsOffset, paymentListFilters);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps
   }, [token, paymentsOffset, paymentListFilters.status, paymentListFilters.from, paymentListFilters.to]);
 
   const fetchAlertConfig = async () => {
@@ -184,7 +184,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
 
   useEffect(() => {
     if (token && adminFeatures.adminFinance) fetchFixedCostsList();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps
   }, [token, adminFeatures.adminFinance]);
 
   const fetchCostMetrics = async () => {
@@ -209,7 +209,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
 
   useEffect(() => {
     if (token && adminFeatures.adminFinance) fetchCostMetrics();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps
   }, [token, adminFeatures.adminFinance]);
 
   const fetchDiscountCodes = async () => {
@@ -236,12 +236,12 @@ export default function AdminDashboard({ token, user, onLogout }) {
 
   useEffect(() => {
     if (token && adminFeatures.adminFinance) fetchDiscountCodes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps
   }, [token, adminFeatures.adminFinance]);
 
   useEffect(() => {
     fetchMessages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only when messageFilters change
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps -- run only when messageFilters change
   }, [messageFilters]);
 
   const fetchLicenseConfig = async () => {
@@ -843,7 +843,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
 
   useEffect(() => {
     if (token && section === 'alerts' && adminFeatures.adminFinance) fetchAlertConfig();
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchAlertConfig when section is alerts
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps -- fetchAlertConfig when section is alerts
   }, [token, section, adminFeatures.adminFinance]);
 
   return (
@@ -851,7 +851,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-blue-900 dark:text-blue-100">{t('admin.title')}</h1>
         {onLogout && (
-          <button onClick={onLogout} className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded hover:from-blue-700 hover:to-purple-700 text-sm w-full sm:w-auto">{t('common.logout')}</button>
+          <button type="button" onClick={onLogout} className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded hover:from-blue-700 hover:to-purple-700 text-sm w-full sm:w-auto"{t('common.logout')}</button>
         )}
       </div>
       <main className="space-y-6">
@@ -936,7 +936,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
                     <tr><td colSpan={5} className="px-3 py-2 border dark:border-gray-600 text-gray-500 dark:text-gray-400">{t('admin.noCostMetrics') || 'Sin datos de métricas aún.'}</td></tr>
                   ) : (
                     costMetrics.byUser
-                      .sort((a, b) => (b.redisCostEur ?? 0) - (a.redisCostEur ?? 0) || b.jobsExecuted - a.jobsExecuted)
+                      .toSorted((a, b) => (b.redisCostEur ?? 0) - (a.redisCostEur ?? 0) || b.jobsExecuted - a.jobsExecuted)
                       .map((row) => (
                         <tr key={row.userId} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                           <td className="px-3 py-2 border dark:border-gray-600 text-gray-900 dark:text-gray-100">
@@ -991,8 +991,8 @@ export default function AdminDashboard({ token, user, onLogout }) {
                 {t('admin.passwordReminderTitle')}
               </h3>
               <div className="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
-                {passwordReminders.filter(r => r.needsChange).map((reminder, idx) => (
-                  <p key={idx} className="mb-1">
+                {passwordReminders.filter(r => r.needsChange).map((reminder) => (
+                  <p key={reminder.email || reminder.userId} className="mb-1">
                     {maskEmail(reminder.email)}: {reminder.message}
                   </p>
                 ))}
@@ -1020,8 +1020,8 @@ export default function AdminDashboard({ token, user, onLogout }) {
       <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-t-4 border-blue-400">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-blue-700 dark:text-blue-300">{t('admin.licenseConfigTitle')}</h3>
-          <button
-            onClick={() => setShowLicenseConfig(!showLicenseConfig)}
+          <button type="button"
+            onClick={() = setShowLicenseConfig(!showLicenseConfig)}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             {showLicenseConfig ? t('admin.hide') : t('admin.manageAvailableLicenses')}
@@ -1072,13 +1072,14 @@ export default function AdminDashboard({ token, user, onLogout }) {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 items-end">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                <label htmlFor="max-trial-extensions-per-user" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                   {t('admin.maxTrialExtensionsPerUserLabel') || 'Máx. extensiones de trial por usuario'}
                 </label>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                   {t('admin.maxTrialExtensionsPerUserHelp') || 'Deja vacío o 0 para ilimitadas. Solo afecta a partir de ahora.'}
                 </p>
                 <input
+                  id="max-trial-extensions-per-user"
                   type="number"
                   min="0"
                   value={trialExtensionConfig.maxTrialExtensionsPerUser ?? ''}
@@ -1093,16 +1094,16 @@ export default function AdminDashboard({ token, user, onLogout }) {
                 />
               </div>
               <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
-                <button
+                <button type="button"
                   onClick={handleUpdateLicenseConfig}
                   className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                >
+                
                   {t('admin.saveConfiguration')}
                 </button>
-                <button
+                <button type="button"
                   onClick={handleUpdateTrialExtensionConfig}
                   className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-                >
+                
                   {t('admin.saveTrialExtensionConfig') || 'Guardar límite de extensiones'}
                 </button>
               </div>
@@ -1118,6 +1119,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
           <div className="space-y-3">
             <input
               type="text"
+              aria-label={t('common.username')}
               placeholder={t('common.username')}
               value={createData.username}
               onChange={e => setCreateData(prev => ({ ...prev, username: e.target.value }))}
@@ -1125,6 +1127,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
             />
             <input
               type="email"
+              aria-label={t('common.email')}
               placeholder={t('common.email')}
               value={createData.email}
               onChange={e => setCreateData(prev => ({ ...prev, email: e.target.value }))}
@@ -1132,6 +1135,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
             />
             <input
               type="password"
+              aria-label={t('common.password')}
               placeholder={t('common.password')}
               value={createData.password}
               onChange={e => setCreateData(prev => ({ ...prev, password: e.target.value }))}
@@ -1145,11 +1149,11 @@ export default function AdminDashboard({ token, user, onLogout }) {
               />
               <span>{t('common.admin')}</span>
             </label>
-            <button
+            <button type="button"
               onClick={handleCreateUser}
               disabled={creating}
               className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
-            >
+            
               {creating ? t('admin.creating') : t('common.create')}
             </button>
           </div>
@@ -1246,12 +1250,13 @@ export default function AdminDashboard({ token, user, onLogout }) {
               </p>
             )}
             {discountCodes.map((code, idx) => (
-              <div key={idx} className="grid grid-cols-1 md:grid-cols-6 gap-2 md:gap-3 items-end bg-gray-50 dark:bg-gray-900/40 rounded px-3 py-3">
+              <div key={code.code || `discount-${code.percentOff}-${code.maxUses ?? 'new'}`} className="grid grid-cols-1 md:grid-cols-6 gap-2 md:gap-3 items-end bg-gray-50 dark:bg-gray-900/40 rounded px-3 py-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+                  <label htmlFor={`discount-code-${idx}`} className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
                     {t('admin.discountCodeCode') || 'Código'}
                   </label>
                   <input
+                    id={`discount-code-${idx}`}
                     type="text"
                     value={code.code}
                     onChange={(e) => {
@@ -1263,10 +1268,11 @@ export default function AdminDashboard({ token, user, onLogout }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+                  <label htmlFor={`discount-percent-${idx}`} className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
                     {t('admin.discountCodePercent') || '% descuento'}
                   </label>
                   <input
+                    id={`discount-percent-${idx}`}
                     type="number"
                     min="1"
                     max="100"
@@ -1279,10 +1285,11 @@ export default function AdminDashboard({ token, user, onLogout }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+                  <label htmlFor={`discount-max-redemptions-${idx}`} className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
                     {t('admin.discountCodeMaxRedemptions') || 'Usos máx.'}
                   </label>
                   <input
+                    id={`discount-max-redemptions-${idx}`}
                     type="number"
                     min="1"
                     value={code.maxRedemptions ?? ''}
@@ -1295,10 +1302,11 @@ export default function AdminDashboard({ token, user, onLogout }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+                  <label htmlFor={`discount-valid-from-${idx}`} className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
                     {t('admin.discountCodeValidFrom') || 'Válido desde'}
                   </label>
                   <input
+                    id={`discount-valid-from-${idx}`}
                     type="date"
                     value={code.validFrom || ''}
                     onChange={(e) => {
@@ -1309,10 +1317,11 @@ export default function AdminDashboard({ token, user, onLogout }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+                  <label htmlFor={`discount-valid-until-${idx}`} className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
                     {t('admin.discountCodeValidUntil') || 'Válido hasta'}
                   </label>
                   <input
+                    id={`discount-valid-until-${idx}`}
                     type="date"
                     value={code.validUntil || ''}
                     onChange={(e) => {
@@ -1324,10 +1333,11 @@ export default function AdminDashboard({ token, user, onLogout }) {
                 </div>
                 <div className="flex items-end justify-between gap-2 md:flex-col md:items-stretch">
                   <div className="flex-1">
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
+                    <label htmlFor={`discount-note-${idx}`} className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">
                       {t('admin.discountCodeNote') || 'Nota'}
                     </label>
                     <input
+                      id={`discount-note-${idx}`}
                       type="text"
                       value={code.note}
                       onChange={(e) => {
@@ -1420,12 +1430,13 @@ export default function AdminDashboard({ token, user, onLogout }) {
                         <div className="flex items-center space-x-2">
                           <input
                             type="email"
+                            aria-label={t('common.email')}
                             value={newEmail}
                             onChange={e => setNewEmail(e.target.value)}
                             className="border dark:border-gray-600 px-2 py-1 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                           />
-                          <button onClick={(e) => { e.stopPropagation(); handleSaveEmail(u.id); }} className="text-green-600 dark:text-green-400 font-bold">{t('admin.save')}</button>
-                          <button onClick={(e) => { e.stopPropagation(); handleCancelEdit(); }} className="text-gray-500 dark:text-gray-400">{t('common.cancel')}</button>
+                          <button type="button" onClick={(e) = { e.stopPropagation(); handleSaveEmail(u.id); }} className="text-green-600 dark:text-green-400 font-bold">{t('admin.save')}</button>
+                          <button type="button" onClick={(e) = { e.stopPropagation(); handleCancelEdit(); }} className="text-gray-500 dark:text-gray-400">{t('common.cancel')}</button>
                         </div>
                       ) : (
                         <span title={u.email}>{maskEmail(u.email)}</span>
@@ -1508,6 +1519,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
                               type="number"
                               min="1"
                               max="7"
+                              aria-label={t('admin.extendTrialDaysTitle')}
                               value={extendTrialDays[u.id] || 7}
                               onChange={(e) => {
                                 const value = parseInt(e.target.value) || 7;
@@ -1516,10 +1528,10 @@ export default function AdminDashboard({ token, user, onLogout }) {
                               className="w-12 px-1 py-1 text-xs border rounded bg-white dark:bg-gray-900"
                               title={t('admin.extendTrialDaysTitle')}
                             />
-                            <button
+                            <button type="button"
                               className="px-2 py-1 text-xs bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={extendingTrial === u.id}
-                              onClick={() => handleExtendTrial(u.id)}
+                              onClick={() = handleExtendTrial(u.id)}
                               title={
                                 trialExtensionConfig.maxTrialExtensionsPerUser && trialExtensionConfig.maxTrialExtensionsPerUser > 0
                                   ? `${t('admin.extendTrial')} (${u.trialExtensions || 0}/${trialExtensionConfig.maxTrialExtensionsPerUser})`
@@ -1532,34 +1544,34 @@ export default function AdminDashboard({ token, user, onLogout }) {
                         )}
                         {!u.licenseKey && (
                           <>
-                            <button
+                            <button type="button"
                               className="px-2 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={generating[u.id] || u.hasUsedTrial}
-                              onClick={() => handleAssignTrial(u.id)}
+                              onClick={() = handleAssignTrial(u.id)}
                               title={u.hasUsedTrial ? t('admin.trialUsed') : t('admin.assignTrialTooltip')}
                             >
                               {generating[u.id] ? '...' : u.hasUsedTrial ? t('admin.trialUsedLabel') : t('admin.trial7Days')}
                             </button>
-                            <button
+                            <button type="button"
                               className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={generating[u.id]}
-                              onClick={() => handleGenerateLicense(u.id, 'monthly')}
+                              onClick={() = handleGenerateLicense(u.id, 'monthly')}
                               title={t('admin.generateMonthly')}
                             >
                               {generating[u.id] ? '...' : t('admin.monthly')}
                             </button>
-                            <button
+                            <button type="button"
                               className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={generating[u.id]}
-                              onClick={() => handleGenerateLicense(u.id, 'lifetime')}
+                              onClick={() = handleGenerateLicense(u.id, 'lifetime')}
                               title={t('admin.generateLifetime')}
                             >
                               {generating[u.id] ? '...' : t('admin.lifetime')}
                             </button>
-                            <button
+                            <button type="button"
                               className="px-2 py-1 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={generating[u.id]}
-                              onClick={() => handleGenerateLicense(u.id, 'quarterly')}
+                              onClick={() = handleGenerateLicense(u.id, 'quarterly')}
                               title={t('admin.generateQuarterly')}
                             >
                               {generating[u.id] ? '...' : '3M'}
@@ -1579,40 +1591,40 @@ export default function AdminDashboard({ token, user, onLogout }) {
                             <option value="temporary">{t('admin.temporary')}</option>
                             <option value="lifetime">{t('admin.lifetime')}</option>
                           </select>
-                          <button
+                          <button type="button"
                             className="px-2 py-1 text-xs bg-gray-700 text-white rounded hover:bg-gray-800"
-                            onClick={() => handleUpdateLicense(u.id)}
+                            onClick={() = handleUpdateLicense(u.id)}
                             title={t('admin.updateLicense')}
                           >
                             ✓
                           </button>
                         </div>
-                        <button
+                        <button type="button"
                           className="px-2 py-1 text-xs bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                          onClick={(e) => { e.stopPropagation(); handleEditEmail(u); }}
+                          onClick={(e) = { e.stopPropagation(); handleEditEmail(u); }}
                           title={t('admin.changeEmail')}
                         >
                           📧
                         </button>
-                        <button
+                        <button type="button"
                           className="px-2 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
                           disabled={resetting === u.id}
-                          onClick={(e) => { e.stopPropagation(); handleResetPassword(u.id); }}
+                          onClick={(e) = { e.stopPropagation(); handleResetPassword(u.id); }}
                           title={t('admin.sendPasswordResetEmail')}
                         >
                           {resetting === u.id ? '...' : '🔑'}
                         </button>
-                        <button
+                        <button type="button"
                           className={`px-2 py-1 text-xs rounded text-white ${u.isDisabled ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'}`}
-                          onClick={(e) => { e.stopPropagation(); handleToggleUserDisabled(u); }}
+                          onClick={(e) = { e.stopPropagation(); handleToggleUserDisabled(u); }}
                           title={u.isDisabled ? (t('admin.enableUser') || 'Enable user') : (t('admin.disableUser') || 'Disable user')}
                         >
                           {u.isDisabled ? (t('admin.enableUser') || 'Enable') : (t('admin.disableUser') || 'Disable')}
                         </button>
-                        <button
+                        <button type="button"
                           className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                           disabled={deletingUserId === u.id || u.id === user?.id}
-                          onClick={(e) => { e.stopPropagation(); handleDeleteUser(u.id); }}
+                          onClick={(e) = { e.stopPropagation(); handleDeleteUser(u.id); }}
                           title={u.id === user?.id ? '' : t('admin.deleteUser')}
                         >
                           {deletingUserId === u.id ? '...' : t('admin.deleteUser')}
@@ -1753,15 +1765,15 @@ export default function AdminDashboard({ token, user, onLogout }) {
                   </div>
                   <div className="flex gap-2 ml-4" onClick={(e) => e.stopPropagation()}>
                     {msg.status !== 'archived' && (
-                      <button
-                        onClick={() => handleUpdateStatus(msg.id, 'archived')}
+                      <button type="button"
+                        onClick={() = handleUpdateStatus(msg.id, 'archived')}
                         className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-500"
                       >
                         {t('admin.archive')}
                       </button>
                     )}
-                    <button
-                      onClick={() => handleDeleteMessage(msg.id)}
+                    <button type="button"
+                      onClick={() = handleDeleteMessage(msg.id)}
                       className="px-2 py-1 text-xs bg-red-200 dark:bg-red-900/40 text-red-800 dark:text-red-300 rounded hover:bg-red-300 dark:hover:bg-red-900/60"
                     >
                       {t('admin.delete')}
@@ -1786,12 +1798,14 @@ export default function AdminDashboard({ token, user, onLogout }) {
         <div className="space-y-3 max-w-xl">
           <input
             type="text"
+            aria-label={t('admin.notificationTitlePlaceholder')}
             placeholder={t('admin.notificationTitlePlaceholder')}
             value={notifTitle}
             onChange={(e) => setNotifTitle(e.target.value)}
             className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           />
           <textarea
+            aria-label={t('admin.notificationContentPlaceholder')}
             placeholder={t('admin.notificationContentPlaceholder')}
             value={notifContent}
             onChange={(e) => setNotifContent(e.target.value)}
@@ -1807,8 +1821,8 @@ export default function AdminDashboard({ token, user, onLogout }) {
             />
             {t('admin.sendToAllUsers')}
           </label>
-          <button
-            onClick={async () => {
+          <button type="button"
+            onClick={async () = {
               if (!notifTitle.trim() || !notifContent.trim()) {
                 window.alert(t('admin.titleAndContentRequired'));
                 return;
@@ -1879,9 +1893,12 @@ export default function AdminDashboard({ token, user, onLogout }) {
                           </p>
                         </div>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
+                      <label htmlFor={`platform-enabled-${platform}`} className="relative inline-flex items-center cursor-pointer">
+                        <span className="sr-only">{config.label || platform}</span>
                         <input
+                          id={`platform-enabled-${platform}`}
                           type="checkbox"
+                          aria-label={`${config.label || platform}: ${config.enabled ? t('admin.platformActive') : t('admin.platformInactive')}`}
                           checked={config.enabled || false}
                           onChange={(e) => setPlatformConfig(prev => ({
                             ...prev,
@@ -1897,11 +1914,11 @@ export default function AdminDashboard({ token, user, onLogout }) {
               })}
             </div>
             <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
-              <button
+              <button type="button"
                 onClick={handleUpdatePlatformConfig}
                 disabled={platformConfigLoading}
                 className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-              >
+              
                 {platformConfigLoading ? (
                   <>
                     <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -1966,8 +1983,8 @@ export default function AdminDashboard({ token, user, onLogout }) {
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   labelLine={{ stroke: 'currentColor' }}
                 >
-                  {revenue.totalsByLicenseType.map((_, index) => (
-                    <Cell key={index} fill={['#059669', '#0d9488', '#0891b2', '#6366f1', '#8b5cf6'][index % 5]} />
+                  {revenue.totalsByLicenseType.map((entry, index) => (
+                    <Cell key={entry.name} fill={['#059669', '#0d9488', '#0891b2', '#6366f1', '#8b5cf6'][index % 5]} />
                   ))}
                 </Pie>
                 <Tooltip
@@ -2022,15 +2039,17 @@ export default function AdminDashboard({ token, user, onLogout }) {
                 const isAnnual = item.type === 'annual';
                 const monthlyEquivalent = isAnnual ? (Number(item.amount) || 0) / 12 : Number(item.amount) || 0;
                 return (
-                <div key={index} className="flex flex-wrap items-center gap-2 py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                <div key={`${item.label}-${item.type}-${item.currency}`} className="flex flex-wrap items-center gap-2 py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
                   <input
                     type="text"
+                    aria-label={t('admin.fixedCostLabelPlaceholder') || 'Concepto'}
                     value={item.label}
                     onChange={(e) => setFixedCosts(prev => prev.map((x, i) => i === index ? { ...x, label: e.target.value } : x))}
                     placeholder={t('admin.fixedCostLabelPlaceholder') || 'Concepto'}
                     className="flex-1 min-w-[100px] px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
                   />
                   <select
+                    aria-label={t('admin.fixedCostTypeMonthly') || 'Tipo de coste'}
                     value={item.type === 'annual' ? 'annual' : 'monthly'}
                     onChange={(e) => setFixedCosts(prev => prev.map((x, i) => i === index ? { ...x, type: e.target.value } : x))}
                     className="w-24 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
@@ -2042,6 +2061,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
                     type="number"
                     min="0"
                     step="0.01"
+                    aria-label={isAnnual ? (t('admin.fixedCostTypeAnnual') || 'Anual') : (t('admin.fixedCostTypeMonthly') || 'Mensual')}
                     value={item.amount}
                     onChange={(e) => setFixedCosts(prev => prev.map((x, i) => i === index ? { ...x, amount: parseFloat(e.target.value) || 0 } : x))}
                     className="w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
@@ -2054,6 +2074,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
                   )}
                   <input
                     type="text"
+                    aria-label={t('admin.currency') || 'Currency'}
                     value={item.currency}
                     onChange={(e) => setFixedCosts(prev => prev.map((x, i) => i === index ? { ...x, currency: (e.target.value || 'EUR').toUpperCase().slice(0, 3) } : x))}
                     placeholder="EUR"
@@ -2143,6 +2164,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
           <h3 className="text-lg font-bold text-indigo-700 dark:text-indigo-300">{t('admin.paymentsListTitle')}</h3>
           <div className="flex flex-wrap items-center gap-2">
             <select
+              aria-label={t('admin.allStatuses')}
               value={paymentListFilters.status}
               onChange={(e) => { setPaymentListFilters(prev => ({ ...prev, status: e.target.value })); setPaymentsOffset(0); }}
               className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
@@ -2155,6 +2177,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
             </select>
             <input
               type="date"
+              aria-label={t('admin.fromDate')}
               value={paymentListFilters.from}
               onChange={(e) => { setPaymentListFilters(prev => ({ ...prev, from: e.target.value })); setPaymentsOffset(0); }}
               className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
@@ -2162,20 +2185,21 @@ export default function AdminDashboard({ token, user, onLogout }) {
             />
             <input
               type="date"
+              aria-label={t('admin.toDate')}
               value={paymentListFilters.to}
               onChange={(e) => { setPaymentListFilters(prev => ({ ...prev, to: e.target.value })); setPaymentsOffset(0); }}
               className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
               title={t('admin.toDate')}
             />
-            <button
-              onClick={() => handleDownloadPayments('csv')}
+            <button type="button"
+              onClick={() = handleDownloadPayments('csv')}
               disabled={exporting}
               className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm"
             >
               {exporting ? '...' : t('admin.downloadCsv')}
             </button>
-            <button
-              onClick={() => handleDownloadPayments('json')}
+            <button type="button"
+              onClick={() = handleDownloadPayments('json')}
               disabled={exporting}
               className="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 text-sm"
             >
@@ -2218,11 +2242,11 @@ export default function AdminDashboard({ token, user, onLogout }) {
             </button>
             </>
             )}
-            <button
+            <button type="button"
               onClick={handleDownloadPaymentsPdf}
               disabled={exporting}
               className="px-3 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 text-sm"
-            >
+            
               {exporting ? '...' : t('admin.downloadPdfInvoices')}
             </button>
           </div>
@@ -2274,15 +2298,15 @@ export default function AdminDashboard({ token, user, onLogout }) {
                 {t('admin.showingPayments', { count: paymentsList.length, total: paymentsTotal })}
               </p>
               <div className="flex gap-2">
-                <button
-                  onClick={() => setPaymentsOffset(Math.max(0, paymentsOffset - paymentsLimit))}
+                <button type="button"
+                  onClick={() = setPaymentsOffset(Math.max(0, paymentsOffset - paymentsLimit))}
                   disabled={paymentsOffset === 0}
                   className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm disabled:opacity-50"
                 >
                   {t('admin.previous')}
                 </button>
-                <button
-                  onClick={() => setPaymentsOffset(paymentsOffset + paymentsLimit)}
+                <button type="button"
+                  onClick={() = setPaymentsOffset(paymentsOffset + paymentsLimit)}
                   disabled={paymentsOffset + paymentsList.length >= paymentsTotal}
                   className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm disabled:opacity-50"
                 >
@@ -2378,8 +2402,8 @@ export default function AdminDashboard({ token, user, onLogout }) {
               </label>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button
-                onClick={async () => {
+              <button type="button"
+                onClick={async () = {
                   if (!token || alertConfigSaving) return;
                   setAlertConfigSaving(true);
                   try {
@@ -2396,8 +2420,8 @@ export default function AdminDashboard({ token, user, onLogout }) {
               >
                 {alertConfigSaving ? (t('admin.saving') || 'Guardando...') : (t('admin.saveConfiguration') || 'Guardar')}
               </button>
-              <button
-                onClick={async () => {
+              <button type="button"
+                onClick={async () = {
                   if (!token || alertTestSending) return;
                   setAlertTestSending('dev');
                   try {
@@ -2420,8 +2444,8 @@ export default function AdminDashboard({ token, user, onLogout }) {
               >
                 {alertTestSending === 'dev' ? '...' : (t('admin.alertTestDev') || 'Probar #dev-internal')}
               </button>
-              <button
-                onClick={async () => {
+              <button type="button"
+                onClick={async () = {
                   if (!token || alertTestSending) return;
                   setAlertTestSending('status');
                   try {
@@ -2464,8 +2488,8 @@ export default function AdminDashboard({ token, user, onLogout }) {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{selectedMessage.subject}</h2>
-              <button
-                onClick={() => setShowMessageModal(false)}
+              <button type="button"
+                onClick={() = setShowMessageModal(false)}
                 className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 ✕
@@ -2510,8 +2534,8 @@ export default function AdminDashboard({ token, user, onLogout }) {
                       )}
                     </p>
                   </div>
-                  <button
-                    onClick={() => handleReopenMessage(selectedMessage.id)}
+                  <button type="button"
+                    onClick={() = handleReopenMessage(selectedMessage.id)}
                     className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                   >
                     Reopen
@@ -2528,8 +2552,8 @@ export default function AdminDashboard({ token, user, onLogout }) {
                   <div className="mt-4">
                     <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Attachments:</h4>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {selectedMessage.attachments.map((att, idx) => (
-                        <div key={idx} className="relative">
+                      {selectedMessage.attachments.map((att) => (
+                        <div key={att.url || att.name} className="relative">
                           <img
                             src={att.url}
                             alt={att.name || `Attachment ${idx + 1}`}
@@ -2591,8 +2615,9 @@ export default function AdminDashboard({ token, user, onLogout }) {
               {/* Reply Form (only if not resolved) */}
               {!selectedMessage.resolved && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Reply:</label>
+                  <label htmlFor="admin-message-reply" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Reply:</label>
                   <textarea
+                    id="admin-message-reply"
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
                     rows={6}
@@ -2623,8 +2648,8 @@ export default function AdminDashboard({ token, user, onLogout }) {
                     
                     {replyAttachments.length > 0 && (
                       <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        {replyAttachments.map((file, index) => (
-                          <div key={index} className="relative group">
+                        {replyAttachments.map((file) => (
+                          <div key={`${file.name}-${file.size}-${file.lastModified}`} className="relative group">
                             <img
                               src={URL.createObjectURL(file)}
                               alt={`Preview ${index + 1}`}
@@ -2632,6 +2657,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
                             />
                             <button
                               type="button"
+                              aria-label={t('common.remove') || 'Remove'}
                               onClick={() => removeReplyAttachment(index)}
                               className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                             >
@@ -2647,21 +2673,21 @@ export default function AdminDashboard({ token, user, onLogout }) {
                   </div>
                   
                   <div className="flex gap-2 mt-2">
-                    <button
+                    <button type="button"
                       onClick={handleReply}
                       disabled={replying || !replyText.trim()}
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
+                    
                       {replying ? 'Sending...' : 'Send Reply'}
                     </button>
-                    <button
-                      onClick={() => handleUpdateStatus(selectedMessage.id, 'read')}
+                    <button type="button"
+                      onClick={() = handleUpdateStatus(selectedMessage.id, 'read')}
                       className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500"
                     >
                       Mark as Read
                     </button>
-                    <button
-                      onClick={() => handleResolveMessage(selectedMessage.id)}
+                    <button type="button"
+                      onClick={() = handleResolveMessage(selectedMessage.id)}
                       className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                     >
                       Mark as Resolved
@@ -2680,8 +2706,8 @@ export default function AdminDashboard({ token, user, onLogout }) {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t('admin.userDetailsTitle')}</h2>
-              <button
-                onClick={() => setShowUserModal(false)}
+              <button type="button"
+                onClick={() = setShowUserModal(false)}
                 className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 ✕
@@ -2771,15 +2797,15 @@ export default function AdminDashboard({ token, user, onLogout }) {
             </div>
             
             <div className="flex flex-wrap gap-2 justify-end mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <button
-                onClick={() => { setShowUserModal(false); handleResetPassword(selectedUser.id); }}
+              <button type="button"
+                onClick={() = { setShowUserModal(false); handleResetPassword(selectedUser.id); }}
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm flex items-center gap-2"
                 disabled={resetting === selectedUser.id}
               >
                 🔑 {resetting === selectedUser.id ? 'Enviando...' : 'Enviar correo para cambio de contraseña'}
               </button>
-              <button
-                onClick={() => setShowUserModal(false)}
+              <button type="button"
+                onClick={() = setShowUserModal(false)}
                 className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
               >
                 Cerrar
@@ -2795,8 +2821,8 @@ export default function AdminDashboard({ token, user, onLogout }) {
           className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
           onClick={() => setViewingImage(null)}
         >
-          <button
-            onClick={() => setViewingImage(null)}
+          <button type="button"
+            onClick={() = setViewingImage(null)}
             className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
           >
             <X className="w-8 h-8" />
