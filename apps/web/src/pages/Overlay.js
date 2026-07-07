@@ -1,12 +1,11 @@
 /**
  * Generic public overlay for OBS/Streamlabs Browser Source.
  * Single component driven by URL: /overlay/:type?key=API_KEY
- * Types: nextstream, goal, week, quote, suggestions
- * Uses backend API URL when REACT_APP_API_URL is set so OBS (loading from frontend origin) gets data from the API server.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { devCatchLog } from '../utils/devCatchLog';
+import { useExternalPoll } from '../hooks/useExternalPoll';
 
 const OVERLAY_API_BASE = (process.env.REACT_APP_API_URL || '').replace(/\/$/, '');
 
@@ -59,6 +58,34 @@ const OVERLAY_CONFIG = {
   },
 };
 
+function fallbackFor(overlayType, endpointKey) {
+  if (endpointKey === 'sub') return '';
+  switch (overlayType) {
+    case 'nextstream': return 'No stream scheduled.';
+    case 'goal': return '—';
+    case 'week': return 'No schedule.';
+    case 'quote': return 'No quotes yet.';
+    case 'suggestions': return '—';
+    default: return '—';
+  }
+}
+
+async function fetchOverlayData(overlayType, key, config) {
+  const base = OVERLAY_API_BASE ? `${OVERLAY_API_BASE}/api/webhooks` : '/api/webhooks';
+  const entries = await Promise.all(
+    config.endpoints.map(async ({ path, key: endpointKey }) => {
+      const bust = `_=${Date.now()}`;
+      const res = await fetch(`${base}/${path}?key=${encodeURIComponent(key)}&${bust}`, {
+        cache: 'no-store',
+      });
+      const text = await res.text().then((t) => t.trim());
+      const isHtml = text.length > 10 && text.toLowerCase().startsWith('<!') && text.toLowerCase().includes('doctype');
+      return [endpointKey, !res.ok || isHtml ? fallbackFor(overlayType, endpointKey) : text];
+    })
+  );
+  return Object.fromEntries(entries);
+}
+
 function useQuery() {
   const { search } = useLocation();
   return new URLSearchParams(search);
@@ -69,76 +96,36 @@ export default function Overlay() {
   const query = useQuery();
   const key = query.get('key') || query.get('apiKey') || '';
   const config = type ? OVERLAY_CONFIG[type] : null;
+  const cacheKey = config && key ? `overlay-${type}-${key}` : null;
 
-  const [data, setData] = useState({ main: 'Loading...', sub: '' });
+  const fetcher = useMemo(() => {
+    if (!cacheKey || !config) return async () => ({ main: 'Missing ?key=API_KEY in URL', sub: '' });
+    return async () => {
+      try {
+        return await fetchOverlayData(type, key, config);
+      } catch (error) {
+        devCatchLog('Overlay.load', error);
+        return { main: 'Could not load.', sub: '' };
+      }
+    };
+  }, [cacheKey, config, key, type]);
+
+  const poll = useExternalPoll(cacheKey || 'overlay-idle', fetcher, config?.interval ?? 0);
+  const data = poll.status === 'ready' && poll.data
+    ? poll.data
+    : { main: !config ? (key ? 'Unknown overlay type.' : 'Missing ?key=API_KEY in URL') : 'Loading...', sub: '' };
+
+  const isPop = config?.layout === 'pop';
   const [visible, setVisible] = useState(type !== 'suggestions');
   const lastMainRef = useRef('');
 
   useEffect(() => {
-    if (!config || !key) {
-      setData({ main: key ? 'Unknown overlay type.' : 'Missing ?key=API_KEY in URL', sub: '' });
-      if (type === 'suggestions') setVisible(true);
-      return;
-    }
-
-    lastMainRef.current = '';
-
-    let cancelled = false;
-    let popTimeoutId = null;
-    const { endpoints, interval, layout, popDuration } = config;
-
-    function fallbackFor(type, key) {
-      if (key === 'sub') return '';
-      switch (type) {
-        case 'nextstream': return 'No stream scheduled.';
-        case 'goal': return '—';
-        case 'week': return 'No schedule.';
-        case 'quote': return 'No quotes yet.';
-        case 'suggestions': return '—';
-        default: return '—';
-      }
-    }
-
-    async function load() {
-      try {
-        const base = OVERLAY_API_BASE ? `${OVERLAY_API_BASE}/api/webhooks` : '/api/webhooks';
-        const results = {};
-        for (const { path, key: k } of endpoints) {
-          const bust = `_=${Date.now()}`;
-          const res = await fetch(`${base}/${path}?key=${encodeURIComponent(key)}&${bust}`, {
-            cache: 'no-store',
-          });
-          const text = await res.text().then((t) => t.trim());
-          const isHtml = text.length > 10 && text.toLowerCase().startsWith('<!') && text.toLowerCase().includes('doctype');
-          if (!res.ok || isHtml) {
-            results[k] = fallbackFor(type, k);
-          } else {
-            results[k] = text;
-          }
-        }
-        if (cancelled) return;
-        setData(results);
-        if (layout === 'pop' && results.main && results.main !== lastMainRef.current) {
-          lastMainRef.current = results.main;
-          setVisible(true);
-          popTimeoutId = setTimeout(() => {
-            if (!cancelled) setVisible(false);
-          }, popDuration);
-        }
-      } catch (e) {
-        devCatchLog('Overlay.load', e);
-        if (!cancelled) setData({ main: 'Could not load.', sub: '' });
-      }
-    }
-
-    load();
-    const id = setInterval(load, interval);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-      if (popTimeoutId) clearTimeout(popTimeoutId);
-    };
-  }, [key, type, config]);
+    if (!isPop || !data.main || data.main === lastMainRef.current) return undefined;
+    lastMainRef.current = data.main;
+    setVisible(true);
+    const id = setTimeout(() => setVisible(false), config.popDuration);
+    return () => clearTimeout(id);
+  }, [isPop, data.main, config?.popDuration]);
 
   if (!config) {
     return (
@@ -151,9 +138,8 @@ export default function Overlay() {
   }
 
   const { title, gradient, border, layout, multiline, transparentCard } = config;
-  const isPop = layout === 'pop';
 
-  if (isPop) {
+  if (layout === 'pop') {
     return (
       <div style={{ backgroundColor: 'transparent' }} className="w-full h-full pointer-events-none">
         <div
@@ -176,15 +162,9 @@ export default function Overlay() {
 
   const mainText = data.main || (type === 'nextstream' ? 'No stream scheduled.' : '—');
   const [headline, ...restLines] = multiline ? mainText.split('\n') : [mainText];
-
   const textShadowOverlay = '0 0 12px rgba(0,0,0,0.95), 0 2px 4px rgba(0,0,0,0.9)';
   const cardStyle = transparentCard
-    ? {
-        background: 'transparent',
-        border: 'none',
-        boxShadow: 'none',
-        color: '#fff',
-      }
+    ? { background: 'transparent', border: 'none', boxShadow: 'none', color: '#fff' }
     : { background: gradient, border };
 
   return (

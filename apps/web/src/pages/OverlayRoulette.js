@@ -55,16 +55,38 @@ function drawWheel(ctx, players, rotationDeg = 0) {
 export default function OverlayRoulette() {
   const [searchParams] = useSearchParams();
   const key = searchParams.get('key') || searchParams.get('apiKey') || '';
-  const [players, setPlayers] = useState([]);
+  const playersRef = useRef([]);
   const [winner, setWinner] = useState(null);
-  const [rotation, setRotation] = useState(0);
+  const rotationRef = useRef(0);
   const [spinning, setSpinning] = useState(false);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState('');
   const canvasRef = useRef(null);
   const socketRef = useRef(null);
-  const rotationRef = useRef(0);
-  rotationRef.current = rotation;
+
+  const redrawWheel = React.useCallback((connectedState = connected) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const players = playersRef.current;
+    const rotation = rotationRef.current;
+    ctx.clearRect(0, 0, WHEEL_SIZE, WHEEL_SIZE);
+    if (players.length > 0) {
+      drawWheel(ctx, players, rotation);
+    } else {
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      ctx.beginPath();
+      ctx.arc(CENTER, CENTER, RADIUS, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 18px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(connectedState ? 'No players yet — use !join in chat' : 'Connecting…', CENTER, CENTER + 6);
+    }
+  }, [connected]);
 
   useEffect(() => {
     if (!key) {
@@ -81,20 +103,26 @@ export default function OverlayRoulette() {
     socket.on('connect', () => {
       setConnected(true);
       setError('');
+      redrawWheel(true);
     });
-    socket.on('disconnect', () => setConnected(false));
+    socket.on('disconnect', () => {
+      setConnected(false);
+      redrawWheel(false);
+    });
     socket.on('connect_error', () => {
       setConnected(false);
       setError('Could not connect. Check API key and backend URL.');
+      redrawWheel(false);
     });
     socket.on('roulette_players', (data) => {
-      setPlayers(data.players || []);
+      playersRef.current = data.players || [];
       setWinner(null);
+      redrawWheel();
     });
     socket.on('roulette_spin', (data) => {
       const list = data.players || [];
       const win = data.winner || '';
-      setPlayers(list);
+      playersRef.current = list;
       setWinner(win);
       setSpinning(true);
 
@@ -110,8 +138,8 @@ export default function OverlayRoulette() {
         const elapsed = Date.now() - startTime;
         const t = Math.min(elapsed / duration, 1);
         const ease = 1 - Math.pow(1 - t, 3);
-        const current = startRotation + ease * (targetRotation - startRotation);
-        setRotation(current);
+        rotationRef.current = startRotation + ease * (targetRotation - startRotation);
+        redrawWheel();
         if (t < 1) requestAnimationFrame(animate);
         else setSpinning(false);
       };
@@ -122,29 +150,11 @@ export default function OverlayRoulette() {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [key]);
+  }, [key, redrawWheel]);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, WHEEL_SIZE, WHEEL_SIZE);
-    if (players.length > 0) {
-      drawWheel(ctx, players, rotation);
-    } else {
-      ctx.fillStyle = 'rgba(0,0,0,0.4)';
-      ctx.beginPath();
-      ctx.arc(CENTER, CENTER, RADIUS, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 18px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(connected ? 'No players yet — use !join in chat' : 'Connecting…', CENTER, CENTER + 6);
-    }
-  }, [players, rotation, connected]);
+    redrawWheel();
+  }, [redrawWheel]);
 
   if (!key) {
     return (
@@ -160,18 +170,8 @@ export default function OverlayRoulette() {
     <div style={{ background: 'transparent' }} className="w-full min-h-screen flex flex-col items-center justify-center overflow-hidden">
       {/* Pointer at top */}
       <div
-        className="absolute z-10"
-        style={{
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, calc(-50% - ' + (RADIUS + 20) + 'px))',
-          width: 0,
-          height: 0,
-          borderLeft: '14px solid transparent',
-          borderRight: '14px solid transparent',
-          borderBottom: '28px solid #e53935',
-          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))',
-        }}
+        className="absolute z-10 w-0 h-0 border-l-[14px] border-r-[14px] border-b-[28px] border-l-transparent border-r-transparent border-b-[#e53935] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
+        style={{ top: '50%', left: '50%', transform: `translate(-50%, calc(-50% - ${RADIUS + 20}px))` }}
       />
 
       <canvas

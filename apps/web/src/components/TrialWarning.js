@@ -57,11 +57,11 @@ export default function TrialWarning({ user, onDismiss }) {
             <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
               {t('trialWarning.title') || 'Tu periodo de prueba esta por expirar'}
             </h3>
-            <button
+            <button type="button"
               onClick={handleDismiss}
               className="ml-4 flex-shrink-0 text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-200"
               aria-label={t('common.close') || 'Cerrar'}
-            >
+            
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -74,10 +74,10 @@ export default function TrialWarning({ user, onDismiss }) {
             </p>
           </div>
           <div className="mt-4">
-            <button
+            <button type="button"
               onClick={handleUpgrade}
               className="inline-flex items-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-md transition-colors"
-            >
+            
               <CreditCard className="h-4 w-4 mr-2" />
               {t('trialWarning.upgradeButton') || 'Actualizar Plan'}
             </button>

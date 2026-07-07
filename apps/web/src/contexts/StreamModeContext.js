@@ -1,7 +1,7 @@
 /**
  * Stream mode: when ON, hides sensitive data (username, API keys, etc.) so nothing is shared when streaming.
  */
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { devCatchLog } from '../utils/devCatchLog';
 
 const STORAGE_KEY = 'streamer_scheduler_stream_mode';
@@ -26,10 +26,15 @@ export function StreamModeProvider({ children }) {
     }
   }, [streamMode]);
 
-  const toggleStreamMode = () => setStreamMode((prev) => !prev);
+  const toggleStreamMode = useCallback(() => setStreamMode((prev) => !prev), []);
+
+  const value = useMemo(
+    () => ({ streamMode, setStreamMode, toggleStreamMode }),
+    [streamMode, toggleStreamMode]
+  );
 
   return (
-    <StreamModeContext.Provider value={{ streamMode, setStreamMode, toggleStreamMode }}>
+    <StreamModeContext.Provider value={value}>
       {children}
     </StreamModeContext.Provider>
   );

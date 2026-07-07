@@ -3,23 +3,34 @@ import { MessageSquare, Bell, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getMyMessages, getNotifications, getNotificationsUnreadCount, markNotificationRead } from '../features/messaging/api';
 import { devCatchLog } from '../utils/devCatchLog';
+function formatDropdownDate(d) {
+  if (!d) return '';
+  const date = new Date(d);
+  const now = new Date();
+  const sameDay = date.toDateString() === now.toDateString();
+  return sameDay ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : date.toLocaleDateString();
+}
+
 /**
  * Dropdown next to logout: Respuestas (admin replies to user messages) + Notificaciones (admin announcements).
  * Shown only for non-admin users.
  */
 export default function MessagesAndNotificationsDropdown({ token }) {
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [notifications, setNotifications] = useState([]);
-  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [panel, setPanel] = useState({
+    loading: false,
+    messages: [],
+    notifications: [],
+    unreadNotifCount: 0,
+  });
+  const { messages, notifications, unreadNotifCount, loading } = panel;
   const dropdownRef = useRef(null);
 
   const withReplies = (messages || []).filter(m => m.replies && m.replies.length > 0);
 
-  useEffect(() => {
-    if (!open || !token) return;
-    setLoading(true);
+  const loadPanel = () => {
+    if (!token) return;
+    setPanel({ loading: true, messages: [], notifications: [], unreadNotifCount: 0 });
     Promise.all([
       getMyMessages(token)
         .then((r) => r.data.messages || [])
@@ -40,11 +51,17 @@ export default function MessagesAndNotificationsDropdown({ token }) {
           return 0;
         }),
     ]).then(([msgs, notifs, count]) => {
-      setMessages(msgs);
-      setNotifications(notifs);
-      setUnreadNotifCount(count);
-    }).finally(() => setLoading(false));
-  }, [open, token]);
+      setPanel({ loading: false, messages: msgs, notifications: notifs, unreadNotifCount: count });
+    }).catch(() => {
+      setPanel((prev) => ({ ...prev, loading: false }));
+    });
+  };
+
+  const toggleOpen = () => {
+    const next = !open;
+    setOpen(next);
+    if (next) loadPanel();
+  };
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -57,13 +74,6 @@ export default function MessagesAndNotificationsDropdown({ token }) {
   }, [open]);
 
   const totalBadge = (withReplies.length) + unreadNotifCount;
-  const formatDate = (d) => {
-    if (!d) return '';
-    const date = new Date(d);
-    const now = new Date();
-    const sameDay = date.toDateString() === now.toDateString();
-    return sameDay ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : date.toLocaleDateString();
-  };
 
   const handleMarkNotifRead = async (e, id) => {
     e.preventDefault();
@@ -71,8 +81,11 @@ export default function MessagesAndNotificationsDropdown({ token }) {
     if (!token) return;
     try {
       await markNotificationRead(id, token);
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-      setUnreadNotifCount(prev => Math.max(0, prev - 1));
+      setPanel((prev) => ({
+        ...prev,
+        notifications: prev.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
+        unreadNotifCount: Math.max(0, prev.unreadNotifCount - 1),
+      }));
     } catch (e) {
       devCatchLog('MessagesDropdown.markNotificationRead', e);
     }
@@ -82,7 +95,7 @@ export default function MessagesAndNotificationsDropdown({ token }) {
     <div className="relative flex-shrink-0" ref={dropdownRef}>
       <button
         type="button"
-        onClick={() => setOpen(!open)}
+        onClick={toggleOpen}
         className="relative p-2 sm:px-3 sm:py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800"
         title="Mensajes y notificaciones"
         aria-label="Mensajes y notificaciones"
@@ -122,7 +135,7 @@ export default function MessagesAndNotificationsDropdown({ token }) {
                             className="block px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm text-gray-900 dark:text-gray-100"
                           >
                             <span className="font-medium truncate block">{msg.subject}</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">{formatDate(msg.repliedAt || msg.updatedAt)}</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">{formatDropdownDate(msg.repliedAt || msg.updatedAt)}</span>
                           </Link>
                         </li>
                       ))}
@@ -155,7 +168,7 @@ export default function MessagesAndNotificationsDropdown({ token }) {
                           >
                             <span className="font-medium text-gray-900 dark:text-gray-100 truncate block">{n.title}</span>
                             <span className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{n.content}</span>
-                            <span className="text-xs text-gray-400 dark:text-gray-500">{formatDate(n.createdAt)}</span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500">{formatDropdownDate(n.createdAt)}</span>
                           </Link>
                         </li>
                       ))}

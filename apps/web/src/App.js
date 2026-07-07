@@ -192,7 +192,7 @@ function Sidebar({ user, open, onClose, adminUnreadMessageCount = 0, adminFinanc
       <div className={`fixed inset-y-0 left-0 z-40 md:static md:inset-auto md:translate-x-0 transition-transform duration-200 ease-out ${open ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 bg-white dark:bg-gray-800 md:bg-transparent shadow-xl md:shadow-none w-64 max-w-[85vw] md:w-56 h-full md:h-auto flex flex-col safe-area-inset-left`}>
         <div className="flex items-center justify-between px-4 py-4 md:hidden border-b border-gray-200 dark:border-gray-700">
           <span className="font-bold text-accent">{t('common.menu')}</span>
-          <button onClick={onClose} className="p-2 -mr-2" aria-label={t('common.closeMenu')}><X className="w-6 h-6" /></button>
+          <button type="button" onClick={onClose} className="p-2 -mr-2" aria-label={t('common.closeMenu')}<X className="w-6 h-6" /></button>
         </div>
         <nav className="flex-1 px-4 py-2 space-y-2 overflow-y-auto">
         <Link to={user?.isAdmin ? "/admin" : "/dashboard"} className={getLinkClasses(user?.isAdmin ? "/admin" : "/dashboard")}>{t('dashboard.title')}</Link>
@@ -264,12 +264,14 @@ function parseMerchandisingPosition(pos) {
 function DraggableMerchandisingButton({ link, position, token, setUser, user, t }) {
   const parsed = parseMerchandisingPosition(position);
   const [pos, setPos] = React.useState(parsed);
+  const [prevPosition, setPrevPosition] = React.useState(position);
   const dragStartRef = React.useRef(null);
   const hasMovedRef = React.useRef(false);
 
-  React.useEffect(() => {
-    setPos(parseMerchandisingPosition(position));
-  }, [position]);
+  if (position !== prevPosition) {
+    setPrevPosition(position);
+    setPos(parsed);
+  }
 
   const savePosition = React.useCallback(async (x, y) => {
     if (!token || !setUser || !user) return;

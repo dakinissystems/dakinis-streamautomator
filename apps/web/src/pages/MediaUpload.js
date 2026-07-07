@@ -1,47 +1,25 @@
-/**
- * Media Upload Page
- * Page for uploading and managing media files
- * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
- */
-
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useCallback } from 'react';
+import { Image, Video, Upload, BarChart3 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import FileUpload from '../components/FileUpload';
 import MediaGallery from '../components/MediaGallery';
 import { getUploadStats } from '../utils/uploadHelper';
-import { Image, Video, Upload, BarChart3 } from 'lucide-react';
+import { useUploadStats } from '../hooks/useUploadStats';
 import { devCatchLog } from '../utils/devCatchLog';
 
 export default function MediaUpload({ user, token }) {
   const { t } = useLanguage();
-  const [uploadStats, setUploadStats] = useState(null);
-
-  // Load upload stats
-  useEffect(() => {
-    const loadStats = async () => {
-      if (user?.id) {
-        try {
-          const stats = await getUploadStats(user.id.toString());
-          setUploadStats(stats);
-        } catch (error) {
-          devCatchLog('MediaUpload.loadStats', error);
-        }
-      }
-    };
-    loadStats();
-  }, [user]);
+  const [statsVersion, setStatsVersion] = useState(0);
+  const uploadStats = useUploadStats(user?.id, statsVersion);
 
   const reloadStats = useCallback(() => {
-    if (user?.id) {
-      getUploadStats(user.id.toString())
-        .then(setUploadStats)
-        .catch((e) => {
-          devCatchLog('MediaUpload.reloadStats', e);
-        });
-    }
+    if (!user?.id) return;
+    getUploadStats(user.id.toString())
+      .then(() => setStatsVersion((v) => v + 1))
+      .catch((e) => devCatchLog('MediaUpload.reloadStats', e));
   }, [user?.id]);
 
-  const handleUploadComplete = useCallback((url, bucket) => {
+  const handleUploadComplete = useCallback(() => {
     reloadStats();
   }, [reloadStats]);
 
@@ -49,16 +27,19 @@ export default function MediaUpload({ user, token }) {
     reloadStats();
   }, [reloadStats]);
 
-  // Memoized stats calculations
-  const statsCalculations = useMemo(() => {
+  void token;
+
+  const statsCalculations = (() => {
     if (!uploadStats?.uploads) {
       return { imageCount: 0, videoCount: 0 };
     }
     return {
-      imageCount: uploadStats.uploads.filter(u => u.bucket === 'images').length,
-      videoCount: uploadStats.uploads.filter(u => u.bucket === 'videos').length
+      imageCount: uploadStats.uploads.filter((u) => u.bucket === 'images').length,
+      videoCount: uploadStats.uploads.filter((u) => u.bucket === 'videos').length,
     };
-  }, [uploadStats]);
+  })();
+
+  void statsVersion;
 
   return (
     <div className="max-w-4xl mx-auto px-3 sm:p-6 py-4 min-w-0">
@@ -71,7 +52,6 @@ export default function MediaUpload({ user, token }) {
         </p>
       </div>
 
-      {/* Upload Stats */}
       {uploadStats && (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
           <div className="flex items-center space-x-2 mb-4">
@@ -80,7 +60,7 @@ export default function MediaUpload({ user, token }) {
               {t('media.uploadStats')}
             </h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
               <div className="flex items-center space-x-2 mb-2">
@@ -137,24 +117,21 @@ export default function MediaUpload({ user, token }) {
         </div>
       )}
 
-      {/* File Upload Component */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <FileUpload user={user} onUploadComplete={handleUploadComplete} />
+        <FileUpload user={user} uploadStats={uploadStats} onUploadComplete={handleUploadComplete} />
       </div>
 
-      {/* Media Gallery - Show uploaded files */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
           {t('media.uploadedFiles')}
         </h2>
-        <MediaGallery 
+        <MediaGallery
           user={user}
           showDeleteButton={true}
           onDelete={handleFileDelete}
         />
       </div>
 
-      {/* Instructions */}
       <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
         <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">
           {t('media.instructions')}

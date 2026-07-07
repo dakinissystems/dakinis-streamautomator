@@ -26,19 +26,7 @@ export default function DevSentryErrorButton() {
       onClick={() => {
         throw new Error('This is your first error!');
       }}
-      style={{
-        position: 'fixed',
-        bottom: 12,
-        right: 12,
-        zIndex: 99999,
-        padding: '8px 12px',
-        fontSize: 12,
-        background: '#c0392b',
-        color: '#fff',
-        border: 'none',
-        borderRadius: 6,
-        cursor: 'pointer',
-      }}
+      className="fixed bottom-3 right-3 z-[99999] px-3 py-2 text-xs bg-[#c0392b] text-white border-0 rounded-md cursor-pointer"
       title="Sentry verify"
     >
       Break the world

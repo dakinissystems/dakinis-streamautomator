@@ -238,15 +238,22 @@ export default function Settings({ user, token, setUser, setAuth }) {
 
   const customColorConfigRef = React.useRef(customColorConfig);
   customColorConfigRef.current = customColorConfig;
+  const accentColorSyncRef = React.useRef(false);
 
   useEffect(() => {
     const prev = customColorConfigRef.current;
     const next = { ...prev, assignments: { ...(prev.assignments || {}), accent: themeSettings.accentColor } };
+    accentColorSyncRef.current = true;
     setCustomColorConfigState(next);
     setCustomColorConfig(next);
+    applyCustomColors(next);
   }, [themeSettings.accentColor]);
 
   useEffect(() => {
+    if (accentColorSyncRef.current) {
+      accentColorSyncRef.current = false;
+      return;
+    }
     applyCustomColors(customColorConfig);
   }, [customColorConfig]);
 
@@ -259,7 +266,7 @@ export default function Settings({ user, token, setUser, setAuth }) {
     }
     fetchAvailableLicenses();
     fetchPaymentConfig();
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: run on token change only
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps -- intentional: run on token change only
   }, [token]);
 
   useEffect(() => {
@@ -267,7 +274,7 @@ export default function Settings({ user, token, setUser, setAuth }) {
     if (requestedTab && getTabsConfig(t).some((tab) => tab.id === requestedTab)) {
       setActiveTab(requestedTab);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- query param driven
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps -- query param driven
   }, [searchParams]);
 
   useEffect(() => {
@@ -328,18 +335,24 @@ export default function Settings({ user, token, setUser, setAuth }) {
       toast.error(msg);
       setSearchParams({}, { replace: true });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- searchParams and t are the triggers
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps -- searchParams and t are the triggers
   }, [searchParams, t]);
 
+  const shouldAutoconnectAkoenet = searchParams.get('autoconnect') === 'akoenet' && token;
+  const [autoconnectTabSync, setAutoconnectTabSync] = useState(false);
+
+  if (shouldAutoconnectAkoenet && !autoconnectTabSync) {
+    setAutoconnectTabSync(true);
+    setActiveTab('platforms');
+  }
+
   useEffect(() => {
-    const shouldAutoconnect = searchParams.get('autoconnect') === 'akoenet';
-    if (!shouldAutoconnect || !token) return;
+    if (!shouldAutoconnectAkoenet) return;
     if (hasTriggeredAkoenetAutoconnect.current) return;
     hasTriggeredAkoenetAutoconnect.current = true;
-    setActiveTab('platforms');
     handleAkoenetAutoConnect();
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- trigger only on query+auth availability
-  }, [searchParams, token]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps, react-doctor/exhaustive-deps -- trigger only on query+auth availability
+  }, [shouldAutoconnectAkoenet]);
 
   const fetchConnectedAccounts = async () => {
     if (!token) return;
@@ -780,7 +793,7 @@ export default function Settings({ user, token, setUser, setAuth }) {
       }
     };
     if (token) checkPaymentStatus();
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- run on token/url change
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps -- run on token/url change
   }, [token, t]);
 
   const handleProfilePhotoSelect = async (e) => {
@@ -1003,9 +1016,9 @@ export default function Settings({ user, token, setUser, setAuth }) {
                 {tabs.map((tab) => {
                   const Icon = tab.Icon;
                   return (
-                    <button
+                    <button type="button"
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
+                      onClick={() = setActiveTab(tab.id)}
                       className={`flex-shrink-0 lg:w-full flex items-center gap-2 lg:space-x-3 px-3 py-2.5 lg:px-4 lg:py-3 text-left rounded-lg transition-colors whitespace-nowrap ${
                         activeTab === tab.id
                           ? 'bg-color-sidebar/10 text-gray-900 dark:bg-color-sidebar/20 dark:text-color-sidebar lg:border-r-2 lg:border-color-sidebar'
@@ -1024,11 +1037,11 @@ export default function Settings({ user, token, setUser, setAuth }) {
               {renderTabContent()}
               {['profile', 'notifications', 'publicPage'].includes(activeTab) && (
                 <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-                  <button
+                  <button type="button"
                     onClick={activeTab === 'profile' ? handleProfileSave : activeTab === 'publicPage' ? handlePublicPageSave : handleNotificationSave}
                     disabled={loading}
                     className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center sm:justify-start gap-2 min-h-[44px]"
-                  >
+                  
                     <Save className="w-4 h-4 flex-shrink-0" />
                     <span>{loading ? t('settings.saving') : t('settings.saveChanges')}</span>
                   </button>

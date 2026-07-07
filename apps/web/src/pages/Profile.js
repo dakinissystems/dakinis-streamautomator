@@ -153,8 +153,8 @@ const Profile = ({ user, token }) => {
                   {user?.username?.charAt(0).toUpperCase()}
                 </div>
               )}
-              <button
-                onClick={() => navigate('/settings')}
+              <button type="button"
+                onClick={() = navigate('/settings')}
                 className="absolute bottom-0 right-0 bg-white dark:bg-gray-700 p-2 rounded-full shadow-lg hover:shadow-xl transition-shadow border border-gray-200 dark:border-gray-600"
                 title={t('profile.changeProfilePhoto')}
               >
@@ -179,8 +179,8 @@ const Profile = ({ user, token }) => {
                     </span>
                   </div>
                 </div>
-                <button
-                  onClick={() => navigate('/settings')}
+                <button type="button"
+                  onClick={() = navigate('/settings')}
                   className="mt-4 md:mt-0 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 mx-auto md:mx-0"
                 >
                   <Settings className="w-4 h-4" />
@@ -349,8 +349,8 @@ const Profile = ({ user, token }) => {
             
             <div className="space-y-4">
               {recentActivity.length > 0 ? (
-                recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                recentActivity.map((activity) => (
+                  <div key={`${activity.type}-${activity.timestamp}`} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
                     {getActivityIcon(activity.type)}
                     <div className="flex-1">
                       <p className="text-sm font-medium text-gray-900">{activity.description}</p>

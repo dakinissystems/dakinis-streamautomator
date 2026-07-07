@@ -119,8 +119,8 @@ export default function TwitchBitsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.map((row, idx) => (
-                      <tr key={`${row.user_id || row.user_login || 'u'}-${idx}`} className="border-t border-gray-200 dark:border-gray-700">
+                    {rows.map((row) => (
+                      <tr key={`${row.user_id || row.user_login || 'u'}-${row.date}-${row.amount}`} className="border-t border-gray-200 dark:border-gray-700">
                         <td className="py-2 pr-3 text-gray-900 dark:text-gray-100">{row.user_name || row.user_login || 'N/A'}</td>
                         <td className="py-2 pr-3 text-gray-900 dark:text-gray-100">{Number(row.amount || 0)}</td>
                         <td className="py-2 text-gray-600 dark:text-gray-300">{row.date ? new Date(row.date).toLocaleString() : '-'}</td>

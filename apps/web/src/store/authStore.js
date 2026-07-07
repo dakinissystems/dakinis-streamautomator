@@ -5,7 +5,7 @@
  */
 
 import { createContext, useContext, useState, useEffect } from 'react';
-import { isTokenExpired, getStoredAuth, clearAuth as clearStoredAuth } from '../utils/auth';
+import { isTokenExpired, getStoredAuth, clearAuth as clearStoredAuth, persistAuthUser, persistAuthToken } from '../utils/auth';
 
 const AuthContext = createContext(null);
 
@@ -27,21 +27,12 @@ export function AuthProvider({ children }) {
     return storedToken;
   });
 
-  // Sync to localStorage
   useEffect(() => {
-    if (user) {
-      localStorage.setItem('auth_user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('auth_user');
-    }
+    persistAuthUser(user);
   }, [user]);
 
   useEffect(() => {
-    if (token) {
-      localStorage.setItem('auth_token', token);
-    } else {
-      localStorage.removeItem('auth_token');
-    }
+    persistAuthToken(token);
   }, [token]);
 
   const setAuth = (newUser, newToken) => {

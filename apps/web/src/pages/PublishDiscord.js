@@ -24,16 +24,24 @@ export default function PublishDiscord({ user }) {
 
   useEffect(() => {
     loadGuilds();
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps -- mount-only guild bootstrap
   }, []);
 
-  useEffect(() => {
-    if (!selectedGuildId) {
-      setChannels([]);
-      setSelectedChannelId('');
-      return;
+  const handleGuildSelect = async (guildId) => {
+    setSelectedGuildId(guildId);
+    setSelectedChannelId('');
+    setChannels([]);
+    if (!guildId) return;
+    setLoadingChannels(true);
+    try {
+      const data = await getDiscordChannels(guildId);
+      setChannels(data.channels || []);
+    } catch (err) {
+      toast.error(err.response?.data?.details || err.response?.data?.error || t('discord.errorLoadingChannels'));
+    } finally {
+      setLoadingChannels(false);
     }
-    loadChannels(selectedGuildId);
-  }, [selectedGuildId]);
+  };
 
   const loadGuilds = async () => {
     setLoadingGuilds(true);
@@ -65,17 +73,7 @@ export default function PublishDiscord({ user }) {
   };
 
   const loadChannels = async (guildId) => {
-    setLoadingChannels(true);
-    setChannels([]);
-    setSelectedChannelId('');
-    try {
-      const data = await getDiscordChannels(guildId);
-      setChannels(data.channels || []);
-    } catch (err) {
-      toast.error(err.response?.data?.details || err.response?.data?.error || t('discord.errorLoadingChannels'));
-    } finally {
-      setLoadingChannels(false);
-    }
+    await handleGuildSelect(guildId);
   };
 
   const handleSend = async (e) => {
@@ -117,6 +115,13 @@ export default function PublishDiscord({ user }) {
           <div className="flex flex-col sm:flex-row gap-3">
             <a
               href={`${API_BASE_URL}/user/auth/discord?returnTo=discord`}
+              onClick={() => {
+                try {
+                  sessionStorage.setItem('oauthReturnTo', 'discord');
+                } catch {
+                  /* ignore */
+                }
+              }}
               className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#5865F2] text-white rounded-lg hover:bg-[#4752C4] transition"
             >
               <MessageCircle className="w-5 h-5" />
@@ -180,7 +185,7 @@ export default function PublishDiscord({ user }) {
           </label>
           <select
             value={selectedGuildId}
-            onChange={(e) => setSelectedGuildId(e.target.value)}
+            onChange={(e) => { handleGuildSelect(e.target.value); }}
             disabled={loadingGuilds}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-[#5865F2] focus:border-transparent disabled:opacity-50"
           >
@@ -210,10 +215,11 @@ export default function PublishDiscord({ user }) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label htmlFor="discord-message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             {t('discord.message')}
           </label>
           <textarea
+            id="discord-message"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder={t('discord.messagePlaceholder')}

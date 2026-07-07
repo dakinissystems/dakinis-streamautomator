@@ -31,7 +31,7 @@ export default function MediaGallery({ user, onSelect, selectedUrls = [], showDe
 
   useEffect(() => {
     loadMediaFiles();
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- loadMediaFiles stable, user.id is the trigger
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps -- loadMediaFiles stable, user.id is the trigger
   }, [user?.id]);
 
   const loadMediaFiles = async () => {
@@ -194,10 +194,10 @@ export default function MediaGallery({ user, onSelect, selectedUrls = [], showDe
     return (
       <div className="text-center py-8">
         <p className="text-red-600">{error}</p>
-        <button
+        <button type="button"
           onClick={loadMediaFiles}
           className="mt-2 text-sm text-blue-600 hover:underline"
-        >
+        
           {t('media.retry')}
         </button>
       </div>
@@ -218,10 +218,10 @@ export default function MediaGallery({ user, onSelect, selectedUrls = [], showDe
         <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
           {t('media.availableFiles')} ({mediaFiles.length})
         </h3>
-        <button
+        <button type="button"
           onClick={loadMediaFiles}
           className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
-        >
+        
           {t('media.refresh')}
         </button>
       </div>
@@ -304,8 +304,8 @@ export default function MediaGallery({ user, onSelect, selectedUrls = [], showDe
 
             {/* Delete button */}
             {showDeleteButton && (
-              <button
-                onClick={(e) => handleDelete(e, file)}
+              <button type="button"
+                onClick={(e) = handleDelete(e, file)}
                 disabled={deletingId === file.id}
                 className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
                 title={t('media.deleteFile')}

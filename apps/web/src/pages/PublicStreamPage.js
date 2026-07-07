@@ -3,7 +3,7 @@
  * Shows upcoming streams, countdown, LIVE on Twitch, Notify me (email reminder). No auth.
  * Calendar style aligned with landing page (grid, event cards).
  */
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, Radio, ExternalLink, Bell, Youtube, Instagram } from 'lucide-react';
 import { Twitch } from 'lucide-react';
@@ -33,6 +33,15 @@ function isLiveNow(scheduledFor, eventEndTime) {
   const start = new Date(scheduledFor);
   const end = eventEndTime ? new Date(eventEndTime) : new Date(start.getTime() + 3 * 60 * 60 * 1000);
   return now >= start && now <= end;
+}
+
+function PublicStreamBanner({ bannerUrl, position, at }) {
+  if (!bannerUrl || position !== at || position === 'background') return null;
+  return (
+    <div className="w-full rounded-xl overflow-hidden mb-6 -mx-4 sm:mx-0 shadow-md">
+      <img src={bannerUrl} alt="" className="w-full h-24 sm:h-32 object-cover object-center" onError={(e) => { e.target.style.display = 'none'; }} />
+    </div>
+  );
 }
 
 /** Next 7 days for calendar columns: { label, dateKey } */
@@ -185,11 +194,22 @@ export default function PublicStreamPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [countdown, setCountdown] = useState(null);
-  const [remindOpen, setRemindOpen] = useState(false);
   const [remindEmail, setRemindEmail] = useState('');
   const [remindSubmitting, setRemindSubmitting] = useState(false);
   const [remindDone, setRemindDone] = useState(false);
   const [remindError, setRemindError] = useState(null);
+  const remindDialogRef = useRef(null);
+
+  const openRemindDialog = () => {
+    setRemindDone(false);
+    setRemindError(null);
+    remindDialogRef.current?.showModal();
+  };
+
+  const closeRemindDialog = () => {
+    if (remindSubmitting) return;
+    if (remindDialogRef.current?.open) remindDialogRef.current.close();
+  };
 
   useEffect(() => {
     if (!username) {
@@ -280,15 +300,6 @@ export default function PublicStreamPage() {
 
   const bannerUrl = data.publicPageBannerUrl || null;
   const bannerPosition = data.publicPageBannerPosition || 'top';
-  const renderBanner = (at) => {
-    if (!bannerUrl || bannerPosition !== at) return null;
-    if (bannerPosition === 'background') return null;
-    return (
-      <div className="w-full rounded-xl overflow-hidden mb-6 -mx-4 sm:mx-0 shadow-md">
-        <img src={bannerUrl} alt="" className="w-full h-24 sm:h-32 object-cover object-center" onError={(e) => { e.target.style.display = 'none'; }} />
-      </div>
-    );
-  };
 
   return (
     <div className={`min-h-screen bg-gradient-accent dark:bg-gray-900 ${bannerUrl && bannerPosition === 'background' ? 'relative' : ''}`} role="document">
@@ -302,7 +313,7 @@ export default function PublicStreamPage() {
         </div>
       )}
       <main id="main-content" className={`max-w-xl mx-auto px-4 py-8 sm:py-12 ${bannerUrl && bannerPosition === 'background' ? 'relative z-10' : ''}`} aria-label={t('publicStream.schedulePageLabel') || `${data.username} stream schedule`}>
-        {renderBanner('top')}
+        <PublicStreamBanner bannerUrl={bannerUrl} position={bannerPosition} at="top" />
         <div className="flex items-center gap-4 mb-8" role="presentation">
           {data.profileImageUrl ? (
             <img src={data.profileImageUrl} alt="" className="w-16 h-16 rounded-full object-cover ring-2 ring-[var(--accent)]/30" aria-hidden />
@@ -338,7 +349,7 @@ export default function PublicStreamPage() {
             </div>
           </section>
         )}
-        {renderBanner('above-avatar')}
+        <PublicStreamBanner bannerUrl={bannerUrl} position={bannerPosition} at="above-avatar" />
 
         {(showLiveTwitch || showLiveSchedule) && (
           <div className="mb-6 p-4 rounded-xl border border-red-500/30 flex flex-wrap items-center gap-3 bg-gradient-to-r from-red-500/15 via-red-500/10 to-rose-500/15 dark:from-red-500/20 dark:via-red-500/15 dark:to-rose-500/20">
@@ -373,8 +384,8 @@ export default function PublicStreamPage() {
             </p>
           </div>
         )}
-        {renderBanner('above-schedule')}
-        {bannerPosition === 'center' && renderBanner('center')}
+        <PublicStreamBanner bannerUrl={bannerUrl} position={bannerPosition} at="above-schedule" />
+        {bannerPosition === 'center' && <PublicStreamBanner bannerUrl={bannerUrl} position={bannerPosition} at="center" />}
 
         <section className="mb-8" aria-labelledby="schedule-heading">
           <h2 id="schedule-heading" className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
@@ -391,52 +402,53 @@ export default function PublicStreamPage() {
         <div className="mb-6">
           <button
             type="button"
-            onClick={() => { setRemindOpen(true); setRemindDone(false); setRemindError(null); }}
+            onClick={openRemindDialog}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:ring-offset-2 dark:focus:ring-offset-gray-900"
           >
             <Bell className="w-4 h-4" />
             {t('publicStream.notifyMe') || 'Notify me'}
           </button>
         </div>
-        {renderBanner('bottom')}
+        <PublicStreamBanner bannerUrl={bannerUrl} position={bannerPosition} at="bottom" />
 
-        {remindOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => !remindSubmitting && setRemindOpen(false)}>
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-sm w-full p-6" onClick={(e) => e.stopPropagation()}>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('publicStream.remindTitle') || 'Get a reminder'}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t('publicStream.remindDescription') || "We'll email you before the next stream."}</p>
-              {remindDone ? (
-                <p className="text-sm text-green-600 dark:text-green-400 mb-4">{t('publicStream.remindSuccess') || "You're subscribed! We'll notify you before the next stream."}</p>
-              ) : (
-                <form onSubmit={handleRemindSubmit}>
-                  <input
-                    type="email"
-                    value={remindEmail}
-                    onChange={(e) => setRemindEmail(e.target.value)}
-                    placeholder={t('publicStream.emailPlaceholder') || 'your@email.com'}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent mb-2"
-                    disabled={remindSubmitting}
-                    autoFocus
-                  />
-                  {remindError && <p className="text-sm text-red-600 dark:text-red-400 mb-2">{remindError}</p>}
-                  <div className="flex gap-2 justify-end mt-2">
-                    <button type="button" onClick={() => setRemindOpen(false)} className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" disabled={remindSubmitting}>
-                      {t('common.cancel') || 'Cancel'}
-                    </button>
-                    <button type="submit" disabled={remindSubmitting} className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 disabled:opacity-50">
-                      {remindSubmitting ? (t('common.loading') || 'Loading…') : (t('publicStream.subscribe') || 'Subscribe')}
-                    </button>
-                  </div>
-                </form>
-              )}
-              <button type="button" onClick={() => setRemindOpen(false)} className="mt-2 text-sm text-[var(--accent)] hover:underline">
-                {remindDone ? (t('common.close') || 'Close') : (t('common.cancel') || 'Cancel')}
-              </button>
-            </div>
-          </div>
-        )}
+        <dialog
+          ref={remindDialogRef}
+          aria-labelledby="remind-dialog-title"
+          className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-sm w-[calc(100%-2rem)] p-6 backdrop:bg-black/50 open:flex open:flex-col"
+          onClose={closeRemindDialog}
+        >
+          <h3 id="remind-dialog-title" className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t('publicStream.remindTitle') || 'Get a reminder'}</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{t('publicStream.remindDescription') || "We'll email you before the next stream."}</p>
+          {remindDone ? (
+            <p className="text-sm text-green-600 dark:text-green-400 mb-4">{t('publicStream.remindSuccess') || "You're subscribed! We'll notify you before the next stream."}</p>
+          ) : (
+            <form onSubmit={handleRemindSubmit}>
+              <input
+                type="email"
+                aria-label={t('publicStream.emailPlaceholder') || 'your@email.com'}
+                value={remindEmail}
+                onChange={(e) => setRemindEmail(e.target.value)}
+                placeholder={t('publicStream.emailPlaceholder') || 'your@email.com'}
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent mb-2"
+                disabled={remindSubmitting}
+              />
+              {remindError && <p className="text-sm text-red-600 dark:text-red-400 mb-2">{remindError}</p>}
+              <div className="flex gap-2 justify-end mt-2">
+                <button type="button" onClick={closeRemindDialog} className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" disabled={remindSubmitting}>
+                  {t('common.cancel') || 'Cancel'}
+                </button>
+                <button type="submit" disabled={remindSubmitting} className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 disabled:opacity-50">
+                  {remindSubmitting ? (t('common.loading') || 'Loading…') : (t('publicStream.subscribe') || 'Subscribe')}
+                </button>
+              </div>
+            </form>
+          )}
+          <button type="button" onClick={closeRemindDialog} className="mt-2 text-sm text-[var(--accent)] hover:underline">
+            {remindDone ? (t('common.close') || 'Close') : (t('common.cancel') || 'Cancel')}
+          </button>
+        </dialog>
 
-        <footer className="mt-8 pt-6 pb-2 border-t border-accent-light dark:border-gray-700 text-center bg-accent-subtle dark:bg-gray-900/50 rounded-lg px-4" role="contentinfo">
+        <footer className="mt-8 pt-6 pb-2 border-t border-accent-light dark:border-gray-700 text-center bg-accent-subtle dark:bg-gray-900/50 rounded-lg px-4">
           <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
             {t('publicStream.poweredBy') || 'Powered by'} <span className="font-medium text-gray-700 dark:text-gray-300">StreamAutomator</span>
           </p>

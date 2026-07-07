@@ -5,6 +5,18 @@
 
 export const DAKINIS_LOGOUT_REDIRECT = '/login';
 
+async function runBestEffortSteps(steps) {
+  await Promise.all(
+    steps.map(async (step) => {
+      try {
+        await step();
+      } catch {
+        /* best-effort */
+      }
+    })
+  );
+}
+
 export async function dakinisPerformClientLogout(options) {
   const {
     clearLocalSession,
@@ -14,23 +26,11 @@ export async function dakinisPerformClientLogout(options) {
     redirectTo = DAKINIS_LOGOUT_REDIRECT,
   } = options;
 
-  for (const step of revokeServer) {
-    try {
-      await step();
-    } catch {
-      /* best-effort server revoke */
-    }
-  }
-
-  await clearLocalSession();
-
-  for (const step of afterClear) {
-    try {
-      await step();
-    } catch {
-      /* optional cleanup */
-    }
-  }
+  await runBestEffortSteps([
+    () => runBestEffortSteps(revokeServer),
+    clearLocalSession,
+    () => runBestEffortSteps(afterClear),
+  ]);
 
   if (typeof navigate === 'function') {
     navigate(redirectTo, { replace: true });

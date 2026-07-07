@@ -18,20 +18,20 @@ const BANNER_POSITIONS = [
   { id: 'background', labelKey: 'publicPage.positionBackground', descKey: 'publicPage.positionBackgroundDesc' },
 ];
 
+function PublicPagePreviewBanner({ bannerUrl, position, at }) {
+  if (!bannerUrl || position !== at) return null;
+  return (
+    <div className="w-full rounded overflow-hidden bg-gray-200 dark:bg-gray-600 flex-shrink-0" style={{ minHeight: 28 }}>
+      <img src={bannerUrl} alt="" className="w-full h-7 object-cover object-center" onError={(e) => { e.target.style.display = 'none'; }} />
+    </div>
+  );
+}
+
 /**
  * Mini preview of the public page with banner at chosen position.
  * Simulates the layout: header area, avatar, content blocks, schedule, footer.
  */
 function PublicPagePreview({ bannerUrl, position, username }) {
-  const renderBanner = (where) => {
-    if (!bannerUrl || position !== where) return null;
-    return (
-      <div className="w-full rounded overflow-hidden bg-gray-200 dark:bg-gray-600 flex-shrink-0" style={{ minHeight: 28 }}>
-        <img src={bannerUrl} alt="" className="w-full h-7 object-cover object-center" onError={(e) => { e.target.style.display = 'none'; }} />
-      </div>
-    );
-  };
-
   const isBackground = position === 'background' && bannerUrl;
 
   return (
@@ -46,7 +46,7 @@ function PublicPagePreview({ bannerUrl, position, username }) {
         {username ? `/streamer/${encodeURIComponent(username)}?${getPublicShareLinkQueryString()}` : 'Vista previa'}
       </div>
       <div className={`p-2 space-y-1 min-h-[140px] flex flex-col ${isBackground ? 'relative z-10' : ''}`}>
-        {renderBanner('top')}
+        <PublicPagePreviewBanner bannerUrl={bannerUrl} position={position} at="top" />
         <div className="flex gap-1.5 items-center flex-shrink-0">
           <div className="w-6 h-6 rounded-full bg-accent-subtle flex items-center justify-center text-[10px] font-bold text-[var(--accent)] flex-shrink-0">
             {(username || 'U').charAt(0).toUpperCase()}
@@ -56,13 +56,13 @@ function PublicPagePreview({ bannerUrl, position, username }) {
             <div className="text-[9px] text-gray-500 dark:text-gray-400">Upcoming streams</div>
           </div>
         </div>
-        {renderBanner('above-avatar')}
+        <PublicPagePreviewBanner bannerUrl={bannerUrl} position={position} at="above-avatar" />
         <div className="h-3 rounded bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 flex items-center gap-1 px-1 flex-shrink-0">
           <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
           <span className="text-[9px] text-red-700 dark:text-red-300">LIVE</span>
         </div>
-        {renderBanner('above-schedule')}
-        {position === 'center' && renderBanner('center')}
+        <PublicPagePreviewBanner bannerUrl={bannerUrl} position={position} at="above-schedule" />
+        {position === 'center' && <PublicPagePreviewBanner bannerUrl={bannerUrl} position={position} at="center" />}
         <div className="flex items-center gap-1 text-[10px] text-gray-700 dark:text-gray-300 flex-shrink-0">
           <Calendar className="w-3 h-3 flex-shrink-0" />
           Schedule
@@ -77,7 +77,7 @@ function PublicPagePreview({ bannerUrl, position, username }) {
             <div key={i} className="rounded bg-white dark:bg-gray-700 p-0.5 min-h-[20px]" />
           ))}
         </div>
-        {renderBanner('bottom')}
+        <PublicPagePreviewBanner bannerUrl={bannerUrl} position={position} at="bottom" />
         <div className="text-[8px] text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-600 pt-1 flex-shrink-0">
           Powered by StreamAutomator
         </div>
@@ -185,6 +185,7 @@ export default function SettingsPublicPageTab({
           <div className="flex flex-wrap gap-2">
             <input
               type="url"
+              aria-label={t('publicPage.bannerTitle') || 'Imagen o banner'}
               value={publicPageData.publicPageBannerUrl || ''}
               onChange={(e) => setPublicPageData((prev) => ({ ...prev, publicPageBannerUrl: e.target.value }))}
               placeholder="https://ejemplo.com/banner.jpg"
@@ -225,6 +226,7 @@ export default function SettingsPublicPageTab({
                     <button
                       key={url}
                       type="button"
+                      aria-label={t('publicPage.selectImage') || 'Selecciona una imagen'}
                       onClick={() => handlePickFromMedia(url)}
                       className="w-14 h-14 rounded border-2 border-gray-200 dark:border-gray-600 overflow-hidden hover:border-[var(--accent)] focus:border-[var(--accent)] focus:outline-none"
                     >

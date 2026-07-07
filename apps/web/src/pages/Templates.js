@@ -206,8 +206,8 @@ export default function Templates({ user, token }) {
             {t('templates.title') || 'Content templates'}
           </h1>
           <div className="flex gap-2">
-            <button
-              onClick={() => navigate('/schedule')}
+            <button type="button"
+              onClick={() = navigate('/schedule')}
               className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
             >
               {t('common.back')} → Schedule
@@ -222,8 +222,9 @@ export default function Templates({ user, token }) {
           </h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('templates.name') || 'Name'}</label>
+              <label htmlFor="template-form-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('templates.name') || 'Name'}</label>
               <input
+                id="template-form-name"
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
@@ -232,8 +233,9 @@ export default function Templates({ user, token }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('templates.title') || 'Title (optional)'}</label>
+              <label htmlFor="template-form-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('templates.title') || 'Title (optional)'}</label>
               <input
+                id="template-form-title"
                 type="text"
                 value={form.title}
                 onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
@@ -241,8 +243,9 @@ export default function Templates({ user, token }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('templates.content') || 'Content'}</label>
+              <label htmlFor="template-form-content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('templates.content') || 'Content'}</label>
               <textarea
+                id="template-form-content"
                 value={form.content}
                 onChange={(e) => setForm((p) => ({ ...p, content: e.target.value }))}
                 rows={4}
@@ -282,11 +285,11 @@ export default function Templates({ user, token }) {
               </div>
             </div>
             <div className="flex gap-2">
-              <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              <button type="button" onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 {editingId ? t('common.update') : t('common.create')}
               </button>
               {editingId && (
-                <button onClick={() => { setEditingId(null); setForm({ name: '', title: '', content: '', contentType: 'post', platforms: [], hashtags: '', mentions: '', isPublic: false }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg">
+                <button type="button" onClick={() = { setEditingId(null); setForm({ name: '', title: '', content: '', contentType: 'post', platforms: [], hashtags: '', mentions: '', isPublic: false }); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg">
                   {t('common.cancel')}
                 </button>
               )}
@@ -322,8 +325,8 @@ export default function Templates({ user, token }) {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => {
+                    <button type="button"
+                      onClick={() = {
                         if (template._source === 'local') {
                           navigate('/schedule', { state: { applyTemplate: template } });
                           toast.success(t('templates.useInSchedule') || 'Opening Schedule');
@@ -337,10 +340,10 @@ export default function Templates({ user, token }) {
                     >
                       <Calendar className="w-5 h-5" />
                     </button>
-                    <button onClick={() => startEdit(template)} className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded">
+                    <button type="button" onClick={() = startEdit(template)} className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded">
                       <Pencil className="w-5 h-5" />
                     </button>
-                    <button onClick={() => handleDelete(template)} className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded">
+                    <button type="button" onClick={() = handleDelete(template)} className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded">
                       <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
@@ -357,7 +360,7 @@ export default function Templates({ user, token }) {
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm w-full">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t('templates.createContentFrom') || 'Create content from template'}</h3>
-              <button onClick={() => { setUseTemplateId(null); setUseTemplateSource(null); }} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+              <button type="button" onClick={() = { setUseTemplateId(null); setUseTemplateSource(null); }} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
             </div>
             <div className="space-y-4">
               <div>
@@ -369,10 +372,10 @@ export default function Templates({ user, token }) {
                 <input id="template-use-time" name="templateUseTime" type="time" value={useTime} onChange={(e) => setUseTime(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700" />
               </div>
               <div className="flex gap-2">
-                <button onClick={handleUseTemplate} className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <button type="button" onClick={handleUseTemplate} className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                   {t('templates.createContent') || 'Create content'}
                 </button>
-                <button onClick={() => { setUseTemplateId(null); setUseTemplateSource(null); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg">{t('common.cancel')}</button>
+                <button type="button" onClick={() = { setUseTemplateId(null); setUseTemplateSource(null); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg">{t('common.cancel')}</button>
               </div>
             </div>
           </div>

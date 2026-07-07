@@ -57,11 +57,11 @@ export default function SettingsSecurityTab({
               </div>
             </div>
 
-            <button
+            <button type="button"
               onClick={onPasswordChange}
               disabled={loading || !securityData.currentPassword || !securityData.newPassword || !securityData.confirmPassword}
               className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-            >
+            
               {loading ? t('settings.changing') : t('settings.changePassword')}
             </button>
           </div>
@@ -77,7 +77,8 @@ export default function SettingsSecurityTab({
                 <p className="text-sm text-gray-600 dark:text-gray-400">Add an extra layer of security to your account</p>
               </div>
             </div>
-            <button
+            <button type="button"
+              aria-label={t('settings.enable2FA') || 'Enable 2FA'}
               onClick={() => setSecurityData(prev => ({ ...prev, twoFactorEnabled: !prev.twoFactorEnabled }))}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                 securityData.twoFactorEnabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
