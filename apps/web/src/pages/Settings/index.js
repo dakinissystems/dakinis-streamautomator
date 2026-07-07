@@ -1018,7 +1018,7 @@ export default function Settings({ user, token, setUser, setAuth }) {
                   return (
                     <button type="button"
                       key={tab.id}
-                      onClick={() = setActiveTab(tab.id)}
+                      onClick={() => setActiveTab(tab.id)}
                       className={`flex-shrink-0 lg:w-full flex items-center gap-2 lg:space-x-3 px-3 py-2.5 lg:px-4 lg:py-3 text-left rounded-lg transition-colors whitespace-nowrap ${
                         activeTab === tab.id
                           ? 'bg-color-sidebar/10 text-gray-900 dark:bg-color-sidebar/20 dark:text-color-sidebar lg:border-r-2 lg:border-color-sidebar'
@@ -1041,7 +1041,7 @@ export default function Settings({ user, token, setUser, setAuth }) {
                     onClick={activeTab === 'profile' ? handleProfileSave : activeTab === 'publicPage' ? handlePublicPageSave : handleNotificationSave}
                     disabled={loading}
                     className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center sm:justify-start gap-2 min-h-[44px]"
-                  
+                  >
                     <Save className="w-4 h-4 flex-shrink-0" />
                     <span>{loading ? t('settings.saving') : t('settings.saveChanges')}</span>
                   </button>

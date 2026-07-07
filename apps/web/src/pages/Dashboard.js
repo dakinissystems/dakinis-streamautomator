@@ -764,13 +764,13 @@ const Dashboard = ({ user, token, ...props }) => {
             <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
               <div className="flex space-x-2">
                 <button type="button"
-                  onClick={() = navigate('/settings')}
+                  onClick={() => navigate('/settings')}
                   className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                 >
                   <Settings className="w-5 h-5" />
                 </button>
                 <button type="button"
-                  onClick={() = navigate('/profile')}
+                  onClick={() => navigate('/profile')}
                   className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                 >
                   <User className="w-5 h-5" />
@@ -833,7 +833,7 @@ const Dashboard = ({ user, token, ...props }) => {
                         onClick={handleDownloadSubs}
                         className="self-start shrink-0 p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                         title={t('dashboard.downloadSubs')}
-                      
+                      >
                         <Download className="w-4 h-4" />
                       </button>
                     </div>
@@ -851,13 +851,13 @@ const Dashboard = ({ user, token, ...props }) => {
                         </p>
                         <div className="mt-2 flex flex-wrap gap-2">
                           <button type="button"
-                            onClick={() = setBitsFormat('chronological')}
+                            onClick={() => setBitsFormat('chronological')}
                             className={`shrink-0 text-xs px-2 py-1 rounded whitespace-nowrap ${bitsFormat === 'chronological' ? 'bg-accent text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'}`}
                           >
                             {t('dashboard.chronological')}
                           </button>
                           <button type="button"
-                            onClick={() = setBitsFormat('total')}
+                            onClick={() => setBitsFormat('total')}
                             className={`shrink-0 text-xs px-2 py-1 rounded whitespace-nowrap ${bitsFormat === 'total' ? 'bg-accent text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'}`}
                           >
                             {t('dashboard.total')}
@@ -874,7 +874,7 @@ const Dashboard = ({ user, token, ...props }) => {
                           <Eye className="w-4 h-4" />
                         </button>
                         <button type="button"
-                          onClick={() = fetchBitsDetails(bitsFormat)}
+                          onClick={() => fetchBitsDetails(bitsFormat)}
                           className="self-start shrink-0 p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                           title={t('common.refresh') || 'Refresh'}
                         >
@@ -884,7 +884,7 @@ const Dashboard = ({ user, token, ...props }) => {
                           onClick={handleCopyBitsList}
                           className="self-start shrink-0 p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                           title={t('dashboard.copySchedule') || 'Copy'}
-                        
+                        >
                           <Copy className="w-4 h-4" />
                         </button>
                       </div>
@@ -964,7 +964,7 @@ const Dashboard = ({ user, token, ...props }) => {
                         onClick={handleDownloadDonations}
                         className="self-start shrink-0 p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                         title={t('dashboard.downloadDonations')}
-                      
+                      >
                         <Download className="w-4 h-4" />
                       </button>
                     </div>
@@ -1149,7 +1149,7 @@ const Dashboard = ({ user, token, ...props }) => {
               <button type="button"
                 onClick={handleExportData}
                 className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2 text-sm"
-              
+              >
                 <Download className="w-4 h-4 flex-shrink-0" />
                 <span className="hidden sm:inline">Export</span>
               </button>
@@ -1157,7 +1157,7 @@ const Dashboard = ({ user, token, ...props }) => {
                 onClick={fetchContents}
                 className="p-2 sm:px-3 sm:py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                 title="Refresh"
-              
+              >
                 <RefreshCw className="w-4 h-4" />
               </button>
             </div>
@@ -1210,7 +1210,7 @@ const Dashboard = ({ user, token, ...props }) => {
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100">{t('dashboard.scheduledContent')}</h2>
           <button type="button"
-            onClick={() = navigate('/schedule')}
+            onClick={() => navigate('/schedule')}
             className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2.5 rounded-lg flex items-center justify-center space-x-2 w-full sm:w-auto"
           >
             <Plus className="w-4 h-4 flex-shrink-0" />
@@ -1227,7 +1227,7 @@ const Dashboard = ({ user, token, ...props }) => {
                   <h3 className="text-lg font-medium text-gray-900 mb-2">{t('dashboard.noContentForDay')}</h3>
               <p className="text-gray-600 mb-4">{t('dashboard.startByScheduling')}</p>
               <button type="button"
-                onClick={() = navigate('/schedule')}
+                onClick={() => navigate('/schedule')}
                 className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg"
               >
                 {t('dashboard.createContentButton')}
@@ -1294,7 +1294,7 @@ const Dashboard = ({ user, token, ...props }) => {
                           <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex flex-wrap gap-1 sm:space-x-2">
                               <button type="button"
-                                onClick={() = {
+                                onClick={() => {
                                   setSelectedContent(content);
                                   setShowContentModal(true);
                                 }}
@@ -1304,14 +1304,14 @@ const Dashboard = ({ user, token, ...props }) => {
                                 <Eye className="w-4 h-4" />
                               </button>
                               <button type="button"
-                                onClick={() = handleCopyPostToClipboard(content)}
+                                onClick={() => handleCopyPostToClipboard(content)}
                                 className="p-1 text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-100 transition-colors"
                                 title={t('dashboard.copyPost') || 'Copy post (paste in Schedule)'}
                               >
                                 <Clipboard className="w-4 h-4" />
                               </button>
                               <button type="button"
-                                onClick={() = handleDuplicateContent(content)}
+                                onClick={() => handleDuplicateContent(content)}
                                 className="p-1 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 transition-colors"
                                 title={t('dashboard.duplicate') || 'Duplicate'}
                               >
@@ -1319,7 +1319,7 @@ const Dashboard = ({ user, token, ...props }) => {
                               </button>
                               {content.status === 'scheduled' && (
                                 <button type="button"
-                                  onClick={() = handleCancelContent(content.id)}
+                                  onClick={() => handleCancelContent(content.id)}
                                   className="p-1 text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300 transition-colors"
                                   title={t('dashboard.cancelPublication') || 'Cancel publication'}
                                 >
@@ -1327,7 +1327,7 @@ const Dashboard = ({ user, token, ...props }) => {
                                 </button>
                               )}
                               <button type="button"
-                                onClick={() = handleDeleteContent(content.id)}
+                                onClick={() => handleDeleteContent(content.id)}
                                 className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors"
                                 title={t('common.delete')}
                               >
@@ -1350,7 +1350,7 @@ const Dashboard = ({ user, token, ...props }) => {
               <div className="flex justify-between items-start mb-4">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{selectedContent.title}</h2>
                 <button type="button"
-                  onClick={() = setShowContentModal(false)}
+                  onClick={() => setShowContentModal(false)}
                   className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   <X className="w-6 h-6" />
@@ -1473,21 +1473,21 @@ const Dashboard = ({ user, token, ...props }) => {
               
               <div className="flex flex-wrap gap-2 justify-end mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button type="button"
-                  onClick={() = handleCopyPostToClipboard(selectedContent)}
+                  onClick={() => handleCopyPostToClipboard(selectedContent)}
                   className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm flex items-center gap-2"
                 >
                   <Clipboard className="w-4 h-4" />
                   {t('dashboard.copyPost') || 'Copy post'}
                 </button>
                 <button type="button"
-                  onClick={() = handleDuplicateContent(selectedContent)}
+                  onClick={() => handleDuplicateContent(selectedContent)}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
                 >
                   {t('dashboard.duplicate') || 'Duplicate'}
                 </button>
                 {selectedContent.status === 'scheduled' && (
                   <button type="button"
-                    onClick={() = handleCancelContent(selectedContent.id)}
+                    onClick={() => handleCancelContent(selectedContent.id)}
                     className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 text-sm flex items-center gap-2"
                   >
                     <XCircle className="w-4 h-4" />
@@ -1495,13 +1495,13 @@ const Dashboard = ({ user, token, ...props }) => {
                   </button>
                 )}
                 <button type="button"
-                  onClick={() = handleDeleteContent(selectedContent.id)}
+                  onClick={() => handleDeleteContent(selectedContent.id)}
                   className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
                 >
                   {t('common.delete')}
                 </button>
                 <button type="button"
-                  onClick={() = setShowContentModal(false)}
+                  onClick={() => setShowContentModal(false)}
                   className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
                 >
                   {t('common.close')}

@@ -132,10 +132,10 @@ export default function Landing() {
             <Globe className="w-5 h-5 flex-shrink-0" aria-hidden />
             <span className="text-sm font-medium">{language === 'es' ? 'ES' : 'EN'}</span>
           </button>
-          <button type="button" onClick={() = navigate('/pricing')} className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+          <button type="button" onClick={() => navigate('/pricing')} className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
             {t('landing.viewPricing')}
           </button>
-          <button type="button" onClick={() = navigate('/login')} className="text-sm font-medium text-[var(--accent)] hover:opacity-90">
+          <button type="button" onClick={() => navigate('/login')} className="text-sm font-medium text-[var(--accent)] hover:opacity-90">
             {t('common.login')}
           </button>
         </div>
@@ -157,7 +157,7 @@ export default function Landing() {
             </p>
             <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
               <button type="button"
-                onClick={() = navigate('/login')}
+                onClick={() => navigate('/login')}
                 className="px-8 py-3.5 bg-white text-[var(--accent)] font-semibold rounded-lg shadow-lg hover:bg-gray-100 transition-colors"
               >
                 {t('landing.getStarted') || 'Start scheduling streams'}
@@ -165,11 +165,11 @@ export default function Landing() {
               <button type="button"
                 onClick={scrollToProduct}
                 className="px-8 py-3.5 bg-white/20 text-white font-semibold rounded-lg border-2 border-white/60 hover:bg-white/30 transition-colors"
-              
+              >
                 {t('landing.seeHowItWorks') || 'See how it works'}
               </button>
               <button type="button"
-                onClick={() = navigate('/pricing')}
+                onClick={() => navigate('/pricing')}
                 className="px-8 py-3.5 bg-white/10 text-white font-semibold rounded-lg border border-white/40 hover:bg-white/20 transition-colors"
               >
                 {t('landing.viewPricing') || 'View pricing'}
@@ -477,7 +477,7 @@ export default function Landing() {
             {t('landing.ctaDescription') || 'Start with a free trial. No credit card required.'}
           </p>
           <button type="button"
-            onClick={() = navigate('/login')}
+            onClick={() => navigate('/login')}
             className="mt-8 px-8 py-3.5 bg-white text-[var(--accent)] font-semibold rounded-lg shadow-lg hover:bg-gray-100 transition-colors"
           >
             {t('landing.startFree') || 'Start scheduling streams'}

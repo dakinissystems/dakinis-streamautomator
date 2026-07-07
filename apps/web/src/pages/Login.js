@@ -4,6 +4,8 @@ import { login, register, loginWithGoogle, loginWithTwitch, loginWithTwitter, lo
 import { useLanguage } from '../contexts/LanguageContext';
 import { Eye } from 'lucide-react';
 import LoginOAuthButtons from './Login/LoginOAuthButtons';
+
+export default function Login({ setAuth }) {
   const { t } = useLanguage();
   const [isRegister, setIsRegister] = useState(false);
   const [username, setUsername] = useState('');

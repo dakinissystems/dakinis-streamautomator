@@ -106,7 +106,7 @@ export default function SettingsBillingTab({
                   onClick={onCancelSubscription}
                   disabled={loadingSubscription}
                   className="w-full sm:w-auto px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 min-h-[44px]"
-                
+                >
                   {loadingSubscription ? t('settings.processing') : t('settings.cancelSubscription')}
                 </button>
               )}
@@ -171,7 +171,7 @@ export default function SettingsBillingTab({
           <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
             <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">{t('settings.monthlySubscription')}</h4>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{t('settings.recurringMonthlyDescription')}</p>
-            <button type="button" onClick={() = onPurchase('creator')} disabled={billingLoading} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 w-full">
+            <button type="button" onClick={() => onPurchase('creator')} disabled={billingLoading} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 w-full">
               {billingLoading ? t('settings.processing') : t('settings.subscribeMonthly')}
             </button>
           </div>
@@ -180,7 +180,7 @@ export default function SettingsBillingTab({
           <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
             <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">{t('settings.quarterlySubscription')}</h4>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{t('settings.quarterlyDescription')}</p>
-            <button type="button" onClick={() = onPurchase('pro_monthly')} disabled={billingLoading} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 w-full">
+            <button type="button" onClick={() => onPurchase('pro_monthly')} disabled={billingLoading} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 w-full">
               {billingLoading ? t('settings.processing') : t('settings.subscribeQuarterly')}
             </button>
           </div>
@@ -189,7 +189,7 @@ export default function SettingsBillingTab({
           <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
             <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">{t('settings.lifetimeLicense')}</h4>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{t('settings.oneTimePaymentDescription')}</p>
-            <button type="button" onClick={() = onPurchase('lifetime')} disabled={billingLoading} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 w-full">
+            <button type="button" onClick={() => onPurchase('lifetime')} disabled={billingLoading} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 w-full">
               {billingLoading ? t('settings.processing') : t('settings.purchaseLifetime')}
             </button>
           </div>

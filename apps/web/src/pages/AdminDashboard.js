@@ -851,7 +851,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-blue-900 dark:text-blue-100">{t('admin.title')}</h1>
         {onLogout && (
-          <button type="button" onClick={onLogout} className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded hover:from-blue-700 hover:to-purple-700 text-sm w-full sm:w-auto"{t('common.logout')}</button>
+            <button type="button" onClick={onLogout} className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded hover:from-blue-700 hover:to-purple-700 text-sm w-full sm:w-auto">{t('common.logout')}</button>
         )}
       </div>
       <main className="space-y-6">
@@ -1021,7 +1021,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-blue-700 dark:text-blue-300">{t('admin.licenseConfigTitle')}</h3>
           <button type="button"
-            onClick={() = setShowLicenseConfig(!showLicenseConfig)}
+            onClick={() => setShowLicenseConfig(!showLicenseConfig)}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             {showLicenseConfig ? t('admin.hide') : t('admin.manageAvailableLicenses')}
@@ -1097,13 +1097,13 @@ export default function AdminDashboard({ token, user, onLogout }) {
                 <button type="button"
                   onClick={handleUpdateLicenseConfig}
                   className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                
+                >
                   {t('admin.saveConfiguration')}
                 </button>
                 <button type="button"
                   onClick={handleUpdateTrialExtensionConfig}
                   className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-                
+                >
                   {t('admin.saveTrialExtensionConfig') || 'Guardar límite de extensiones'}
                 </button>
               </div>
@@ -1153,7 +1153,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
               onClick={handleCreateUser}
               disabled={creating}
               className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
-            
+            >
               {creating ? t('admin.creating') : t('common.create')}
             </button>
           </div>
@@ -1435,8 +1435,8 @@ export default function AdminDashboard({ token, user, onLogout }) {
                             onChange={e => setNewEmail(e.target.value)}
                             className="border dark:border-gray-600 px-2 py-1 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                           />
-                          <button type="button" onClick={(e) = { e.stopPropagation(); handleSaveEmail(u.id); }} className="text-green-600 dark:text-green-400 font-bold">{t('admin.save')}</button>
-                          <button type="button" onClick={(e) = { e.stopPropagation(); handleCancelEdit(); }} className="text-gray-500 dark:text-gray-400">{t('common.cancel')}</button>
+                          <button type="button" onClick={(e) => { e.stopPropagation(); handleSaveEmail(u.id); }} className="text-green-600 dark:text-green-400 font-bold">{t('admin.save')}</button>
+                          <button type="button" onClick={(e) => { e.stopPropagation(); handleCancelEdit(); }} className="text-gray-500 dark:text-gray-400">{t('common.cancel')}</button>
                         </div>
                       ) : (
                         <span title={u.email}>{maskEmail(u.email)}</span>
@@ -1531,7 +1531,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
                             <button type="button"
                               className="px-2 py-1 text-xs bg-orange-600 text-white rounded hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={extendingTrial === u.id}
-                              onClick={() = handleExtendTrial(u.id)}
+                              onClick={() => handleExtendTrial(u.id)}
                               title={
                                 trialExtensionConfig.maxTrialExtensionsPerUser && trialExtensionConfig.maxTrialExtensionsPerUser > 0
                                   ? `${t('admin.extendTrial')} (${u.trialExtensions || 0}/${trialExtensionConfig.maxTrialExtensionsPerUser})`
@@ -1547,7 +1547,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
                             <button type="button"
                               className="px-2 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={generating[u.id] || u.hasUsedTrial}
-                              onClick={() = handleAssignTrial(u.id)}
+                              onClick={() => handleAssignTrial(u.id)}
                               title={u.hasUsedTrial ? t('admin.trialUsed') : t('admin.assignTrialTooltip')}
                             >
                               {generating[u.id] ? '...' : u.hasUsedTrial ? t('admin.trialUsedLabel') : t('admin.trial7Days')}
@@ -1555,7 +1555,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
                             <button type="button"
                               className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={generating[u.id]}
-                              onClick={() = handleGenerateLicense(u.id, 'monthly')}
+                              onClick={() => handleGenerateLicense(u.id, 'monthly')}
                               title={t('admin.generateMonthly')}
                             >
                               {generating[u.id] ? '...' : t('admin.monthly')}
@@ -1563,7 +1563,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
                             <button type="button"
                               className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={generating[u.id]}
-                              onClick={() = handleGenerateLicense(u.id, 'lifetime')}
+                              onClick={() => handleGenerateLicense(u.id, 'lifetime')}
                               title={t('admin.generateLifetime')}
                             >
                               {generating[u.id] ? '...' : t('admin.lifetime')}
@@ -1571,7 +1571,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
                             <button type="button"
                               className="px-2 py-1 text-xs bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                               disabled={generating[u.id]}
-                              onClick={() = handleGenerateLicense(u.id, 'quarterly')}
+                              onClick={() => handleGenerateLicense(u.id, 'quarterly')}
                               title={t('admin.generateQuarterly')}
                             >
                               {generating[u.id] ? '...' : '3M'}
@@ -1593,7 +1593,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
                           </select>
                           <button type="button"
                             className="px-2 py-1 text-xs bg-gray-700 text-white rounded hover:bg-gray-800"
-                            onClick={() = handleUpdateLicense(u.id)}
+                            onClick={() => handleUpdateLicense(u.id)}
                             title={t('admin.updateLicense')}
                           >
                             ✓
@@ -1601,7 +1601,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
                         </div>
                         <button type="button"
                           className="px-2 py-1 text-xs bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                          onClick={(e) = { e.stopPropagation(); handleEditEmail(u); }}
+                          onClick={(e) => { e.stopPropagation(); handleEditEmail(u); }}
                           title={t('admin.changeEmail')}
                         >
                           📧
@@ -1609,14 +1609,14 @@ export default function AdminDashboard({ token, user, onLogout }) {
                         <button type="button"
                           className="px-2 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
                           disabled={resetting === u.id}
-                          onClick={(e) = { e.stopPropagation(); handleResetPassword(u.id); }}
+                          onClick={(e) => { e.stopPropagation(); handleResetPassword(u.id); }}
                           title={t('admin.sendPasswordResetEmail')}
                         >
                           {resetting === u.id ? '...' : '🔑'}
                         </button>
                         <button type="button"
                           className={`px-2 py-1 text-xs rounded text-white ${u.isDisabled ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'}`}
-                          onClick={(e) = { e.stopPropagation(); handleToggleUserDisabled(u); }}
+                          onClick={(e) => { e.stopPropagation(); handleToggleUserDisabled(u); }}
                           title={u.isDisabled ? (t('admin.enableUser') || 'Enable user') : (t('admin.disableUser') || 'Disable user')}
                         >
                           {u.isDisabled ? (t('admin.enableUser') || 'Enable') : (t('admin.disableUser') || 'Disable')}
@@ -1624,7 +1624,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
                         <button type="button"
                           className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                           disabled={deletingUserId === u.id || u.id === user?.id}
-                          onClick={(e) = { e.stopPropagation(); handleDeleteUser(u.id); }}
+                          onClick={(e) => { e.stopPropagation(); handleDeleteUser(u.id); }}
                           title={u.id === user?.id ? '' : t('admin.deleteUser')}
                         >
                           {deletingUserId === u.id ? '...' : t('admin.deleteUser')}
@@ -1766,14 +1766,14 @@ export default function AdminDashboard({ token, user, onLogout }) {
                   <div className="flex gap-2 ml-4" onClick={(e) => e.stopPropagation()}>
                     {msg.status !== 'archived' && (
                       <button type="button"
-                        onClick={() = handleUpdateStatus(msg.id, 'archived')}
+                        onClick={() => handleUpdateStatus(msg.id, 'archived')}
                         className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-500"
                       >
                         {t('admin.archive')}
                       </button>
                     )}
                     <button type="button"
-                      onClick={() = handleDeleteMessage(msg.id)}
+                      onClick={() => handleDeleteMessage(msg.id)}
                       className="px-2 py-1 text-xs bg-red-200 dark:bg-red-900/40 text-red-800 dark:text-red-300 rounded hover:bg-red-300 dark:hover:bg-red-900/60"
                     >
                       {t('admin.delete')}
@@ -1822,7 +1822,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
             {t('admin.sendToAllUsers')}
           </label>
           <button type="button"
-            onClick={async () = {
+            onClick={async () => {
               if (!notifTitle.trim() || !notifContent.trim()) {
                 window.alert(t('admin.titleAndContentRequired'));
                 return;
@@ -1918,7 +1918,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
                 onClick={handleUpdatePlatformConfig}
                 disabled={platformConfigLoading}
                 className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-              
+              >
                 {platformConfigLoading ? (
                   <>
                     <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -2192,14 +2192,14 @@ export default function AdminDashboard({ token, user, onLogout }) {
               title={t('admin.toDate')}
             />
             <button type="button"
-              onClick={() = handleDownloadPayments('csv')}
+              onClick={() => handleDownloadPayments('csv')}
               disabled={exporting}
               className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm"
             >
               {exporting ? '...' : t('admin.downloadCsv')}
             </button>
             <button type="button"
-              onClick={() = handleDownloadPayments('json')}
+              onClick={() => handleDownloadPayments('json')}
               disabled={exporting}
               className="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 text-sm"
             >
@@ -2246,7 +2246,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
               onClick={handleDownloadPaymentsPdf}
               disabled={exporting}
               className="px-3 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 text-sm"
-            
+            >
               {exporting ? '...' : t('admin.downloadPdfInvoices')}
             </button>
           </div>
@@ -2299,14 +2299,14 @@ export default function AdminDashboard({ token, user, onLogout }) {
               </p>
               <div className="flex gap-2">
                 <button type="button"
-                  onClick={() = setPaymentsOffset(Math.max(0, paymentsOffset - paymentsLimit))}
+                  onClick={() => setPaymentsOffset(Math.max(0, paymentsOffset - paymentsLimit))}
                   disabled={paymentsOffset === 0}
                   className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm disabled:opacity-50"
                 >
                   {t('admin.previous')}
                 </button>
                 <button type="button"
-                  onClick={() = setPaymentsOffset(paymentsOffset + paymentsLimit)}
+                  onClick={() => setPaymentsOffset(paymentsOffset + paymentsLimit)}
                   disabled={paymentsOffset + paymentsList.length >= paymentsTotal}
                   className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-sm disabled:opacity-50"
                 >
@@ -2403,7 +2403,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
             </div>
             <div className="flex flex-wrap gap-2">
               <button type="button"
-                onClick={async () = {
+                onClick={async () => {
                   if (!token || alertConfigSaving) return;
                   setAlertConfigSaving(true);
                   try {
@@ -2421,7 +2421,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
                 {alertConfigSaving ? (t('admin.saving') || 'Guardando...') : (t('admin.saveConfiguration') || 'Guardar')}
               </button>
               <button type="button"
-                onClick={async () = {
+                onClick={async () => {
                   if (!token || alertTestSending) return;
                   setAlertTestSending('dev');
                   try {
@@ -2445,7 +2445,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
                 {alertTestSending === 'dev' ? '...' : (t('admin.alertTestDev') || 'Probar #dev-internal')}
               </button>
               <button type="button"
-                onClick={async () = {
+                onClick={async () => {
                   if (!token || alertTestSending) return;
                   setAlertTestSending('status');
                   try {
@@ -2489,7 +2489,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{selectedMessage.subject}</h2>
               <button type="button"
-                onClick={() = setShowMessageModal(false)}
+                onClick={() => setShowMessageModal(false)}
                 className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 ✕
@@ -2535,7 +2535,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
                     </p>
                   </div>
                   <button type="button"
-                    onClick={() = handleReopenMessage(selectedMessage.id)}
+                    onClick={() => handleReopenMessage(selectedMessage.id)}
                     className="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                   >
                     Reopen
@@ -2677,17 +2677,17 @@ export default function AdminDashboard({ token, user, onLogout }) {
                       onClick={handleReply}
                       disabled={replying || !replyText.trim()}
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    
+                    >
                       {replying ? 'Sending...' : 'Send Reply'}
                     </button>
                     <button type="button"
-                      onClick={() = handleUpdateStatus(selectedMessage.id, 'read')}
+                      onClick={() => handleUpdateStatus(selectedMessage.id, 'read')}
                       className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500"
                     >
                       Mark as Read
                     </button>
                     <button type="button"
-                      onClick={() = handleResolveMessage(selectedMessage.id)}
+                      onClick={() => handleResolveMessage(selectedMessage.id)}
                       className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                     >
                       Mark as Resolved
@@ -2707,7 +2707,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t('admin.userDetailsTitle')}</h2>
               <button type="button"
-                onClick={() = setShowUserModal(false)}
+                onClick={() => setShowUserModal(false)}
                 className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 ✕
@@ -2798,14 +2798,14 @@ export default function AdminDashboard({ token, user, onLogout }) {
             
             <div className="flex flex-wrap gap-2 justify-end mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
               <button type="button"
-                onClick={() = { setShowUserModal(false); handleResetPassword(selectedUser.id); }}
+                onClick={() => { setShowUserModal(false); handleResetPassword(selectedUser.id); }}
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm flex items-center gap-2"
                 disabled={resetting === selectedUser.id}
               >
                 🔑 {resetting === selectedUser.id ? 'Enviando...' : 'Enviar correo para cambio de contraseña'}
               </button>
               <button type="button"
-                onClick={() = setShowUserModal(false)}
+                onClick={() => setShowUserModal(false)}
                 className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
               >
                 Cerrar
@@ -2822,7 +2822,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
           onClick={() => setViewingImage(null)}
         >
           <button type="button"
-            onClick={() = setViewingImage(null)}
+            onClick={() => setViewingImage(null)}
             className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
           >
             <X className="w-8 h-8" />
