@@ -148,7 +148,7 @@ export default function SettingsAppearanceTab({
             {themes.map((theme) => (
               <button type="button"
                 key={theme.id}
-                onClick={() = setThemeSettings(prev => ({ ...prev, theme: theme.id }))}
+                onClick={() => setThemeSettings(prev => ({ ...prev, theme: theme.id }))}
                 className={`p-4 border-2 rounded-lg text-left transition-all ${
                   themeSettings.theme === theme.id ? 'border-accent bg-gray-50 dark:bg-gray-800' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}

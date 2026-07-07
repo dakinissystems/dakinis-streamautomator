@@ -131,7 +131,7 @@ export default function Pricing() {
                   ))}
                 </ul>
                 <button type="button"
-                  onClick={() = handleCta(tier.ctaAction)}
+                  onClick={() => handleCta(tier.ctaAction)}
                   className={`mt-6 w-full py-3 rounded-lg font-semibold transition-colors ${
                     tier.highlight
                       ? 'bg-indigo-600 text-white hover:bg-indigo-700'

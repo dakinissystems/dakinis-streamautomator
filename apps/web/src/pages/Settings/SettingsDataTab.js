@@ -19,7 +19,7 @@ export default function SettingsDataTab({ loading, onExport, onDeleteAccount, t 
                 onClick={onExport}
                 disabled={loading}
                 className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 min-h-[44px]"
-              
+              >
                 {loading ? t('settings.exporting') : t('settings.exportData')}
               </button>
             </div>
@@ -38,7 +38,7 @@ export default function SettingsDataTab({ loading, onExport, onDeleteAccount, t 
                 onClick={onDeleteAccount}
                 disabled={loading}
                 className="w-full sm:w-auto px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 min-h-[44px]"
-              
+              >
                 {loading ? t('settings.deleting') : t('settings.deleteAccount')}
               </button>
             </div>

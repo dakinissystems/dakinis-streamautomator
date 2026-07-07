@@ -514,7 +514,7 @@ const Schedule = ({ user, token }) => {
               <p className="font-medium">💡 {t('schedule.saveTemplatePrompt')}</p>
               <div className="flex space-x-2">
                 <button type="button"
-                  onClick={() = {
+                  onClick={() => {
                     setTemplateName(`${formData.title} Template`);
                     toast.dismiss(toastInstance.id);
                     setTimeout(() => {
@@ -526,7 +526,7 @@ const Schedule = ({ user, token }) => {
                   {t('schedule.saveTemplateButton')}
                 </button>
                 <button type="button"
-                  onClick={() = toast.dismiss(toastInstance.id)}
+                  onClick={() => toast.dismiss(toastInstance.id)}
                   className="px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
                 >
                   {t('schedule.maybeLater')}

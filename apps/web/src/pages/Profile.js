@@ -154,7 +154,7 @@ const Profile = ({ user, token }) => {
                 </div>
               )}
               <button type="button"
-                onClick={() = navigate('/settings')}
+                onClick={() => navigate('/settings')}
                 className="absolute bottom-0 right-0 bg-white dark:bg-gray-700 p-2 rounded-full shadow-lg hover:shadow-xl transition-shadow border border-gray-200 dark:border-gray-600"
                 title={t('profile.changeProfilePhoto')}
               >
@@ -180,7 +180,7 @@ const Profile = ({ user, token }) => {
                   </div>
                 </div>
                 <button type="button"
-                  onClick={() = navigate('/settings')}
+                  onClick={() => navigate('/settings')}
                   className="mt-4 md:mt-0 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 mx-auto md:mx-0"
                 >
                   <Settings className="w-4 h-4" />
