@@ -34,7 +34,7 @@ import { THEME_CHANGE_EVENT, getCustomColorConfig, setCustomColorConfig, applyCu
 import { getPlatformColors } from '../../utils/platformColors';
 import { BANNER_CONFIG_KEY, getBannersFromEnv } from '../../components/HeaderBanners';
 import { handleUpload, getUploadStats } from '../../utils/uploadHelper';
-import { getPublicImageUrl } from '../../utils/supabaseClient';
+import { getPublicImageUrl } from '../../utils/supabasePublicUrl';
 import { devCatchLog } from '../../utils/devCatchLog';
 import { initAkoenetAutoConnect } from '../../features/akoenet/api';
 
@@ -49,6 +49,32 @@ import SettingsDataTab from './SettingsDataTab';
 import SettingsBotsTab from './SettingsBotsTab';
 import SettingsPublicPageTab from './SettingsPublicPageTab';
 import SettingsWorkspaceTab from './SettingsWorkspaceTab';
+
+function createProfileDataFromUser(user) {
+  return {
+    username: user?.username || '',
+    email: user?.email || '',
+    bio: '',
+    timezone: 'UTC',
+    language: 'en',
+    merchandisingLink: user?.merchandisingLink || '',
+    merchandisingButtonPosition: user?.merchandisingButtonPosition || 'bottom-right',
+    profileImageUrl: user?.profileImageUrl || '',
+    dashboardShowTwitchSubs: user?.dashboardShowTwitchSubs !== false,
+    dashboardShowTwitchBits: user?.dashboardShowTwitchBits !== false,
+    dashboardShowTwitchDonations: user?.dashboardShowTwitchDonations === true,
+    streamGoalType: user?.streamGoalType || '',
+    streamGoalTarget: user?.streamGoalTarget ?? '',
+    discordAnnounceWebhookUrl: user?.discordAnnounceWebhookUrl || '',
+  };
+}
+
+function createPublicPageDataFromUser(user) {
+  return {
+    publicPageBannerUrl: user?.publicPageBannerUrl || '',
+    publicPageBannerPosition: user?.publicPageBannerPosition || 'top',
+  };
+}
 
 const getTabsConfig = (t) => [
   { id: 'profile', name: t('settings.profile'), Icon: User },
@@ -85,26 +111,8 @@ export default function Settings({ user, token, setUser, setAuth }) {
   const [connectingKey, setConnectingKey] = useState(null);
   const hasTriggeredAkoenetAutoconnect = useRef(false);
 
-  const [profileData, setProfileData] = useState({
-    username: user?.username || '',
-    email: user?.email || '',
-    bio: '',
-    timezone: 'UTC',
-    language: 'en',
-    merchandisingLink: user?.merchandisingLink || '',
-    merchandisingButtonPosition: user?.merchandisingButtonPosition || 'bottom-right',
-    profileImageUrl: user?.profileImageUrl || '',
-    dashboardShowTwitchSubs: user?.dashboardShowTwitchSubs !== false,
-    dashboardShowTwitchBits: user?.dashboardShowTwitchBits !== false,
-    dashboardShowTwitchDonations: user?.dashboardShowTwitchDonations === true,
-    streamGoalType: user?.streamGoalType || '',
-    streamGoalTarget: user?.streamGoalTarget ?? '',
-    discordAnnounceWebhookUrl: user?.discordAnnounceWebhookUrl || '',
-  });
-  const [publicPageData, setPublicPageData] = useState({
-    publicPageBannerUrl: user?.publicPageBannerUrl || '',
-    publicPageBannerPosition: user?.publicPageBannerPosition || 'top',
-  });
+  const [profileData, setProfileData] = useState(() => createProfileDataFromUser(user));
+  const [publicPageData, setPublicPageData] = useState(() => createPublicPageDataFromUser(user));
   const [profilePhotoUploading, setProfilePhotoUploading] = useState(false);
 
   const [notificationSettings, setNotificationSettings] = useState({
@@ -197,30 +205,6 @@ export default function Settings({ user, token, setUser, setAuth }) {
   }, [bannerMediaPickerFor, user?.id]);
 
   useEffect(() => {
-    if (user) {
-      setProfileData((prev) => ({
-        ...prev,
-        username: user.username || '',
-        email: user.email || '',
-        merchandisingLink: user.merchandisingLink || '',
-        merchandisingButtonPosition: user.merchandisingButtonPosition || 'bottom-right',
-        profileImageUrl: user.profileImageUrl || '',
-        dashboardShowTwitchSubs: user.dashboardShowTwitchSubs !== false,
-        dashboardShowTwitchBits: user.dashboardShowTwitchBits !== false,
-        dashboardShowTwitchDonations: user.dashboardShowTwitchDonations === true,
-        streamGoalType: user.streamGoalType || '',
-        streamGoalTarget: user.streamGoalTarget ?? '',
-        discordAnnounceWebhookUrl: user.discordAnnounceWebhookUrl || '',
-      }));
-      setPublicPageData((prev) => ({
-        ...prev,
-        publicPageBannerUrl: user.publicPageBannerUrl || '',
-        publicPageBannerPosition: user.publicPageBannerPosition || 'top',
-      }));
-    }
-  }, [user]);
-
-  useEffect(() => {
     const applyTheme = (theme) => {
       if (theme === 'dark') {
         document.documentElement.classList.add('dark');
@@ -258,16 +242,14 @@ export default function Settings({ user, token, setUser, setAuth }) {
   }, [customColorConfig]);
 
   useEffect(() => {
-    if (token) {
-      fetchLicenseStatus();
-      fetchSubscriptionStatus();
-      fetchPaymentHistory();
-      fetchConnectedAccounts();
-    }
+    fetchLicenseStatus();
+    fetchSubscriptionStatus();
+    fetchPaymentHistory();
+    fetchConnectedAccounts();
     fetchAvailableLicenses();
     fetchPaymentConfig();
-  // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps -- intentional: run on token change only
-  }, [token]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps -- mount bootstrap; token via tokenRef
+  }, []);
 
   useEffect(() => {
     const requestedTab = (searchParams.get('tab') || '').trim();
@@ -289,35 +271,35 @@ export default function Settings({ user, token, setUser, setAuth }) {
       setConnectingKey(null);
       toast.success(t(`settings.linked${linked.charAt(0).toUpperCase() + linked.slice(1)}`) || `Linked ${linked}`);
       setSearchParams({}, { replace: true });
-      if (token) fetchConnectedAccounts();
+      fetchConnectedAccounts();
     }
     if (twitchConnected) {
       setActiveTab('platforms');
       setConnectingKey(null);
       toast.success(t('settings.twitchPublishConnected') || 'Twitch connected for scheduling and bits.');
       setSearchParams({}, { replace: true });
-      if (token) fetchConnectedAccounts();
+      fetchConnectedAccounts();
     }
     if (twitchError) {
       setActiveTab('platforms');
       setConnectingKey(null);
       toast.error(decodeURIComponent(twitchError));
       setSearchParams({}, { replace: true });
-      if (token) fetchConnectedAccounts();
+      fetchConnectedAccounts();
     }
     if (youtubeConnected) {
       setActiveTab('platforms');
       setConnectingKey(null);
       toast.success(t('settings.youtubeConnected') || 'YouTube connected. You can schedule video uploads.');
       setSearchParams({}, { replace: true });
-      if (token) fetchConnectedAccounts();
+      fetchConnectedAccounts();
     }
     if (youtubeError) {
       setActiveTab('platforms');
       setConnectingKey(null);
       toast.error(decodeURIComponent(youtubeError));
       setSearchParams({}, { replace: true });
-      if (token) fetchConnectedAccounts();
+      fetchConnectedAccounts();
     }
     if (errorParam) {
       setActiveTab('platforms');
@@ -337,22 +319,6 @@ export default function Settings({ user, token, setUser, setAuth }) {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps -- searchParams and t are the triggers
   }, [searchParams, t]);
-
-  const shouldAutoconnectAkoenet = searchParams.get('autoconnect') === 'akoenet' && token;
-  const [autoconnectTabSync, setAutoconnectTabSync] = useState(false);
-
-  if (shouldAutoconnectAkoenet && !autoconnectTabSync) {
-    setAutoconnectTabSync(true);
-    setActiveTab('platforms');
-  }
-
-  useEffect(() => {
-    if (!shouldAutoconnectAkoenet) return;
-    if (hasTriggeredAkoenetAutoconnect.current) return;
-    hasTriggeredAkoenetAutoconnect.current = true;
-    handleAkoenetAutoConnect();
-  // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps, react-doctor/exhaustive-deps -- trigger only on query+auth availability
-  }, [shouldAutoconnectAkoenet]);
 
   const fetchConnectedAccounts = async () => {
     if (!token) return;
@@ -388,6 +354,10 @@ export default function Settings({ user, token, setUser, setAuth }) {
   };
 
   const fetchLicenseStatus = async () => {
+    if (!token) {
+      setLicenseInfo(null);
+      return;
+    }
     try {
       const res = await getLicenseStatus(token);
       setLicenseInfo(res.data);
@@ -398,6 +368,10 @@ export default function Settings({ user, token, setUser, setAuth }) {
   };
 
   const fetchSubscriptionStatus = async () => {
+    if (!token) {
+      setSubscriptionStatus(null);
+      return;
+    }
     try {
       const res = await getSubscriptionStatus(token);
       setSubscriptionStatus(res.data);
@@ -408,6 +382,10 @@ export default function Settings({ user, token, setUser, setAuth }) {
   };
 
   const fetchPaymentHistory = async () => {
+    if (!token) {
+      setPaymentHistory([]);
+      return;
+    }
     try {
       const res = await getPaymentHistory(token);
       setPaymentHistory(res.data.payments || []);
@@ -453,6 +431,15 @@ export default function Settings({ user, token, setUser, setAuth }) {
     }
   };
 
+  useEffect(() => {
+    if (searchParams.get('autoconnect') !== 'akoenet') return;
+    if (hasTriggeredAkoenetAutoconnect.current) return;
+    hasTriggeredAkoenetAutoconnect.current = true;
+    setActiveTab('platforms');
+    void handleAkoenetAutoConnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps -- OAuth return URL is external
+  }, [searchParams]);
+
   const handleConnect = (key) => {
     setConnectingKey(key);
     if (key === 'google') startGoogleLink();
@@ -481,7 +468,7 @@ export default function Settings({ user, token, setUser, setAuth }) {
       toast.success(t('settings.disconnected') || 'Disconnected');
     } catch (err) {
       toast.error(err.response?.data?.error || err.message || t('settings.linkFailed'));
-      if (token) fetchConnectedAccounts();
+      fetchConnectedAccounts();
       throw err;
     } finally {
       setDisconnectingKey(null);
@@ -769,11 +756,12 @@ export default function Settings({ user, token, setUser, setAuth }) {
 
   useEffect(() => {
     const checkPaymentStatus = async () => {
+      if (!token) return;
       const urlParams = new URLSearchParams(window.location.search);
       const paymentStatus = urlParams.get('payment');
       const subscriptionStatusParam = urlParams.get('subscription');
       const sessionId = urlParams.get('session_id');
-      if ((paymentStatus === 'success' || subscriptionStatusParam === 'success') && sessionId && token) {
+      if ((paymentStatus === 'success' || subscriptionStatusParam === 'success') && sessionId) {
         try {
           const result = await verifyPaymentSession({ sessionId, token });
           if (result.data.status === 'paid') {
@@ -792,9 +780,9 @@ export default function Settings({ user, token, setUser, setAuth }) {
         window.history.replaceState({}, document.title, '/settings');
       }
     };
-    if (token) checkPaymentStatus();
-  // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps -- run on token/url change
-  }, [token, t]);
+    checkPaymentStatus();
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps -- Stripe return URL is external
+  }, []);
 
   const handleProfilePhotoSelect = async (e) => {
     const file = e.target?.files?.[0];
