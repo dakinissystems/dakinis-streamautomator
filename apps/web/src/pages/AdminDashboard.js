@@ -12,8 +12,17 @@ import { buildPaymentsInvoicePdf } from '../utils/paymentInvoicePdf';
 import { devCatchLog } from '../utils/devCatchLog';
 import { PLATFORM_IDS } from '../constants/platforms.js';
 
+function isNetworkError(err) {
+  if (!err) return false;
+  const code = err.code || err.response?.code;
+  const msg = err.message || '';
+  return code === 'ERR_NETWORK' || code === 'ERR_NETWORK_CHANGED' || /network error/i.test(msg);
+}
+
 export default function AdminDashboard({ token, user, onLogout }) {
   const { t } = useLanguage();
+  const [searchParams] = useSearchParams();
+  const section = searchParams.get('section') || 'overview';
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -95,17 +104,27 @@ export default function AdminDashboard({ token, user, onLogout }) {
   const [discountCodesSaving, setDiscountCodesSaving] = useState(false);
   const networkErrorShownRef = useRef(false);
 
-  const isNetworkError = (err) => {
-    if (!err) return false;
-    const code = err.code || err.response?.code;
-    const msg = err.message || '';
-    return code === 'ERR_NETWORK' || code === 'ERR_NETWORK_CHANGED' || /network error/i.test(msg);
-  };
-
   const maybeShowNetworkError = (err) => {
     if (isNetworkError(err) && !networkErrorShownRef.current) {
       networkErrorShownRef.current = true;
       toast.error(t('admin.networkError') || 'Revisa tu conexión. Si cambió la red, recarga la página.');
+    }
+  };
+
+  const loadAdminFeatures = async () => {
+    if (!token) {
+      setAdminFeatures({ adminFinance: false, prometheusMetrics: false });
+      return;
+    }
+    try {
+      const f = await getAdminFeatures(token);
+      setAdminFeatures({
+        adminFinance: f.adminFinance !== false,
+        prometheusMetrics: !!f.prometheusMetrics,
+      });
+    } catch (e) {
+      devCatchLog('AdminDashboard.getAdminFeatures', e);
+      setAdminFeatures({ adminFinance: false, prometheusMetrics: false });
     }
   };
 
@@ -117,29 +136,17 @@ export default function AdminDashboard({ token, user, onLogout }) {
     fetchMessages();
     fetchUnreadCount();
     fetchPlatformConfig();
-    if (token) {
-      getAdminFeatures(token)
-        .then((f) =>
-          setAdminFeatures({
-            adminFinance: f.adminFinance !== false,
-            prometheusMetrics: !!f.prometheusMetrics,
-          })
-        )
-        .catch((e) => {
-          devCatchLog('AdminDashboard.getAdminFeatures', e);
-          setAdminFeatures({ adminFinance: false, prometheusMetrics: false });
-        });
-    }
+    void loadAdminFeatures();
     // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
-    if (token) fetchPaymentsList(paymentsOffset, paymentListFilters);
+    fetchPaymentsList(paymentsOffset, paymentListFilters);
     // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps
   }, [token, paymentsOffset, paymentListFilters.status, paymentListFilters.from, paymentListFilters.to]);
 
   const fetchAlertConfig = async () => {
-    if (!token) return;
+    if (!token || section !== 'alerts' || !adminFeatures.adminFinance) return;
     setAlertConfigLoading(true);
     try {
       const res = await getAlertConfig(token);
@@ -160,7 +167,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
   };
 
   const fetchFixedCostsList = async () => {
-    if (!token) return;
+    if (!token || !adminFeatures.adminFinance) return;
     setFixedCostsLoading(true);
     try {
       const res = await getFixedCosts(token);
@@ -183,12 +190,12 @@ export default function AdminDashboard({ token, user, onLogout }) {
   };
 
   useEffect(() => {
-    if (token && adminFeatures.adminFinance) fetchFixedCostsList();
+    fetchFixedCostsList();
     // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps
   }, [token, adminFeatures.adminFinance]);
 
   const fetchCostMetrics = async () => {
-    if (!token) return;
+    if (!token || !adminFeatures.adminFinance) return;
     setCostMetricsLoading(true);
     try {
       const res = await getCostMetrics(token);
@@ -208,12 +215,12 @@ export default function AdminDashboard({ token, user, onLogout }) {
   };
 
   useEffect(() => {
-    if (token && adminFeatures.adminFinance) fetchCostMetrics();
+    fetchCostMetrics();
     // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps
   }, [token, adminFeatures.adminFinance]);
 
   const fetchDiscountCodes = async () => {
-    if (!token) return;
+    if (!token || !adminFeatures.adminFinance) return;
     setDiscountCodesLoading(true);
     try {
       const res = await getDiscountCodes(token);
@@ -235,7 +242,7 @@ export default function AdminDashboard({ token, user, onLogout }) {
   };
 
   useEffect(() => {
-    if (token && adminFeatures.adminFinance) fetchDiscountCodes();
+    fetchDiscountCodes();
     // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps
   }, [token, adminFeatures.adminFinance]);
 
@@ -838,11 +845,9 @@ export default function AdminDashboard({ token, user, onLogout }) {
   };
 
   const expiringUsers = users.filter(u => u.licenseAlert === '7_days' || u.licenseAlert === '3_days' || u.licenseAlert === 'expired');
-  const [searchParams] = useSearchParams();
-  const section = searchParams.get('section') || 'overview';
 
   useEffect(() => {
-    if (token && section === 'alerts' && adminFeatures.adminFinance) fetchAlertConfig();
+    fetchAlertConfig();
   // eslint-disable-next-line react-hooks/exhaustive-deps, react-doctor/exhaustive-deps -- fetchAlertConfig when section is alerts
   }, [token, section, adminFeatures.adminFinance]);
 

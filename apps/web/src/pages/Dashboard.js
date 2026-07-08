@@ -56,6 +56,50 @@ import {
 import html2canvas from 'html2canvas';
 import { DISCORD_ICON_URL } from '../constants/platforms';
 
+function getDashboardPlatformIcon(platform, size = 'w-5 h-5') {
+  const className = `${size}`;
+  switch (platform) {
+    case 'twitch':
+      return <Twitch className={className} />;
+    case 'twitter':
+      return <Twitter className={className} />;
+    case 'instagram':
+      return <Instagram className={className} />;
+    case 'discord':
+      return (
+        <img
+          src={DISCORD_ICON_URL}
+          alt="Discord"
+          className={`${className} object-contain dark:invert`}
+        />
+      );
+    case 'youtube':
+      return <Video className={className} />;
+    default:
+      return null;
+  }
+}
+
+function getDashboardPlatformLabel(platform) {
+  const labels = { twitch: 'Twitch', twitter: 'Twitter', instagram: 'Instagram', discord: 'Discord', youtube: 'YouTube' };
+  return labels[platform] || platform;
+}
+
+function getDashboardStatusIcon(status) {
+  switch (status) {
+    case 'published':
+      return <CheckCircle className="w-4 h-4 text-green-500" />;
+    case 'scheduled':
+      return <Clock className="w-4 h-4 text-yellow-500" />;
+    case 'failed':
+      return <XCircle className="w-4 h-4 text-red-500" />;
+    case 'canceled':
+      return <XCircle className="w-4 h-4 text-gray-500" />;
+    default:
+      return <Clock className="w-4 h-4 text-gray-500" />;
+  }
+}
+
 const Dashboard = ({ user, token, ...props }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -110,6 +154,7 @@ const Dashboard = ({ user, token, ...props }) => {
   );
 
   const fetchContents = useCallback(async (options = {}) => {
+    if (!user || user.isAdmin) return;
     try {
       const response = await apiClient.get('/content', {
         params: {
@@ -140,11 +185,11 @@ const Dashboard = ({ user, token, ...props }) => {
     } finally {
       setLoading(false);
     }
-  }, [filters.status, filters.platform, filters.dateRange, searchTerm, token]);
+  }, [filters.status, filters.platform, filters.dateRange, searchTerm, token, user]);
 
   useEffect(() => {
-    if (user && !user.isAdmin) fetchContents();
-  }, [user, fetchContents]);
+    void fetchContents();
+  }, [fetchContents]);
 
   useEffect(() => {
     if (!showTwitchOnDashboard) {
@@ -251,50 +296,6 @@ const Dashboard = ({ user, token, ...props }) => {
       toast.error(t('dashboard.rouletteResetFailed') || 'Failed to reset');
     } finally {
       setRouletteLoading(false);
-    }
-  };
-
-  const getPlatformIcon = (platform, size = 'w-5 h-5') => {
-    const className = `${size}`;
-    switch (platform) {
-      case 'twitch':
-        return <Twitch className={className} />;
-      case 'twitter':
-        return <Twitter className={className} />;
-      case 'instagram':
-        return <Instagram className={className} />;
-      case 'discord':
-        return (
-          <img
-            src={DISCORD_ICON_URL}
-            alt="Discord"
-            className={`${className} object-contain dark:invert`}
-          />
-        );
-      case 'youtube':
-        return <Video className={className} />;
-      default:
-        return null;
-    }
-  };
-
-  const getPlatformLabel = (platform) => {
-    const labels = { twitch: 'Twitch', twitter: 'Twitter', instagram: 'Instagram', discord: 'Discord', youtube: 'YouTube' };
-    return labels[platform] || platform;
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'published':
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case 'scheduled':
-        return <Clock className="w-4 h-4 text-yellow-500" />;
-      case 'failed':
-        return <XCircle className="w-4 h-4 text-red-500" />;
-      case 'canceled':
-        return <XCircle className="w-4 h-4 text-gray-500" />;
-      default:
-        return <Clock className="w-4 h-4 text-gray-500" />;
     }
   };
 
@@ -690,9 +691,9 @@ const Dashboard = ({ user, token, ...props }) => {
                 key={platform}
                 className="inline-flex items-center justify-center w-4 h-4 rounded flex-shrink-0 text-white"
                 style={{ backgroundColor: getPlatformColor(platform) }}
-                title={getPlatformLabel(platform)}
+                title={getDashboardPlatformLabel(platform)}
               >
-                {getPlatformIcon(platform, 'w-3 h-3')}
+                {getDashboardPlatformIcon(platform, 'w-3 h-3')}
               </span>
             ))}
             {platforms.length > 4 && (
@@ -1274,8 +1275,8 @@ const Dashboard = ({ user, token, ...props }) => {
                         <div className="flex flex-wrap gap-1">
                               {Array.isArray(content.platforms)
                                 ? content.platforms.map((platform) => (
-                            <div key={platform} className="p-1.5 rounded inline-flex items-center text-white" style={{ backgroundColor: getPlatformColor(platform) }} title={getPlatformLabel(platform)}>
-                              {getPlatformIcon(platform)}
+                            <div key={platform} className="p-1.5 rounded inline-flex items-center text-white" style={{ backgroundColor: getPlatformColor(platform) }} title={getDashboardPlatformLabel(platform)}>
+                              {getDashboardPlatformIcon(platform)}
                                     </div>
                                   ))
                                 : null}
@@ -1287,7 +1288,7 @@ const Dashboard = ({ user, token, ...props }) => {
                       </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          {getStatusIcon(content.status)}
+                          {getDashboardStatusIcon(content.status)}
                           <span className="ml-2 text-sm text-gray-900 dark:text-gray-100 group-hover:dark:text-white capitalize transition-colors">{content.status}</span>
                         </div>
                       </td>
@@ -1370,8 +1371,8 @@ const Dashboard = ({ user, token, ...props }) => {
                       {Array.isArray(selectedContent.platforms)
                         ? selectedContent.platforms.map((platform) => (
                             <div key={platform} className="p-2 rounded-lg flex items-center space-x-2 text-white" style={{ backgroundColor: getPlatformColor(platform) }}>
-                              {getPlatformIcon(platform, 'w-5 h-5')}
-                              <span className="text-sm font-medium">{getPlatformLabel(platform)}</span>
+                              {getDashboardPlatformIcon(platform, 'w-5 h-5')}
+                              <span className="text-sm font-medium">{getDashboardPlatformLabel(platform)}</span>
                             </div>
                           ))
                         : null}
@@ -1381,7 +1382,7 @@ const Dashboard = ({ user, token, ...props }) => {
                   <div>
                     <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</h3>
                     <div className="flex items-center">
-                      {getStatusIcon(selectedContent.status)}
+                      {getDashboardStatusIcon(selectedContent.status)}
                       <span className="ml-2 text-sm capitalize text-gray-900 dark:text-gray-100">{selectedContent.status}</span>
                     </div>
                     {selectedContent.status === 'published' && selectedContent.publishedAt && (
