@@ -1,21 +1,15 @@
 /**
- * Supabase Client for Frontend
- * Uses Anon Key (public, safe for frontend)
- * Single instance (singleton) to avoid "Multiple GoTrueClient instances" warning.
+ * Supabase client for storage/OAuth — SDK loaded on demand (separate chunk).
+ * Public image URLs are built without shipping createClient in the main bundle.
  * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
-
-import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  // Supabase not configured; upload/OAuth may use backend only
-}
-
-// Rewrite requests to Supabase base URL only (no path) to /auth/v1/settings to avoid GET https://xxx.supabase.co/ 404 during OAuth
 const AUTH_SETTINGS_PATH = '/auth/v1/settings';
+const globalKey = '__STREAMER_SCHEDULER_SUPABASE__';
+
 function createSafeFetch() {
   const base = (supabaseUrl || '').replace(/\/$/, '');
   return function safeFetch(input, init) {
@@ -31,13 +25,14 @@ function createSafeFetch() {
   };
 }
 
-// Singleton: reuse one client across the app (avoids multiple GoTrueClient instances with HMR / multiple imports)
-const globalKey = '__STREAMER_SCHEDULER_SUPABASE__';
-function getSupabaseClient() {
+/** Lazy singleton — keeps @supabase/supabase-js out of the main app chunk. */
+export async function getSupabase() {
   if (typeof window !== 'undefined' && window[globalKey]) {
     return window[globalKey];
   }
   if (!supabaseUrl || !supabaseAnonKey) return null;
+
+  const { createClient } = await import('@supabase/supabase-js');
   const client = createClient(supabaseUrl, supabaseAnonKey, {
     global: { fetch: createSafeFetch() },
   });
@@ -47,16 +42,8 @@ function getSupabaseClient() {
   return client;
 }
 
-export const supabase = getSupabaseClient();
-
-/**
- * Upload a file to Supabase Storage
- * @param {File} file - The file to upload
- * @param {string} bucket - 'images' or 'videos'
- * @param {string} userId - User ID for organizing files
- * @returns {Promise<{path: string, error: Error|null}>}
- */
 export async function uploadFile(file, bucket, userId) {
+  const supabase = await getSupabase();
   if (!supabase) {
     const error = new Error('Supabase no está configurado. Verifica REACT_APP_SUPABASE_URL y REACT_APP_SUPABASE_ANON_KEY');
     return { path: null, error };
@@ -73,15 +60,12 @@ export async function uploadFile(file, bucket, userId) {
     const fileName = `${timestamp}-${sanitizedFileName}`;
     const filePath = userId ? `${userId}/${fileName}` : fileName;
 
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
+    const { data, error } = await supabase.storage.from(bucket).upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false,
+    });
 
     if (error) {
-      // Provide more specific error messages
       if (error.message.includes('Bucket not found')) {
         return { path: null, error: new Error('Bucket no encontrado. Verifica que los buckets "images" y "videos" existan en Supabase Storage') };
       }
@@ -97,7 +81,6 @@ export async function uploadFile(file, bucket, userId) {
   }
 }
 
-/** Supabase Storage path must be non-empty and not contain \ : * ? " < > | */
 function isStoragePathValid(filePath) {
   if (filePath == null || typeof filePath !== 'string') return false;
   const trimmed = filePath.trim();
@@ -106,7 +89,6 @@ function isStoragePathValid(filePath) {
   return true;
 }
 
-/** Avoid using the Supabase base URL as resource URL (causes GET base 404) */
 function ensureNotBaseUrl(url) {
   if (!url || typeof url !== 'string') return;
   const base = (supabaseUrl || '').replace(/\/$/, '');
@@ -116,34 +98,8 @@ function ensureNotBaseUrl(url) {
   }
 }
 
-/**
- * Get public URL for an image
- * @param {string} filePath - Path to the file in storage
- * @returns {string} Public URL
- */
-export function getPublicImageUrl(filePath) {
-  if (!supabase) {
-    throw new Error('Supabase no está configurado');
-  }
-  if (!isStoragePathValid(filePath)) {
-    throw new Error('requested path is invalid');
-  }
-
-  const { data } = supabase.storage
-    .from('images')
-    .getPublicUrl(filePath.trim().replace(/^\/+/, ''));
-
-  ensureNotBaseUrl(data.publicUrl);
-  return data.publicUrl;
-}
-
-/**
- * Get signed URL for a video (videos are private)
- * @param {string} filePath - Path to the file in storage
- * @param {number} expiresIn - Expiration time in seconds (default: 3600 = 1 hour)
- * @returns {Promise<string>} Signed URL
- */
 export async function getSignedVideoUrl(filePath, expiresIn = 3600) {
+  const supabase = await getSupabase();
   if (!supabase) {
     throw new Error('Supabase no está configurado');
   }
@@ -152,9 +108,7 @@ export async function getSignedVideoUrl(filePath, expiresIn = 3600) {
   }
 
   const path = filePath.trim().replace(/^\/+/, '');
-  const { data, error } = await supabase.storage
-    .from('videos')
-    .createSignedUrl(path, expiresIn);
+  const { data, error } = await supabase.storage.from('videos').createSignedUrl(path, expiresIn);
 
   if (error) throw error;
 

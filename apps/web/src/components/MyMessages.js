@@ -4,6 +4,10 @@ import { getMyMessages, getMessage, replyToMessage } from '../features/messaging
 import { useLanguage } from '../contexts/LanguageContext';
 import toast from 'react-hot-toast';
 
+function formatMessageDate(dateString) {
+  return new Date(dateString).toLocaleString();
+}
+
 export default function MyMessages({ token }) {
   const { t, language } = useLanguage();
   const [messages, setMessages] = useState([]);
@@ -130,9 +134,6 @@ export default function MyMessages({ token }) {
     );
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString();
-  };
 
   if (loading) {
     return (
@@ -188,7 +189,7 @@ export default function MyMessages({ token }) {
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 truncate mb-2">{msg.content}</p>
                 <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-500">
-                  <span>{formatDate(msg.createdAt)}</span>
+                  <span>{formatMessageDate(msg.createdAt)}</span>
                       {msg.attachments && msg.attachments.length > 0 && (
                         <span className="flex items-center gap-1">
                           <ImageIcon className="w-3 h-3" />
@@ -225,7 +226,7 @@ export default function MyMessages({ token }) {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-gray-600 dark:text-gray-400">Date:</span>
-                  <span className="ml-2 text-gray-900 dark:text-gray-100">{formatDate(selectedMessage.createdAt)}</span>
+                  <span className="ml-2 text-gray-900 dark:text-gray-100">{formatMessageDate(selectedMessage.createdAt)}</span>
                 </div>
                 <div>
                   <span className="text-gray-600 dark:text-gray-400">Status:</span>
@@ -251,7 +252,7 @@ export default function MyMessages({ token }) {
                     {t('messages.conversationResolved') || 'This conversation has been marked as resolved.'}
                     {selectedMessage.resolvedByUser && (
                       <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
-                        by {selectedMessage.resolvedByUser.username} on {formatDate(selectedMessage.resolvedAt)}
+                        by {selectedMessage.resolvedByUser.username} on {formatMessageDate(selectedMessage.resolvedAt)}
                       </span>
                     )}
                   </p>
@@ -300,7 +301,7 @@ export default function MyMessages({ token }) {
                         <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                           {reply.isAdmin ? t('messages.admin') || 'Administrator' : t('messages.you') || 'You'}
                         </span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">{formatDate(reply.createdAt)}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{formatMessageDate(reply.createdAt)}</span>
                       </div>
                       <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap mb-2">{reply.content}</p>
                       

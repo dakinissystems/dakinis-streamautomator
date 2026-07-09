@@ -24,6 +24,21 @@ import {
   Activity
 } from 'lucide-react';
 
+function getProfileActivityIcon(type) {
+  switch (type) {
+    case 'post_created':
+      return <Edit className="w-4 h-4 text-blue-500" />;
+    case 'post_published':
+      return <Share2 className="w-4 h-4 text-green-500" />;
+    case 'post_scheduled':
+      return <Clock className="w-4 h-4 text-purple-500" />;
+    case 'achievement_earned':
+      return <Award className="w-4 h-4 text-yellow-500" />;
+    default:
+      return <Activity className="w-4 h-4 text-gray-500" />;
+  }
+}
+
 const Profile = ({ user, token }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -87,22 +102,6 @@ const Profile = ({ user, token }) => {
   useEffect(() => {
     fetchProfileData();
   }, [fetchProfileData]);
-
-
-  const getActivityIcon = (type) => {
-    switch (type) {
-      case 'post_created':
-        return <Edit className="w-4 h-4 text-blue-500" />;
-      case 'post_published':
-        return <Share2 className="w-4 h-4 text-green-500" />;
-      case 'post_scheduled':
-        return <Clock className="w-4 h-4 text-purple-500" />;
-      case 'achievement_earned':
-        return <Award className="w-4 h-4 text-yellow-500" />;
-      default:
-        return <Activity className="w-4 h-4 text-gray-500" />;
-    }
-  };
 
 
   const getProgressPercentage = useCallback((current, target) => {
@@ -351,7 +350,7 @@ const Profile = ({ user, token }) => {
               {recentActivity.length > 0 ? (
                 recentActivity.map((activity) => (
                   <div key={`${activity.type}-${activity.timestamp}`} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                    {getActivityIcon(activity.type)}
+                    {getProfileActivityIcon(activity.type)}
                     <div className="flex-1">
                       <p className="text-sm font-medium text-gray-900">{activity.description}</p>
                       <p className="text-xs text-gray-500">{formatDate(activity.timestamp, { month: 'short', day: 'numeric', year: 'numeric' })}</p>

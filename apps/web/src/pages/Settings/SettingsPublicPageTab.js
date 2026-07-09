@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import { Image, Upload, ExternalLink, Calendar, Trash2 } from 'lucide-react';
 import { getUploadStats } from '../../utils/uploadHelper';
-import { getPublicImageUrl } from '../../utils/supabaseClient';
+import { getPublicImageUrl } from '../../utils/supabasePublicUrl';
 import { handleUpload } from '../../utils/uploadHelper';
 import { devCatchLog } from '../../utils/devCatchLog';
 import { getPublicStreamerShareUrl, getPublicShareLinkQueryString } from '../../shared/config/publicUrls';
