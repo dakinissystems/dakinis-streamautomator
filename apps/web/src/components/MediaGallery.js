@@ -6,7 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import { Image, Video, Check, Trash2 } from 'lucide-react';
-import { supabase, getPublicImageUrl } from '../utils/supabaseClient';
+import { getPublicImageUrl } from '../utils/supabasePublicUrl';
 import { getUploadStats } from '../utils/uploadHelper';
 import { deleteUpload, getVideoSignedUrl } from '../features/uploads/api';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -35,6 +35,8 @@ export default function MediaGallery({ user, onSelect, selectedUrls = [], showDe
   }, [user?.id]);
 
   const loadMediaFiles = async () => {
+    const { getSupabase } = await import('../utils/supabaseClient');
+    const supabase = await getSupabase();
     if (!user?.id || !supabase) {
       setLoading(false);
       return;

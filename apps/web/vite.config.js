@@ -80,7 +80,7 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       outDir: 'dist',
-      sourcemap: true,
+      sourcemap: mode !== 'production',
     },
     preview: {
       host: '0.0.0.0',

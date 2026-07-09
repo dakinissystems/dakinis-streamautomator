@@ -19,6 +19,14 @@ import AppFooter from './components/AppFooter';
 
 const PUBLIC_PAGES_WITH_OWN_FOOTER = ['/', '/pricing', '/privacy', '/terms', '/legal-notice', '/aviso-legal', '/faq'];
 
+function getSidebarLinkClasses(active) {
+  return `block px-3 py-2 rounded font-medium transition-colors ${
+    active
+      ? 'bg-color-sidebar/10 text-color-sidebar dark:bg-color-sidebar/20'
+      : 'text-gray-700 dark:text-gray-300 hover:bg-color-sidebar/10 dark:hover:bg-gray-700'
+  }`;
+}
+
 function Header({ user, token, onSignOut, onMenuClick, installPromptEvent, onInstallApp }) {
   const navigate = useNavigate();
   const { t, toggleLanguage, language } = useLanguage();
@@ -143,13 +151,6 @@ function Sidebar({ user, open, onClose, adminUnreadMessageCount = 0, adminFinanc
   const settingsTab = searchParams.get('tab') || 'profile';
   const supportCount = adminUnreadMessageCount ?? 0;
 
-  const getSidebarLinkClasses = (active) =>
-    `block px-3 py-2 rounded font-medium transition-colors ${
-      active
-        ? 'bg-color-sidebar/10 text-color-sidebar dark:bg-color-sidebar/20'
-        : 'text-gray-700 dark:text-gray-300 hover:bg-color-sidebar/10 dark:hover:bg-gray-700'
-    }`;
-  
   // Helper to check if route is active
   const isActive = (path) => {
     if (path.includes('?')) {
@@ -180,12 +181,11 @@ function Sidebar({ user, open, onClose, adminUnreadMessageCount = 0, adminFinanc
     <>
       {/* Mobile overlay: tap to close sidebar */}
       {open && (
-        <div
-          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+        <button
+          type="button"
+          className="fixed inset-0 z-30 bg-black/50 md:hidden border-0 p-0 cursor-default"
           onClick={onClose}
           onKeyDown={(e) => e.key === 'Escape' && onClose()}
-          role="button"
-          tabIndex={0}
           aria-label={t('common.closeMenu')}
         />
       )}

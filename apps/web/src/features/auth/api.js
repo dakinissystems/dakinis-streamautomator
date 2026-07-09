@@ -1,6 +1,5 @@
 import { apiClient, API_BASE_URL } from '../../shared/api/client';
 import { getApiBasePath } from '../../shared/config/apiOrigin.js';
-import { supabase } from '../../utils/supabaseClient';
 
 const OAUTH_LINK_MODE_KEY = 'oauthLinkMode';
 
@@ -28,6 +27,8 @@ export async function forgotPassword({ email }) {
 }
 
 export async function loginWithGoogle() {
+  const { getSupabase } = await import('../../utils/supabaseClient');
+  const supabase = await getSupabase();
   if (supabase) {
     const redirectTo = getOAuthRedirectUrl();
     const options = { redirectTo, queryParams: { prompt: 'select_account' } };
@@ -47,6 +48,8 @@ export function loginWithTwitch() {
 }
 
 export async function loginWithTwitter() {
+  const { getSupabase } = await import('../../utils/supabaseClient');
+  const supabase = await getSupabase();
   if (!supabase) throw new Error('Supabase not configured');
   const redirectTo = getOAuthRedirectUrl();
   const { data, error } = await supabase.auth.signInWithOAuth({

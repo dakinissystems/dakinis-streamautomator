@@ -34,6 +34,42 @@ import { parsePastedPost } from '../utils/copyPastePost';
 import { TWITTER_MAX_CHARS, DISCORD_ICON_URL } from '../constants/platforms';
 import { devCatchLog } from '../utils/devCatchLog';
 
+function scheduleErrStr(v) {
+  return typeof v === 'string' ? v : (v && typeof v.message === 'string' ? v.message : '');
+}
+
+function normalizeScheduleMediaItems(items) {
+  if (!items || !items.length) return [];
+  return items.map((item) => {
+    if (typeof item === 'string') return { url: item };
+    return {
+      url: item.url,
+      ...(item.fileName && { fileName: item.fileName }),
+      ...(item.type && { type: item.type }),
+      ...(item.durationSeconds !== undefined && { durationSeconds: item.durationSeconds }),
+      ...(item.file_path && { file_path: item.file_path }),
+    };
+  });
+}
+
+function getSchedulePlatformIcon(platformId, discordSelected = false) {
+  switch (platformId) {
+    case 'twitch': return <Twitch className="w-6 h-6" />;
+    case 'twitter': return <Twitter className="w-6 h-6" />;
+    case 'instagram': return <Instagram className="w-6 h-6" />;
+    case 'discord':
+      return (
+        <img
+          src={DISCORD_ICON_URL}
+          alt="Discord"
+          className={`w-6 h-6 object-contain ${discordSelected ? 'invert' : ''}`}
+        />
+      );
+    case 'youtube': return <Video className="w-6 h-6" />;
+    default: return <Share2 className="w-6 h-6" />;
+  }
+}
+
 // Content types available per platform (platform-first UX)
 const PLATFORM_CONTENT_TYPES = {
   discord: ['post', 'event'],
@@ -99,9 +135,6 @@ const Schedule = ({ user, token }) => {
   const [errors, setErrors] = useState({});
   const [showTour, setShowTour] = useState(false);
   const [enabledPlatforms, setEnabledPlatforms] = useState([]);
-
-  /** Ensure we never render an object as React child (API may return { field, message }). */
-  const errStr = (v) => (typeof v === 'string' ? v : (v && typeof v.message === 'string' ? v.message : ''));
 
   // Tour steps
   const steps = [
@@ -420,7 +453,7 @@ const Schedule = ({ user, token }) => {
         platforms: formData.platforms,
         scheduledFor: scheduledDateTime.toISOString(), // Convert to UTC ISO string
         timezone: formData.timezone,
-        mediaItems: normalizeMediaItems(formData.mediaItems), // Include media with metadata
+        mediaItems: normalizeScheduleMediaItems(formData.mediaItems), // Include media with metadata
         recurrence: formData.recurrence
       };
       
@@ -756,20 +789,6 @@ const Schedule = ({ user, token }) => {
     }
   };
 
-  const normalizeMediaItems = (items) => {
-    if (!items || !items.length) return [];
-    return items.map((item) => {
-      if (typeof item === 'string') return { url: item };
-      return {
-        url: item.url,
-        ...(item.fileName && { fileName: item.fileName }),
-        ...(item.type && { type: item.type }),
-        ...(item.durationSeconds !== undefined && { durationSeconds: item.durationSeconds }),
-        ...(item.file_path && { file_path: item.file_path })
-      };
-    });
-  };
-
   const handleMediaSelect = (url, bucket, extra = {}) => {
     setFormData(prev => {
       const items = prev.mediaItems || [];
@@ -800,24 +819,6 @@ const Schedule = ({ user, token }) => {
       mediaItems: [...(prev.mediaItems || []), item]
     }));
     toast.success(t('schedule.fileAdded'));
-  };
-
-  const getPlatformIcon = (platformId, discordSelected = false) => {
-    switch (platformId) {
-      case 'twitch': return <Twitch className="w-6 h-6" />;
-      case 'twitter': return <Twitter className="w-6 h-6" />;
-      case 'instagram': return <Instagram className="w-6 h-6" />;
-      case 'discord':
-        return (
-          <img
-            src={DISCORD_ICON_URL}
-            alt="Discord"
-            className={`w-6 h-6 object-contain ${discordSelected ? 'invert' : ''}`}
-          />
-        );
-      case 'youtube': return <Video className="w-6 h-6" />;
-      default: return <Share2 className="w-6 h-6" />;
-    }
   };
 
   const platformColorsMap = getPlatformColors();
@@ -960,7 +961,7 @@ const Schedule = ({ user, token }) => {
                 )}
               </div>
               {errors.title && (
-                <p className="mt-1 text-sm text-red-600">{errStr(errors.title)}</p>
+                <p className="mt-1 text-sm text-red-600">{scheduleErrStr(errors.title)}</p>
               )}
                   </div>
                   
@@ -993,7 +994,7 @@ const Schedule = ({ user, token }) => {
                     </div>
               <div className="flex justify-between items-center mt-1">
                 {errors.content && (
-                  <p className="text-sm text-red-600">{errStr(errors.content)}</p>
+                  <p className="text-sm text-red-600">{scheduleErrStr(errors.content)}</p>
                 )}
                 <p className={`text-sm ml-auto ${formData.platforms.includes('twitter') && formData.content.length > TWITTER_MAX_CHARS ? 'text-red-600 dark:text-red-400' : 'text-gray-500'}`}>
                   {formData.content.length}/{formData.platforms.includes('twitter') ? TWITTER_MAX_CHARS : 500} {t('schedule.characters')}
@@ -1211,7 +1212,7 @@ const Schedule = ({ user, token }) => {
                       }`}
                       style={isSelected ? { backgroundColor: bgColor } : undefined}
                     >
-                      {getPlatformIcon(platform.id, isSelected)}
+                      {getSchedulePlatformIcon(platform.id, isSelected)}
                       <span className="text-sm font-medium">{platform.name}</span>
                       {isSelected && (
                         <CheckCircle className="w-4 h-4" />
@@ -1221,7 +1222,7 @@ const Schedule = ({ user, token }) => {
                 })}
               </div>
               {errors.platforms && (
-                <p className="mt-1 text-sm text-red-600">{errStr(errors.platforms)}</p>
+                <p className="mt-1 text-sm text-red-600">{scheduleErrStr(errors.platforms)}</p>
               )}
 
             {/* Content type: options depend on selected platform(s) */}
@@ -1257,7 +1258,7 @@ const Schedule = ({ user, token }) => {
                 )}
               </select>
               {errors.contentType && (
-                <p className="mt-1 text-sm text-red-600">{errStr(errors.contentType)}</p>
+                <p className="mt-1 text-sm text-red-600">{scheduleErrStr(errors.contentType)}</p>
               )}
               {formData.contentType === 'event' && (
                 <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
@@ -1360,7 +1361,7 @@ const Schedule = ({ user, token }) => {
                         ))}
                       </select>
                       {errors.discordChannel && (
-                        <p className="mt-1 text-sm text-red-600">{errStr(errors.discordChannel)}</p>
+                        <p className="mt-1 text-sm text-red-600">{scheduleErrStr(errors.discordChannel)}</p>
                       )}
                     </>
                   )}
@@ -1620,7 +1621,7 @@ const Schedule = ({ user, token }) => {
                     />
                   </div>
                   {errors.scheduledFor && (
-                    <p className="mt-1 text-sm text-red-600">{errStr(errors.scheduledFor)}</p>
+                    <p className="mt-1 text-sm text-red-600">{scheduleErrStr(errors.scheduledFor)}</p>
                   )}
                 </div>
 
@@ -1641,7 +1642,7 @@ const Schedule = ({ user, token }) => {
                     />
                   </div>
                   {errors.scheduledTime && (
-                    <p className="mt-1 text-sm text-red-600">{errStr(errors.scheduledTime)}</p>
+                    <p className="mt-1 text-sm text-red-600">{scheduleErrStr(errors.scheduledTime)}</p>
                   )}
                 </div>
               </div>
