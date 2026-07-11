@@ -2629,26 +2629,28 @@ router.post('/forgot-password', validateBody(forgotPasswordSchema), async (req, 
   try {
     const user = await User.findOne({ where: { email } });
     if (!user) {
-      // Don't reveal if user exists or not (security best practice)
       return res.json({ message: 'If an account with that email exists, a password reset link has been sent.' });
     }
-    
-    // Check if user is OAuth-only
+
     if (!user.passwordHash) {
-      return res.status(400).json({ error: 'This account uses OAuth and does not have a password. Please sign in with Google or Twitch.' });
+      return res.status(400).json({
+        error: 'This account uses OAuth and does not have a password. Please sign in with Google or Twitch.',
+      });
     }
-    
-    // Generate a secure temporary password
-    const tempPassword = generateTemporaryPassword(12);
-    const hash = await bcrypt.hash(tempPassword, 10);
-    user.passwordHash = hash;
-    user.lastPasswordChange = new Date();
-    await user.save();
-    
-    // TODO: In production, send email with reset link or temporary password
-    // NEVER expose passwords in API responses
-    res.json({ 
-      message: 'Password reset successful. Please check your email for the temporary password.'
+
+    const authBase = String(process.env.DAKINIS_AUTH_URL || process.env.AUTH_PUBLIC_URL || 'https://auth.dakinissystems.com').replace(/\/$/, '');
+    try {
+      await fetch(`${authBase}/auth/password-reset/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+    } catch (proxyErr) {
+      logger.warn('forgot-password: auth proxy failed', { error: proxyErr?.message });
+    }
+
+    return res.json({
+      message: 'If an account with that email exists, a password reset link has been sent.',
     });
   } catch (err) {
     logger.error('Error in forgot password', {
