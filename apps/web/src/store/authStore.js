@@ -4,7 +4,7 @@
  * Copyright © 2024-2026 Dakinis Systems. All rights reserved.
  */
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { isTokenExpired, getStoredAuth, clearAuth as clearStoredAuth, persistAuthUser, persistAuthToken } from '../utils/auth';
 
 const AuthContext = createContext(null);
@@ -35,30 +35,33 @@ export function AuthProvider({ children }) {
     persistAuthToken(token);
   }, [token]);
 
-  const setAuth = (newUser, newToken) => {
+  const setAuth = useCallback((newUser, newToken) => {
     setUser(newUser);
     setToken(newToken);
-  };
+  }, []);
 
-  const clearAuth = () => {
+  const clearAuth = useCallback(() => {
     setUser(null);
     setToken(null);
     clearStoredAuth();
-  };
+  }, []);
 
-  const isAuthenticated = () => {
+  const isAuthenticated = useCallback(() => {
     return !!token && !isTokenExpired(token);
-  };
+  }, [token]);
 
-  const value = {
-    user,
-    token,
-    setAuth,
-    clearAuth,
-    isAuthenticated,
-    setUser,
-    setToken,
-  };
+  const value = useMemo(
+    () => ({
+      user,
+      token,
+      setAuth,
+      clearAuth,
+      isAuthenticated,
+      setUser,
+      setToken,
+    }),
+    [user, token, setAuth, clearAuth, isAuthenticated],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
