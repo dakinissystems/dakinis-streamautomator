@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import {
   linkGoogleWithSupabaseToken,
   linkTwitchWithSupabaseToken,
@@ -41,23 +41,41 @@ function userFromJwt(token) {
   }
 }
 
+function redirectTo(path) {
+  const target = path.startsWith('/') ? path : `/${path}`;
+  window.location.replace(target);
+}
+
+function applyAuth(setAuth, user, token) {
+  const stored = getStoredAuth();
+  if (stored.token === token && stored.user?.id === user?.id) {
+    return;
+  }
+  setAuth(user, token);
+}
+
 export default function AuthCallback({ setAuth }) {
   const { t } = useLanguage();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const finishedRef = useRef(false);
+  const handlingRef = useRef(false);
+  const queryString = searchParams.toString();
 
   useEffect(() => {
+    const hashRaw = window.location.hash?.substring(1) || '';
+    const lockKey = `sa_oauth:${queryString}:${hashRaw}`;
+    if (sessionStorage.getItem('sa_oauth_lock') === lockKey) return;
+    if (handlingRef.current) return;
+    handlingRef.current = true;
+    sessionStorage.setItem('sa_oauth_lock', lockKey);
+
     let cancelled = false;
 
-    const finish = (path, { replace = true } = {}) => {
-      if (cancelled || finishedRef.current) return;
-      finishedRef.current = true;
-      navigate(path, { replace });
+    const finish = (path) => {
+      if (cancelled) return;
+      redirectTo(path);
     };
 
     const run = async () => {
-      const hashRaw = window.location.hash?.substring(1) || '';
       const hashParams = new URLSearchParams(hashRaw);
       const accessToken = hashParams.get('access_token');
       const errorParam = hashParams.get('error');
@@ -71,7 +89,7 @@ export default function AuthCallback({ setAuth }) {
       if (!hasOAuthPayload) {
         const { token: storedToken, user: storedUser } = getStoredAuth();
         if (storedToken && storedUser && !isTokenExpired(storedToken)) {
-          setAuth(storedUser, storedToken);
+          applyAuth(setAuth, storedUser, storedToken);
           finish(consumePostLoginRedirect() || '/dashboard');
           return;
         }
@@ -92,7 +110,6 @@ export default function AuthCallback({ setAuth }) {
           try {
             await linkGoogleWithSupabaseToken(accessToken);
             clearOAuthLinkMode();
-            window.history.replaceState(null, '', window.location.pathname + window.location.search);
             finish('/settings?linked=google');
           } catch (error) {
             clearOAuthLinkMode();
@@ -105,7 +122,6 @@ export default function AuthCallback({ setAuth }) {
           try {
             await linkTwitchWithSupabaseToken(accessToken);
             clearOAuthLinkMode();
-            window.history.replaceState(null, '', window.location.pathname + window.location.search);
             finish('/settings?linked=twitch');
           } catch (error) {
             clearOAuthLinkMode();
@@ -118,7 +134,6 @@ export default function AuthCallback({ setAuth }) {
           try {
             await linkTwitterWithSupabaseToken(accessToken);
             clearOAuthLinkMode();
-            window.history.replaceState(null, '', window.location.pathname + window.location.search);
             finish('/settings?linked=twitter');
           } catch (error) {
             clearOAuthLinkMode();
@@ -144,8 +159,7 @@ export default function AuthCallback({ setAuth }) {
             const message = [data.error, data.details].filter(Boolean).join(' - ') || 'OAuth login failed';
             throw Object.assign(new Error(message), { response: { data, status: res.status } });
           }
-          setAuth(data.user, data.token);
-          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          applyAuth(setAuth, data.user, data.token);
           finish(consumePostLoginRedirect() || '/dashboard');
         } catch (error) {
           const msg = error?.name === 'AbortError'
@@ -177,8 +191,7 @@ export default function AuthCallback({ setAuth }) {
           if (!user) {
             throw new Error(t('login.authDataError') || 'Invalid auth data');
           }
-          setAuth(user, token);
-          window.history.replaceState(null, '', window.location.pathname);
+          applyAuth(setAuth, user, token);
           if (returnTo === 'discord') {
             finish('/schedule');
             return;
@@ -199,7 +212,7 @@ export default function AuthCallback({ setAuth }) {
     return () => {
       cancelled = true;
     };
-  }, [searchParams, setAuth, navigate, t]);
+  }, [queryString, setAuth, t]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
