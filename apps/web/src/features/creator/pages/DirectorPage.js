@@ -42,7 +42,9 @@ export default function DirectorPage() {
       toast.success('Sesión Director iniciada');
       load();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Error al iniciar');
+      const details = err.response?.data?.details;
+      const message = err.response?.data?.error || 'Error al iniciar';
+      toast.error(details ? `${message}: ${details}` : message);
     }
   };
 
