@@ -26,18 +26,37 @@ function consumeOAuthReturnTo() {
   return raw === 'discord' ? 'discord' : null;
 }
 
+function userFromJwt(token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if (!payload?.id) return null;
+    return {
+      id: payload.id,
+      email: payload.email,
+      username: payload.username,
+      isAdmin: Boolean(payload.isAdmin),
+    };
+  } catch {
+    return null;
+  }
+}
+
 export default function AuthCallback({ setAuth }) {
   const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const handledRef = useRef(false);
+  const finishedRef = useRef(false);
 
   useEffect(() => {
-    let timeoutId = null;
-    const run = async () => {
-      // Prevent double run (e.g. React Strict Mode): second run often sees hash already cleared
-      if (handledRef.current) return;
+    let cancelled = false;
 
+    const finish = (path, { replace = true } = {}) => {
+      if (cancelled || finishedRef.current) return;
+      finishedRef.current = true;
+      navigate(path, { replace });
+    };
+
+    const run = async () => {
       const hashRaw = window.location.hash?.substring(1) || '';
       const hashParams = new URLSearchParams(hashRaw);
       const accessToken = hashParams.get('access_token');
@@ -46,44 +65,39 @@ export default function AuthCallback({ setAuth }) {
       const token = searchParams.get('token');
       const userParam = searchParams.get('user');
       const queryError = searchParams.get('error');
-      const hasOAuthPayload = Boolean(accessToken || (token && userParam) || errorParam || queryError);
+      const reason = searchParams.get('reason');
+      const hasOAuthPayload = Boolean(accessToken || token || errorParam || queryError);
 
-      // Already logged in but landed on /auth/callback (refresh, back button, stale URL)
       if (!hasOAuthPayload) {
         const { token: storedToken, user: storedUser } = getStoredAuth();
         if (storedToken && storedUser && !isTokenExpired(storedToken)) {
-          handledRef.current = true;
           setAuth(storedUser, storedToken);
-          navigate(consumePostLoginRedirect() || '/dashboard', { replace: true });
+          finish(consumePostLoginRedirect() || '/dashboard');
           return;
         }
-        navigate(queryError ? `/login?error=${queryError}` : '/login', { replace: true });
+        finish(queryError ? `/login?error=${queryError}` : '/login');
         return;
       }
 
-      // Handle OAuth errors from Supabase
       if (errorParam && !accessToken) {
         console.error('OAuth error in hash', { error: errorParam, description: errorDescription });
-        const errorMsg = errorDescription || errorParam || t('login.oauthFailed');
-        window.alert(errorMsg);
-        navigate('/login?error=oauth_failed');
+        window.alert(errorDescription || errorParam || t('login.oauthFailed'));
+        finish('/login?error=oauth_failed');
         return;
       }
 
       if (accessToken) {
-        handledRef.current = true;
         const linkMode = getOAuthLinkMode();
         if (linkMode === 'google') {
           try {
             await linkGoogleWithSupabaseToken(accessToken);
             clearOAuthLinkMode();
             window.history.replaceState(null, '', window.location.pathname + window.location.search);
-            navigate('/settings?linked=google');
+            finish('/settings?linked=google');
           } catch (error) {
             clearOAuthLinkMode();
-            const msg = error?.response?.data?.error || error?.message || t('login.linkGoogleFailed');
-            window.alert(msg);
-            navigate('/settings?error=link_google_failed');
+            window.alert(error?.response?.data?.error || error?.message || t('login.linkGoogleFailed'));
+            finish('/settings?error=link_google_failed');
           }
           return;
         }
@@ -92,12 +106,11 @@ export default function AuthCallback({ setAuth }) {
             await linkTwitchWithSupabaseToken(accessToken);
             clearOAuthLinkMode();
             window.history.replaceState(null, '', window.location.pathname + window.location.search);
-            navigate('/settings?linked=twitch');
+            finish('/settings?linked=twitch');
           } catch (error) {
             clearOAuthLinkMode();
-            const msg = error?.response?.data?.error || error?.message || t('login.linkTwitchFailed');
-            window.alert(msg);
-            navigate('/settings?error=link_twitch_failed');
+            window.alert(error?.response?.data?.error || error?.message || t('login.linkTwitchFailed'));
+            finish('/settings?error=link_twitch_failed');
           }
           return;
         }
@@ -106,13 +119,11 @@ export default function AuthCallback({ setAuth }) {
             await linkTwitterWithSupabaseToken(accessToken);
             clearOAuthLinkMode();
             window.history.replaceState(null, '', window.location.pathname + window.location.search);
-            navigate('/settings?linked=twitter');
+            finish('/settings?linked=twitter');
           } catch (error) {
-            console.error('Link Twitter error:', error);
             clearOAuthLinkMode();
-            const msg = error?.response?.data?.error || error?.message || t('login.linkTwitterFailed');
-            window.alert(msg);
-            navigate('/settings?error=link_twitter_failed');
+            window.alert(error?.response?.data?.error || error?.message || t('login.linkTwitterFailed'));
+            finish('/settings?error=link_twitter_failed');
           }
           return;
         }
@@ -133,66 +144,60 @@ export default function AuthCallback({ setAuth }) {
             const message = [data.error, data.details].filter(Boolean).join(' - ') || 'OAuth login failed';
             throw Object.assign(new Error(message), { response: { data, status: res.status } });
           }
-          const { token: jwt, user } = data;
-          setAuth(user, jwt);
-          const postLoginRedirect = consumePostLoginRedirect();
+          setAuth(data.user, data.token);
           window.history.replaceState(null, '', window.location.pathname + window.location.search);
-          navigate(postLoginRedirect || '/dashboard', { replace: true });
+          finish(consumePostLoginRedirect() || '/dashboard');
         } catch (error) {
           const msg = error?.name === 'AbortError'
             ? (t('login.oauthTimeout') || 'Authentication timed out. Try again.')
             : (error?.message || error?.response?.data?.error || 'OAuth login failed');
           window.alert(msg);
-          navigate('/login?error=oauth_failed');
+          finish('/login?error=oauth_failed');
         }
         return;
       }
 
-      // 2) Backend Passport OAuth callback: token and user in query (?token=...&user=...)
       const returnTo = consumeOAuthReturnTo();
-      const error = queryError;
-      const reason = searchParams.get('reason');
 
-      if (error && !token) {
-        console.error('OAuth error in query params', { error, reason });
-        const errorMsg = reason || error || t('login.oauthFailed');
-        window.alert(errorMsg);
-        navigate(`/login?error=${error}`);
+      if (queryError && !token) {
+        window.alert(reason || queryError || t('login.oauthFailed'));
+        finish(`/login?error=${queryError}`);
         return;
       }
 
-      if (token && userParam) {
-        handledRef.current = true;
+      // Twitch / Discord / Twitter Passport OAuth → ?token=...&user=...
+      if (token) {
         try {
-          const user = JSON.parse(decodeURIComponent(userParam));
+          let user = null;
+          if (userParam) {
+            user = JSON.parse(decodeURIComponent(userParam));
+          } else {
+            user = userFromJwt(token);
+          }
+          if (!user) {
+            throw new Error(t('login.authDataError') || 'Invalid auth data');
+          }
           setAuth(user, token);
-          const postLoginRedirect = consumePostLoginRedirect();
-          
-          // Clean URL before navigation to prevent Chrome navigation issues
           window.history.replaceState(null, '', window.location.pathname);
-          
-          // Use setTimeout to ensure state is set before navigation
-          timeoutId = setTimeout(() => {
-            if (returnTo === 'discord') {
-              navigate('/schedule', { replace: true });
-              return;
-            }
-            navigate(postLoginRedirect || '/dashboard', { replace: true });
-          }, 100);
+          if (returnTo === 'discord') {
+            finish('/schedule');
+            return;
+          }
+          finish(consumePostLoginRedirect() || '/dashboard');
         } catch (error) {
-          console.error('Error parsing user data:', error);
-          window.alert(t('login.authDataError'));
-          navigate('/login?error=oauth_failed', { replace: true });
+          console.error('Passport OAuth callback error:', error);
+          window.alert(error?.message || t('login.authDataError'));
+          finish('/login?error=oauth_failed');
         }
         return;
       }
 
-      navigate('/login', { replace: true });
+      finish('/login');
     };
 
     run();
     return () => {
-      if (timeoutId != null) clearTimeout(timeoutId);
+      cancelled = true;
     };
   }, [searchParams, setAuth, navigate, t]);
 
