@@ -4,6 +4,7 @@ import { login, register, loginWithGoogle, loginWithTwitch, loginWithTwitter, lo
 import { useLanguage } from '../contexts/LanguageContext';
 import { Eye } from 'lucide-react';
 import LoginOAuthButtons from './Login/LoginOAuthButtons';
+import { consumeOAuthLoginError } from '../utils/oauthLoginError';
 
 export default function Login({ setAuth }) {
   const { t } = useLanguage();
@@ -21,6 +22,8 @@ export default function Login({ setAuth }) {
   const [resetLoading, setResetLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [urlOAuthError, setUrlOAuthError] = useState(null);
+  const [urlOAuthNotice, setUrlOAuthNotice] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -77,10 +80,19 @@ export default function Login({ setAuth }) {
   }, [location.search, t]);
 
   useEffect(() => {
-    if (oauthFromUrl?.oauthError) {
-      window.history.replaceState({}, document.title, '/login');
+    const persisted = consumeOAuthLoginError();
+    if (persisted?.message) {
+      setError(persisted.message);
+      if (persisted.detail) setNotice(persisted.detail);
     }
-  }, [oauthFromUrl?.oauthError]);
+  }, []);
+
+  useEffect(() => {
+    if (!oauthFromUrl?.oauthError) return;
+    if (oauthFromUrl.derivedError) setUrlOAuthError(oauthFromUrl.derivedError);
+    if (oauthFromUrl.derivedNotice) setUrlOAuthNotice(oauthFromUrl.derivedNotice);
+    window.history.replaceState({}, document.title, '/login');
+  }, [oauthFromUrl?.oauthError, oauthFromUrl?.derivedError, oauthFromUrl?.derivedNotice]);
 
   const slug = getSlugFromLocation();
   const [slugRoute, setSlugRoute] = useState(location.search);
@@ -92,8 +104,8 @@ export default function Login({ setAuth }) {
     }
   }
 
-  const displayError = error ?? oauthFromUrl?.derivedError ?? null;
-  const displayNotice = notice ?? oauthFromUrl?.derivedNotice ?? null;
+  const displayError = error ?? urlOAuthError ?? null;
+  const displayNotice = notice ?? urlOAuthNotice ?? null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -210,8 +222,16 @@ export default function Login({ setAuth }) {
       <button type="button" onClick={() => navigate('/')} className="absolute top-4 left-4 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">← {t('common.back')}</button>
       <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-5 sm:p-8 rounded-lg shadow-md w-full max-w-sm min-w-0">
         <h1 className="text-2xl font-bold mb-6 text-center text-gray-900 dark:text-gray-100">{isRegister ? t('login.createAccount') : t('login.title')}</h1>
-        {displayError && <div className="mb-4 text-red-600 dark:text-red-400 text-center">{displayError}</div>}
-        {displayNotice && <div className="mb-4 text-yellow-700 dark:text-yellow-400 text-center">{displayNotice}</div>}
+        {displayError && (
+          <div className="mb-4 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-3 py-2 text-red-700 dark:text-red-300 text-center text-sm">
+            {displayError}
+          </div>
+        )}
+        {displayNotice && (
+          <div className="mb-4 rounded-lg border border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 px-3 py-2 text-yellow-800 dark:text-yellow-300 text-center text-sm">
+            {displayNotice}
+          </div>
+        )}
         
         <LoginOAuthButtons isRegister={isRegister} loading={loading} onOAuthLogin={handleOAuthLogin} t={t} />
         {isRegister && (

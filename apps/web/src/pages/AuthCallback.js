@@ -10,6 +10,7 @@ import {
 import { API_BASE_URL } from '../shared/api/client';
 import { getStoredAuth, isTokenExpired } from '../utils/auth';
 import { useLanguage } from '../contexts/LanguageContext';
+import { persistOAuthLoginError, logAuthDebug } from '../utils/oauthLoginError';
 
 function consumePostLoginRedirect() {
   if (typeof sessionStorage === 'undefined') return null;
@@ -44,6 +45,11 @@ function userFromJwt(token) {
 function redirectTo(path) {
   const target = path.startsWith('/') ? path : `/${path}`;
   window.location.replace(target);
+}
+
+function redirectToLoginWithError(message, code = 'oauth_failed', detail = null) {
+  persistOAuthLoginError(message, detail);
+  redirectTo(`/login?error=${encodeURIComponent(code)}`);
 }
 
 function applyAuth(setAuth, user, token) {
@@ -98,9 +104,9 @@ export default function AuthCallback({ setAuth }) {
       }
 
       if (errorParam && !accessToken) {
-        console.error('OAuth error in hash', { error: errorParam, description: errorDescription });
-        window.alert(errorDescription || errorParam || t('login.oauthFailed'));
-        finish('/login?error=oauth_failed');
+        const message = errorDescription || errorParam || t('login.oauthFailed');
+        logAuthDebug('oauth.hash_error', { message, errorParam, errorDescription });
+        redirectToLoginWithError(message, 'oauth_failed', errorDescription || null);
         return;
       }
 
@@ -165,8 +171,8 @@ export default function AuthCallback({ setAuth }) {
           const msg = error?.name === 'AbortError'
             ? (t('login.oauthTimeout') || 'Authentication timed out. Try again.')
             : (error?.message || error?.response?.data?.error || 'OAuth login failed');
-          window.alert(msg);
-          finish('/login?error=oauth_failed');
+          logAuthDebug('oauth.google_login', error);
+          redirectToLoginWithError(msg, 'oauth_failed');
         }
         return;
       }
@@ -174,8 +180,9 @@ export default function AuthCallback({ setAuth }) {
       const returnTo = consumeOAuthReturnTo();
 
       if (queryError && !token) {
-        window.alert(reason || queryError || t('login.oauthFailed'));
-        finish(`/login?error=${queryError}`);
+        const message = reason || queryError || t('login.oauthFailed');
+        logAuthDebug('oauth.query_error', { message, queryError, reason });
+        redirectToLoginWithError(message, queryError, reason || null);
         return;
       }
 
@@ -198,9 +205,11 @@ export default function AuthCallback({ setAuth }) {
           }
           finish(consumePostLoginRedirect() || '/dashboard');
         } catch (error) {
-          console.error('Passport OAuth callback error:', error);
-          window.alert(error?.message || t('login.authDataError'));
-          finish('/login?error=oauth_failed');
+          logAuthDebug('oauth.passport_token', error);
+          redirectToLoginWithError(
+            error?.message || t('login.authDataError'),
+            'oauth_failed',
+          );
         }
         return;
       }

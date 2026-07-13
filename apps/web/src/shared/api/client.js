@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { isTokenExpired, clearAuth } from '../../utils/auth';
+import { getStoredAuth, isTokenExpired, clearAuth } from '../../utils/auth';
 import { getApiOrigin } from '../config/apiOrigin.js';
 
 const API_URL = getApiOrigin();
@@ -26,7 +26,7 @@ function shouldSkipLogoutOn401(config) {
 
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('auth_token');
+    const token = getStoredAuth().token;
     if (token && isTokenExpired(token) && !shouldSkipLogoutOn401(config)) {
       clearAuth();
       if (window.location.pathname !== '/login') {
