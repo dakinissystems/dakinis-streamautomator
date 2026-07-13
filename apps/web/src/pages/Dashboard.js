@@ -27,6 +27,7 @@ import { copyPostToClipboard } from '../utils/copyPastePost';
 import { devCatchLog } from '../utils/devCatchLog';
 import TrialWarning from '../components/TrialWarning';
 import OnboardingChecklist from '../components/OnboardingChecklist';
+import CreatorSuiteCard from '../features/creator/components/CreatorSuiteCard';
 import { SearchAdvanced } from '../components/SearchAdvanced';
 import { 
   Calendar as CalendarIcon, 
@@ -796,6 +797,8 @@ const Dashboard = ({ user, token, ...props }) => {
             onFirstStreamCreated={fetchContents}
           />
         )}
+
+        {!user?.isAdmin && <CreatorSuiteCard />}
 
         {/* Twitch: suscripciones, bits, donaciones (según preferencias del perfil) */}
         {showTwitchOnDashboard && (

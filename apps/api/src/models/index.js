@@ -36,6 +36,8 @@ import StreamTimelineEvent from '../modules/content/infrastructure/StreamTimelin
 import ReminderSent from '../modules/reminders/infrastructure/ReminderSent.model.js';
 import Tenant from '../modules/tenants/infrastructure/Tenant.model.js';
 import Membership from '../modules/tenants/infrastructure/Membership.model.js';
+import AutomationRule from '../modules/automation/infrastructure/AutomationRule.model.js';
+import StreamDirectorSession from '../modules/automation/infrastructure/StreamDirectorSession.model.js';
 
 // 👤 User and 📝 Content are now defined in module infrastructure files.
 
@@ -114,6 +116,14 @@ User.hasMany(StreamSuggestion, { foreignKey: 'userId', onDelete: 'CASCADE' });
 StreamSuggestion.belongsTo(User, { foreignKey: 'userId' });
 User.hasMany(StreamTimelineEvent, { foreignKey: 'userId', onDelete: 'CASCADE' });
 StreamTimelineEvent.belongsTo(User, { foreignKey: 'userId' });
+
+User.hasMany(AutomationRule, { foreignKey: 'userId', onDelete: 'CASCADE' });
+AutomationRule.belongsTo(User, { foreignKey: 'userId' });
+
+User.hasMany(StreamDirectorSession, { foreignKey: 'userId', onDelete: 'CASCADE' });
+StreamDirectorSession.belongsTo(User, { foreignKey: 'userId' });
+Content.hasMany(StreamDirectorSession, { foreignKey: 'contentId', onDelete: 'SET NULL' });
+StreamDirectorSession.belongsTo(Content, { foreignKey: 'contentId' });
 StreamReminder.hasMany(ReminderSent, { foreignKey: 'streamReminderId', onDelete: 'CASCADE' });
 ReminderSent.belongsTo(StreamReminder, { foreignKey: 'streamReminderId' });
 Content.hasMany(ReminderSent, { foreignKey: 'contentId', onDelete: 'CASCADE' });
@@ -157,4 +167,6 @@ export {
   StripeWebhookEvent,
   Tenant,
   Membership,
+  AutomationRule,
+  StreamDirectorSession,
 };

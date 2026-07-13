@@ -1,0 +1,103 @@
+import AutomationRule from '../infrastructure/AutomationRule.model.js';
+import { listSupportedAutomationActions } from './automationExecutor.js';
+
+const TRIGGER_TYPES = ['stream.started', 'stream.scheduled', 'stream.ended'];
+
+export function listTriggerTypes() {
+  return TRIGGER_TYPES;
+}
+
+export async function listRules(userId) {
+  return AutomationRule.findAll({
+    where: { userId },
+    order: [['updatedAt', 'DESC']],
+  });
+}
+
+export async function createRule(userId, input) {
+  const triggerType = String(input.triggerType || '').trim();
+  if (!TRIGGER_TYPES.includes(triggerType)) {
+    const err = new Error('invalid_trigger_type');
+    err.status = 400;
+    throw err;
+  }
+  return AutomationRule.create({
+    userId,
+    name: String(input.name || 'Automation').slice(0, 120),
+    enabled: input.enabled !== false,
+    triggerType,
+    triggerConfig: input.triggerConfig || null,
+    actions: Array.isArray(input.actions) ? input.actions : [],
+  });
+}
+
+export async function updateRule(userId, ruleId, patch) {
+  const rule = await AutomationRule.findOne({ where: { id: ruleId, userId } });
+  if (!rule) {
+    const err = new Error('not_found');
+    err.status = 404;
+    throw err;
+  }
+  if (patch.name != null) rule.name = String(patch.name).slice(0, 120);
+  if (patch.enabled != null) rule.enabled = Boolean(patch.enabled);
+  if (patch.triggerType != null) {
+    if (!TRIGGER_TYPES.includes(patch.triggerType)) {
+      const err = new Error('invalid_trigger_type');
+      err.status = 400;
+      throw err;
+    }
+    rule.triggerType = patch.triggerType;
+  }
+  if (patch.triggerConfig !== undefined) rule.triggerConfig = patch.triggerConfig;
+  if (patch.actions !== undefined) rule.actions = Array.isArray(patch.actions) ? patch.actions : [];
+  await rule.save();
+  return rule;
+}
+
+export async function deleteRule(userId, ruleId) {
+  const n = await AutomationRule.destroy({ where: { id: ruleId, userId } });
+  if (!n) {
+    const err = new Error('not_found');
+    err.status = 404;
+    throw err;
+  }
+}
+
+export async function seedDefaultRules(userId) {
+  const existing = await AutomationRule.count({ where: { userId } });
+  if (existing > 0) return { seeded: false, reason: 'already_has_rules' };
+
+  await AutomationRule.bulkCreate([
+    {
+      userId,
+      name: 'Go live → Discord + AkoeNet',
+      enabled: true,
+      triggerType: 'stream.started',
+      triggerConfig: null,
+      actions: [
+        { type: 'akoenet.assistant', params: { type: 'stream.started' } },
+        { type: 'platform.notification', params: { title: 'En directo', body: 'Tu stream ha comenzado' } },
+      ],
+    },
+    {
+      userId,
+      name: 'Programar → plataforma + AkoeNet',
+      enabled: true,
+      triggerType: 'stream.scheduled',
+      triggerConfig: null,
+      actions: [
+        { type: 'platform.event', params: { event: 'stream.scheduled' } },
+        { type: 'akoenet.schedule_notify', params: {} },
+      ],
+    },
+  ]);
+
+  return { seeded: true, count: 2 };
+}
+
+export function getAutomationCatalog() {
+  return {
+    triggers: TRIGGER_TYPES,
+    actions: listSupportedAutomationActions(),
+  };
+}

@@ -24,7 +24,7 @@ import {
   sendText,
   getUserByApiKey,
 } from './shared.js';
-import { announceStreamStarted } from '../../utils/discordAnnounce.js';
+import { handleStreamStarted, handleStreamEnded } from '../../services/platformIntegrationService.js';
 import rouletteService from '../../modules/content/application/rouletteService.js';
 import { emitRouletteToUser } from '../../services/websocketService.js';
 import { buildPublicStreamerShareUrl } from '../../utils/publicStreamerShareUrl.js';
@@ -161,18 +161,60 @@ router.post('/stream/start', async (req, res) => {
     }
 
     const note = (req.body?.note ?? req.body?.message ?? '').trim();
-    logger.info('Webhook stream/start', { userId: user.id, username: user.username, note: note || undefined });
+    const title = (req.body?.title ?? '').trim();
+    const platform = (req.body?.platform ?? 'twitch').trim();
 
-    const fullUser = await User.findByPk(user.id, { attributes: ['discordAnnounceWebhookUrl'] });
-    const webhookUrl = fullUser?.discordAnnounceWebhookUrl?.trim();
-    if (webhookUrl) {
-      await announceStreamStarted(webhookUrl, note);
-    }
+    const fullUser = await User.findByPk(user.id, {
+      attributes: [
+        'id',
+        'username',
+        'platformAuthSub',
+        'akoenetServerId',
+        'discordAnnounceWebhookUrl',
+      ],
+    });
 
-    res.json({ ok: true, message: 'Stream start recorded.' });
+    logger.info('Webhook stream/start', {
+      userId: user.id,
+      username: user.username,
+      note: note || undefined,
+    });
+
+    const integration = await handleStreamStarted(fullUser, { note, title, platform });
+
+    res.json({
+      ok: true,
+      message: 'Stream start recorded.',
+      directorSessionId: integration?.director?.id || null,
+    });
   } catch (err) {
     logger.error('Webhook stream/start error', { error: err.message });
     res.status(500).json({ error: 'Could not record stream start.' });
+  }
+});
+
+/**
+ * POST /api/webhooks/stream/end
+ * Mark stream ended — platform events, automation, timeline.
+ */
+router.post('/stream/end', async (req, res) => {
+  try {
+    const user = await getUserByApiKey(req);
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid or missing API key.' });
+    }
+
+    const fullUser = await User.findByPk(user.id, {
+      attributes: ['id', 'username', 'platformAuthSub', 'akoenetServerId'],
+    });
+
+    const title = (req.body?.title ?? req.body?.note ?? 'Stream ended').trim();
+    await handleStreamEnded(fullUser, { title, source: 'webhook' });
+
+    res.json({ ok: true, message: 'Stream end recorded.' });
+  } catch (err) {
+    logger.error('Webhook stream/end error', { error: err.message });
+    res.status(500).json({ error: 'Could not record stream end.' });
   }
 });
 
