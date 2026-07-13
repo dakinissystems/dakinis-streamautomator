@@ -16,6 +16,7 @@ import { getAdminFeatures } from './features/admin/api';
 import { apiClient } from './shared/api/client';
 import { devCatchLog } from './utils/devCatchLog';
 import AppFooter from './components/AppFooter';
+import CommandPalette, { useCommandPaletteShortcut } from './components/CommandPalette';
 
 const PUBLIC_PAGES_WITH_OWN_FOOTER = ['/', '/pricing', '/privacy', '/terms', '/legal-notice', '/aviso-legal', '/faq'];
 const MINIMAL_SHELL_PATHS = ['/login', '/auth/callback', '/auth/hub-sso'];
@@ -405,6 +406,11 @@ function AppContent() {
   const [deferredInstallPrompt, setDeferredInstallPrompt] = useState(null);
   const [adminUnreadMessageCount, setAdminUnreadMessageCount] = useState(0);
   const [adminFinance, setAdminFinance] = useState(true);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+
+  useCommandPaletteShortcut(() => {
+    if (user) setCommandPaletteOpen(true);
+  });
   // Admin: fetch unread support message count and feature flags for sidebar
   useEffect(() => {
     if (!user?.isAdmin || !token) {
@@ -489,6 +495,7 @@ function AppContent() {
   return (
     <>
       <Toaster position="top-right" />
+      <CommandPalette open={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} />
       <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 min-w-0">
         <div className="flex flex-1 min-w-0">
           {showAppShell && (

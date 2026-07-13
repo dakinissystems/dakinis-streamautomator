@@ -2,6 +2,11 @@ import { Op } from 'sequelize';
 import StreamDirectorSession from '../infrastructure/StreamDirectorSession.model.js';
 import Content from '../../content/infrastructure/Content.model.js';
 import { CONTENT_STATUS } from '../../../constants/contentStatus.js';
+import { User } from '../../users/infrastructure/models.js';
+import {
+  buildDirectorStepHints,
+  runDirectorStepSideEffects,
+} from './directorStepActions.js';
 
 function normalizePlatform(value, fallback = 'twitch') {
   if (value == null || value === '') return fallback;
@@ -122,6 +127,18 @@ export async function completeDirectorStep(userId, sessionId, stepIdValue) {
   }
 
   const steps = Array.isArray(session.steps) ? [...session.steps] : [];
+  const currentStep = steps.find((s) => s.id === stepIdValue && s.status === 'active');
+  if (!currentStep) {
+    const err = new Error('step_not_found');
+    err.status = 404;
+    throw err;
+  }
+
+  const user = await User.findByPk(userId);
+  const sideEffects = user
+    ? await runDirectorStepSideEffects(user, currentStep, session.get({ plain: true }))
+    : [];
+
   let found = false;
   let nextActive = false;
   const updated = steps.map((step) => {
@@ -136,15 +153,12 @@ export async function completeDirectorStep(userId, sessionId, stepIdValue) {
     return step;
   });
 
-  if (!found) {
-    const err = new Error('step_not_found');
-    err.status = 404;
-    throw err;
-  }
-
   session.steps = updated;
   await session.save();
-  return session;
+
+  const plain = session.get({ plain: true });
+  plain.lastStepEffects = sideEffects;
+  return plain;
 }
 
 export async function endDirectorSession(userId, sessionId) {
@@ -183,6 +197,16 @@ export async function getDirectorSummary(userId) {
   const steps = Array.isArray(session.steps) ? session.steps : [];
   const activeStep = steps.find((s) => s.status === 'active') || null;
   const done = steps.filter((s) => s.status === 'done').length;
+
+  const user = await User.findByPk(userId);
+  const sessionPlain = session.get({ plain: true });
+  const activeStepWithHints = activeStep
+    ? {
+        ...activeStep,
+        hints: user ? buildDirectorStepHints(user, activeStep, sessionPlain) : [],
+      }
+    : null;
+
   return {
     active: true,
     session: {
@@ -192,8 +216,12 @@ export async function getDirectorSummary(userId) {
       status: session.status,
       startedAt: session.startedAt,
       progress: { done, total: steps.length },
-      activeStep,
-      steps,
+      activeStep: activeStepWithHints,
+      steps: steps.map((step) =>
+        step.id === activeStep?.id
+          ? activeStepWithHints
+          : step,
+      ),
     },
   };
 }

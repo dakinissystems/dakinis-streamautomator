@@ -95,9 +95,60 @@ export async function seedDefaultRules(userId) {
   return { seeded: true, count: 2 };
 }
 
+const TRIGGER_LABELS = {
+  'stream.started': 'Cuando empieza el directo',
+  'stream.scheduled': 'Cuando programas contenido',
+  'stream.ended': 'Cuando termina el directo',
+};
+
+const ACTION_CATALOG = [
+  {
+    type: 'platform.event',
+    label: 'Evento plataforma Dakinis',
+    description: 'Emite evento al Internal API (Hub, Assistant)',
+    params: [{ key: 'event', label: 'Tipo evento', optional: true }],
+  },
+  {
+    type: 'akoenet.assistant',
+    label: 'AkoeNet Assistant',
+    description: 'Notifica al módulo Stream del Assistant',
+    params: [{ key: 'type', label: 'Tipo', optional: true }],
+  },
+  {
+    type: 'akoenet.schedule_notify',
+    label: 'Aviso programación AkoeNet',
+    description: 'Webhook de stream programado a tu servidor AkoeNet',
+    params: [],
+  },
+  {
+    type: 'discord.announce',
+    label: 'Anunciar en Discord',
+    description: 'Mensaje al webhook configurado en Ajustes',
+    params: [{ key: 'message', label: 'Mensaje', optional: true }],
+  },
+  {
+    type: 'timeline.log',
+    label: 'Registrar en timeline',
+    description: 'Añade entrada al timeline del streamer',
+    params: [{ key: 'label', label: 'Etiqueta', optional: true }],
+  },
+  {
+    type: 'platform.notification',
+    label: 'Notificación in-app Dakinis',
+    description: 'Push al workspace Hub (si IdP conectado)',
+    params: [
+      { key: 'title', label: 'Título', optional: true },
+      { key: 'body', label: 'Cuerpo', optional: true },
+    ],
+  },
+];
+
 export function getAutomationCatalog() {
   return {
-    triggers: TRIGGER_TYPES,
-    actions: listSupportedAutomationActions(),
+    triggers: TRIGGER_TYPES.map((id) => ({
+      id,
+      label: TRIGGER_LABELS[id] || id,
+    })),
+    actions: ACTION_CATALOG.filter((a) => listSupportedAutomationActions().includes(a.type)),
   };
 }

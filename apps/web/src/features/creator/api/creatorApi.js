@@ -20,9 +20,29 @@ export async function endDirectorSession(sessionId) {
   return data;
 }
 
+export async function getAutomationCatalog() {
+  const { data } = await apiClient.get('/automation/catalog');
+  return data;
+}
+
 export async function getAutomationRules() {
   const { data } = await apiClient.get('/automation/rules');
   return data.items || [];
+}
+
+export async function createAutomationRule(body) {
+  const { data } = await apiClient.post('/automation/rules', body);
+  return data;
+}
+
+export async function updateAutomationRule(id, body) {
+  const { data } = await apiClient.patch(`/automation/rules/${id}`, body);
+  return data;
+}
+
+export async function deleteAutomationRule(id) {
+  const { data } = await apiClient.delete(`/automation/rules/${id}`);
+  return data;
 }
 
 export async function seedAutomationDefaults() {
