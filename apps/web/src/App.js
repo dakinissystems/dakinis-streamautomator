@@ -18,6 +18,7 @@ import { devCatchLog } from './utils/devCatchLog';
 import AppFooter from './components/AppFooter';
 
 const PUBLIC_PAGES_WITH_OWN_FOOTER = ['/', '/pricing', '/privacy', '/terms', '/legal-notice', '/aviso-legal', '/faq'];
+const MINIMAL_SHELL_PATHS = ['/login', '/auth/callback', '/auth/hub-sso'];
 
 function getSidebarLinkClasses(active) {
   return `block px-3 py-2 rounded font-medium transition-colors ${
@@ -194,7 +195,7 @@ function Sidebar({ user, open, onClose, adminUnreadMessageCount = 0, adminFinanc
           <span className="font-bold text-accent">{t('common.menu')}</span>
           <button type="button" onClick={onClose} className="p-2 -mr-2" aria-label={t('common.closeMenu')}><X className="w-6 h-6" /></button>
         </div>
-        <nav className="flex-1 px-4 py-2 space-y-2 overflow-y-auto">
+        <nav className="flex-1 px-4 py-2 space-y-2 overflow-y-auto" onClick={onClose}>
         <Link to={user?.isAdmin ? "/admin" : "/dashboard"} className={getLinkClasses(user?.isAdmin ? "/admin" : "/dashboard")}>{t('dashboard.title')}</Link>
         {!user?.isAdmin && <Link to="/schedule" className={getLinkClasses("/schedule")}>{t('schedule.newPost')}</Link>}
         {!user?.isAdmin && <Link to="/templates" className={getLinkClasses("/templates")}>{t('templates.menu') || 'Templates'}</Link>}
@@ -399,6 +400,8 @@ function AppContent() {
   const { t } = useLanguage();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const minimalShell = MINIMAL_SHELL_PATHS.includes(location.pathname);
+  const showAppShell = user && !minimalShell;
   const [deferredInstallPrompt, setDeferredInstallPrompt] = useState(null);
   const [adminUnreadMessageCount, setAdminUnreadMessageCount] = useState(0);
   const [adminFinance, setAdminFinance] = useState(true);
@@ -488,7 +491,7 @@ function AppContent() {
       <Toaster position="top-right" />
       <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 min-w-0">
         <div className="flex flex-1 min-w-0">
-          {user && (
+          {showAppShell && (
             <Sidebar
               user={user}
               open={sidebarOpen}
@@ -498,11 +501,13 @@ function AppContent() {
             />
           )}
           <div className="flex-1 flex flex-col min-h-screen min-w-0 overflow-x-hidden">
-            <Header user={user} token={token} onSignOut={signOut} onMenuClick={() => setSidebarOpen(true)} installPromptEvent={deferredInstallPrompt} onInstallApp={handleInstallClick} />
+            {showAppShell && (
+              <Header user={user} token={token} onSignOut={signOut} onMenuClick={() => setSidebarOpen(true)} installPromptEvent={deferredInstallPrompt} onInstallApp={handleInstallClick} />
+            )}
             <main className="flex-1 min-h-0 overflow-y-auto">
               <AppRoutes user={user} token={token} setAuth={setAuth} setUser={setUser} signOut={signOut} />
             </main>
-            {user && user.merchandisingLink && (
+            {showAppShell && user.merchandisingLink && (
               <DraggableMerchandisingButton
                 link={user.merchandisingLink}
                 position={user.merchandisingButtonPosition}
@@ -514,7 +519,7 @@ function AppContent() {
             )}
           </div>
         </div>
-        {!PUBLIC_PAGES_WITH_OWN_FOOTER.includes(location.pathname) && <AppFooter />}
+        {!minimalShell && !PUBLIC_PAGES_WITH_OWN_FOOTER.includes(location.pathname) && <AppFooter />}
       </div>
     </>
   );

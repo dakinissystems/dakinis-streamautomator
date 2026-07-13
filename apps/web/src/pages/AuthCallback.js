@@ -1,14 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  loginBackendWithSupabaseToken,
   linkGoogleWithSupabaseToken,
   linkTwitchWithSupabaseToken,
   linkTwitterWithSupabaseToken,
   getOAuthLinkMode,
   clearOAuthLinkMode,
 } from '../features/auth/api';
-import { useLanguage } from '../contexts/LanguageContext';
+import { API_BASE_URL } from '../shared/api/client';
+import { getStoredAuth, isTokenExpired } from '../utils/auth';
 
 function consumePostLoginRedirect() {
   if (typeof sessionStorage === 'undefined') return null;
@@ -37,11 +37,28 @@ export default function AuthCallback({ setAuth }) {
       // Prevent double run (e.g. React Strict Mode): second run often sees hash already cleared
       if (handledRef.current) return;
 
-      // 1) Supabase OAuth callback: tokens in hash (#access_token=...)
-      const hashParams = new URLSearchParams(window.location.hash?.substring(1) || '');
+      const hashRaw = window.location.hash?.substring(1) || '';
+      const hashParams = new URLSearchParams(hashRaw);
       const accessToken = hashParams.get('access_token');
       const errorParam = hashParams.get('error');
       const errorDescription = hashParams.get('error_description');
+      const token = searchParams.get('token');
+      const userParam = searchParams.get('user');
+      const queryError = searchParams.get('error');
+      const hasOAuthPayload = Boolean(accessToken || (token && userParam) || errorParam || queryError);
+
+      // Already logged in but landed on /auth/callback (refresh, back button, stale URL)
+      if (!hasOAuthPayload) {
+        const { token: storedToken, user: storedUser } = getStoredAuth();
+        if (storedToken && storedUser && !isTokenExpired(storedToken)) {
+          handledRef.current = true;
+          setAuth(storedUser, storedToken);
+          navigate(consumePostLoginRedirect() || '/dashboard', { replace: true });
+          return;
+        }
+        navigate(queryError ? `/login?error=${queryError}` : '/login', { replace: true });
+        return;
+      }
 
       // Handle OAuth errors from Supabase
       if (errorParam && !accessToken) {
@@ -99,14 +116,31 @@ export default function AuthCallback({ setAuth }) {
           return;
         }
         try {
-          const res = await loginBackendWithSupabaseToken(accessToken);
-          const { token, user } = res.data;
-          setAuth(user, token);
+          const controller = new AbortController();
+          const abortTimer = setTimeout(() => controller.abort(), 20000);
+          const res = await fetch(`${API_BASE_URL}/user/google-login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+            },
+            signal: controller.signal,
+          });
+          clearTimeout(abortTimer);
+          const data = await res.json();
+          if (!res.ok) {
+            const message = [data.error, data.details].filter(Boolean).join(' - ') || 'OAuth login failed';
+            throw Object.assign(new Error(message), { response: { data, status: res.status } });
+          }
+          const { token: jwt, user } = data;
+          setAuth(user, jwt);
           const postLoginRedirect = consumePostLoginRedirect();
           window.history.replaceState(null, '', window.location.pathname + window.location.search);
           navigate(postLoginRedirect || '/dashboard', { replace: true });
         } catch (error) {
-          const msg = error?.message || error?.response?.data?.error || 'OAuth login failed';
+          const msg = error?.name === 'AbortError'
+            ? (t('login.oauthTimeout') || 'Authentication timed out. Try again.')
+            : (error?.message || error?.response?.data?.error || 'OAuth login failed');
           window.alert(msg);
           navigate('/login?error=oauth_failed');
         }
@@ -114,10 +148,8 @@ export default function AuthCallback({ setAuth }) {
       }
 
       // 2) Backend Passport OAuth callback: token and user in query (?token=...&user=...)
-      const token = searchParams.get('token');
-      const userParam = searchParams.get('user');
       const returnTo = consumeOAuthReturnTo();
-      const error = searchParams.get('error');
+      const error = queryError;
       const reason = searchParams.get('reason');
 
       if (error && !token) {
@@ -154,13 +186,7 @@ export default function AuthCallback({ setAuth }) {
         return;
       }
 
-      // No token or access token found
-      
-      if (error) {
-        navigate(`/login?error=${error}`, { replace: true });
-      } else {
-        navigate('/login', { replace: true });
-      }
+      navigate('/login', { replace: true });
     };
 
     run();
