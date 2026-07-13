@@ -45,6 +45,12 @@ export async function buildWorkspaceWidgetPayload(userId) {
   return {
     product: 'streamautomator',
     platformIntegration: isDakinisInternalConfigured(),
+    quickActions: [
+      { id: 'open-director', label: 'Modo Director', path: '/director' },
+      { id: 'open-automation', label: 'Automatización', path: '/automation' },
+      { id: 'open-schedule', label: 'Calendario', path: '/schedule' },
+      { id: 'open-campaigns', label: 'Campaign kits', path: '/creator/campaign-kits' },
+    ],
     widgets: {
       'streamautomator.next-stream': nextStream
         ? {
