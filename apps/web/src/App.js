@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, useNavigate, Link, useLocation, useSearchParams } from 'react-router-dom';
-import { Menu, X, ShoppingBag, Globe, LogOut, Video, Building2 } from 'lucide-react';
+import { Menu, X, ShoppingBag, Globe, LogOut, Video, Building2, Rocket, Zap, BarChart3, Package } from 'lucide-react';
 import { AppRoutes } from './routes/AppRoutes';
 import HeaderBanners from './components/HeaderBanners';
 import MessagesAndNotificationsDropdown from './components/MessagesAndNotificationsDropdown';
@@ -203,6 +203,34 @@ function Sidebar({ user, open, onClose, adminUnreadMessageCount = 0, adminFinanc
         {!user?.isAdmin && <Link to="/stream-ideas" className={getLinkClasses("/stream-ideas")}>{t('streamIdeas.menu') || 'Stream Ideas'}</Link>}
         {!user?.isAdmin && <Link to="/suggestions" className={getLinkClasses("/suggestions")}>{t('suggestions.menu') || 'Suggestions'}</Link>}
         {!user?.isAdmin && <Link to="/stream-timeline" className={getLinkClasses("/stream-timeline")}>{t('timeline.menu') || 'Timeline'}</Link>}
+        {!user?.isAdmin && (
+          <>
+            <Link to="/director" className={getLinkClasses("/director")}>
+              <span className="flex items-center gap-2">
+                <Rocket className="w-4 h-4 flex-shrink-0 opacity-90" aria-hidden />
+                Director
+              </span>
+            </Link>
+            <Link to="/automation" className={getLinkClasses("/automation")}>
+              <span className="flex items-center gap-2">
+                <Zap className="w-4 h-4 flex-shrink-0 opacity-90" aria-hidden />
+                Automatización
+              </span>
+            </Link>
+            <Link to="/creator/analytics" className={getLinkClasses("/creator/analytics")}>
+              <span className="flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 flex-shrink-0 opacity-90" aria-hidden />
+                Analytics
+              </span>
+            </Link>
+            <Link to="/creator/campaign-kits" className={getLinkClasses("/creator/campaign-kits")}>
+              <span className="flex items-center gap-2">
+                <Package className="w-4 h-4 flex-shrink-0 opacity-90" aria-hidden />
+                Kits de campaña
+              </span>
+            </Link>
+          </>
+        )}
         {!user?.isAdmin && <Link to="/messages" className={getLinkClasses("/messages")}>{t('common.messages')}</Link>}
         <Link
           to="/settings"

@@ -3,12 +3,14 @@
  */
 
 import { Content } from '../infrastructure/models.js';
+import User from '../../users/infrastructure/User.model.js';
 import { Op } from 'sequelize';
 import { CONTENT_STATUS } from '../../../constants/contentStatus.js';
 import logger from '../../../utils/logger.js';
 import { parsePagination, formatPaginatedResponse } from '../../../utils/pagination.js';
 import { enqueueDiscordSync } from '../../../services/discordQueueService.js';
 import { enqueueAkoeNetStreamScheduled } from '../../../services/akoeNetWebhookService.js';
+import { enqueuePlatformStreamScheduled } from '../../../services/platformIntegrationService.js';
 import { normalizeTenantId, scopedUserTenantWhere } from '../../../utils/tenantScope.js';
 
 function isDiscordEventContent(content) {
@@ -68,6 +70,13 @@ export class ContentService {
         );
       }
       enqueueAkoeNetStreamScheduled(userId, c);
+      User.findByPk(userId, {
+        attributes: ['id', 'username', 'platformAuthSub', 'akoenetServerId'],
+      })
+        .then((user) => {
+          if (user) enqueuePlatformStreamScheduled(user, c);
+        })
+        .catch(() => {});
     }
 
     return created;
