@@ -1,7 +1,30 @@
 import { Op } from 'sequelize';
 import StreamDirectorSession from '../infrastructure/StreamDirectorSession.model.js';
-import { Content } from '../../content/infrastructure/models.js';
+import Content from '../../content/infrastructure/Content.model.js';
 import { CONTENT_STATUS } from '../../../constants/contentStatus.js';
+
+function normalizePlatform(value, fallback = 'twitch') {
+  if (value == null || value === '') return fallback;
+  if (typeof value === 'string') return value.trim().slice(0, 40) || fallback;
+  if (typeof value === 'object') {
+    const candidate = value.id ?? value.name ?? value.platform;
+    if (candidate != null && String(candidate).trim()) {
+      return String(candidate).trim().slice(0, 40);
+    }
+  }
+  const asString = String(value).trim().slice(0, 40);
+  return asString || fallback;
+}
+
+function resolveUserId(user) {
+  const userId = typeof user === 'object' && user != null ? user.id : user;
+  if (userId == null || userId === '') {
+    const err = new Error('user_required');
+    err.status = 400;
+    throw err;
+  }
+  return userId;
+}
 
 function stepId(prefix, index) {
   return `${prefix}_${index}`;
@@ -54,28 +77,38 @@ export async function getActiveDirectorSession(userId) {
 }
 
 export async function startDirectorForStream(user, opts = {}) {
-  const existing = await getActiveDirectorSession(user.id);
+  const userId = resolveUserId(user);
+  const existing = await getActiveDirectorSession(userId);
   if (existing) return existing;
 
   let content = null;
   if (opts.contentId) {
-    content = await Content.findOne({ where: { id: opts.contentId, userId: user.id } });
+    content = await Content.findOne({ where: { id: opts.contentId, userId } });
   } else {
-    content = await findUpcomingContent(user.id);
+    content = await findUpcomingContent(userId);
   }
 
   const title = opts.title || content?.title || 'Live session';
-  const platform = opts.platform || content?.platforms?.[0] || 'twitch';
+  const platform = normalizePlatform(
+    opts.platform || (Array.isArray(content?.platforms) ? content.platforms[0] : null),
+  );
 
-  return StreamDirectorSession.create({
-    userId: user.id,
-    contentId: content?.id || null,
-    title: String(title).slice(0, 500),
-    status: 'live',
-    platform,
-    steps: buildDefaultSteps({ title, platform, content }),
-    startedAt: new Date(),
-  });
+  try {
+    return await StreamDirectorSession.create({
+      userId,
+      contentId: content?.id || null,
+      title: String(title).slice(0, 500),
+      status: 'live',
+      platform,
+      steps: buildDefaultSteps({ title, platform, content }),
+      startedAt: new Date(),
+    });
+  } catch (err) {
+    const wrapped = new Error(err?.original?.message || err.message);
+    wrapped.cause = err;
+    wrapped.pgCode = err?.original?.code;
+    throw wrapped;
+  }
 }
 
 export async function completeDirectorStep(userId, sessionId, stepIdValue) {
