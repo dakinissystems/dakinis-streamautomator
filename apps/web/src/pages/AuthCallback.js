@@ -9,6 +9,7 @@ import {
 } from '../features/auth/api';
 import { API_BASE_URL } from '../shared/api/client';
 import { getStoredAuth, isTokenExpired } from '../utils/auth';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function consumePostLoginRedirect() {
   if (typeof sessionStorage === 'undefined') return null;
