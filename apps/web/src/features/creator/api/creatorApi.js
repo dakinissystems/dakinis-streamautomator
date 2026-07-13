@@ -1,4 +1,4 @@
-import { apiClient } from '../../shared/api/client.js';
+import { apiClient } from '../../../shared/api/client.js';
 
 export async function getDirectorActive() {
   const { data } = await apiClient.get('/director/active');
