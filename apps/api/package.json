@@ -22,7 +22,8 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "smoke:baseline": "node src/scripts/smokeStructureBaseline.js",
-    "check:architecture": "node src/scripts/check-model-imports.js"
+    "check:architecture": "node src/scripts/check-model-imports.js",
+    "search:reindex": "node src/scripts/reindexSearch.js"
   },
   "dependencies": {
     "@ffmpeg.wasm/core-mt": "^0.13.2",
