@@ -14,6 +14,7 @@ import logger from '../utils/logger.js';
 import { sendPaymentSuccessNotification, sendPaymentFailedNotification } from '../utils/notifications.js';
 import { syncEntitlementsFromLicense } from '../modules/system/application/entitlementService.js';
 import { getPrimaryTenantIdForUser } from '../modules/tenants/application/tenantResolutionService.js';
+import { syncStreamAutomatorLicenseToUnifiedBilling, tryUnifiedBillingCheckout, createUnifiedBillingPortal, verifyUnifiedCheckoutSession } from '../lib/billingUnifiedSync.js';
 
 const router = express.Router();
 
@@ -65,6 +66,18 @@ const API_LICENSE_TYPE_MAP = {
 function normalizeLicenseTypeFromApi(licenseType) {
   const key = typeof licenseType === 'string' ? licenseType.toLowerCase() : '';
   return API_LICENSE_TYPE_MAP[key] || LICENSE_TYPES.MONTHLY;
+}
+
+async function maybeSyncUnifiedBilling(user, opts) {
+  if (!user) return;
+  try {
+    await syncStreamAutomatorLicenseToUnifiedBilling(user, opts);
+  } catch (err) {
+    logger.warn('Unified billing sync error', {
+      userId: user.id,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
 }
 
 /**
@@ -173,6 +186,19 @@ router.post('/create-checkout-session', requireAuth, validateBody(createCheckout
 
 // Create a Stripe checkout session (by licenseType - app-defined plans, resolved via Stripe Price lookup_key)
 router.post('/checkout', requireAuth, validateBody(checkoutSchema), async (req, res) => {
+  const requestedLicenseType = req.body.licenseType || 'creator';
+  const licenseType = normalizeLicenseTypeFromApi(requestedLicenseType);
+  const plan = PLANS[licenseType];
+  if (!plan) return res.status(400).json({ error: 'Invalid licenseType' });
+
+  const user = await User.findByPk(req.user.id);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  const unifiedCheckout = await tryUnifiedBillingCheckout(user, licenseType, req.body);
+  if (unifiedCheckout) {
+    return res.json(unifiedCheckout);
+  }
+
   if (!stripe) {
     return res.status(500).json({ 
       error: 'Stripe is not configured. Please set STRIPE_SECRET_KEY in environment variables.',
@@ -180,11 +206,6 @@ router.post('/checkout', requireAuth, validateBody(checkoutSchema), async (req, 
     });
   }
   
-  const requestedLicenseType = req.body.licenseType || 'creator';
-  const licenseType = normalizeLicenseTypeFromApi(requestedLicenseType);
-  const plan = PLANS[licenseType];
-  if (!plan) return res.status(400).json({ error: 'Invalid licenseType' });
-
   const lookupKey = LICENSE_LOOKUP_KEYS[licenseType];
   if (!lookupKey) {
     return res.status(400).json({
@@ -203,9 +224,6 @@ router.post('/checkout', requireAuth, validateBody(checkoutSchema), async (req, 
   }
 
   try {
-    const user = await User.findByPk(req.user.id);
-    if (!user) return res.status(404).json({ error: 'User not found' });
-
     // Resolve Stripe Price by lookup_key so that Stripe controls pricing/activation
     const prices = await stripe.prices.list({
       lookup_keys: [lookupKey],
@@ -338,12 +356,20 @@ router.post('/checkout', requireAuth, validateBody(checkoutSchema), async (req, 
 
 // Verify payment status from Stripe session (used after redirect when webhook may not have run yet)
 router.post('/verify-session', requireAuth, validateBody(verifySessionSchema), async (req, res) => {
-  if (!stripe) return res.status(500).json({ error: 'Stripe is not configured' });
-  
   const { sessionId } = req.body;
   const userId = req.user.id;
 
   try {
+    const user = await User.findByPk(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const unifiedResult = await verifyUnifiedCheckoutSession(user, sessionId);
+    if (unifiedResult) {
+      return res.json(unifiedResult);
+    }
+
+    if (!stripe) return res.status(500).json({ error: 'Stripe is not configured' });
+
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     if (session.metadata?.userId && String(session.metadata.userId) !== String(userId)) {
       return res.status(403).json({ error: 'Session does not belong to this user' });
@@ -373,6 +399,13 @@ router.post('/verify-session', requireAuth, validateBody(verifySessionSchema), a
       user.licenseExpiresAt = expiryResult.value;
       await user.save();
       await syncEntitlementsFromLicense(user.id, user.licenseType, user.licenseExpiresAt);
+      await maybeSyncUnifiedBilling(user, {
+        licenseType,
+        stripeCustomerId: subscription.customer,
+        stripeSubscriptionId: subscription.id,
+        status: subscription.status,
+        currentPeriodEnd: user.licenseExpiresAt,
+      });
       const plan = PLANS[licenseType];
       if (plan && !payment) {
         const tenantId = await getPrimaryTenantIdForUser(userId);
@@ -540,6 +573,16 @@ export async function handleStripeWebhook(req, res) {
             
             // Sync entitlements after license assignment
             await syncEntitlementsFromLicense(user.id, user.licenseType, user.licenseExpiresAt);
+
+            await maybeSyncUnifiedBilling(user, {
+              licenseType,
+              stripeCustomerId: subscription.customer,
+              stripeSubscriptionId: subscription.id,
+              status: subscription.status,
+              currentPeriodEnd: subscription.current_period_end
+                ? new Date(subscription.current_period_end * 1000)
+                : null,
+            });
             
             // Create payment record for subscription
             const plan = PLANS[licenseType];
@@ -613,6 +656,14 @@ export async function handleStripeWebhook(req, res) {
         
         // Sync entitlements after license assignment
         await syncEntitlementsFromLicense(user.id, user.licenseType, user.licenseExpiresAt);
+
+        await maybeSyncUnifiedBilling(user, {
+          licenseType: payment.licenseType,
+          stripeCustomerId: session.customer,
+          stripeSubscriptionId: session.subscription || user.stripeSubscriptionId,
+          status: 'active',
+          currentPeriodEnd: user.licenseExpiresAt,
+        });
         
         logger.info('License assigned via webhook', {
           userId,
@@ -688,6 +739,13 @@ export async function handleStripeWebhook(req, res) {
           user.licenseExpiresAt = expiryResult.value;
           // Sync entitlements when subscription is active
           await syncEntitlementsFromLicense(user.id, user.licenseType, user.licenseExpiresAt);
+          await maybeSyncUnifiedBilling(user, {
+            licenseType: user.licenseType,
+            stripeCustomerId: subscription.customer,
+            stripeSubscriptionId: subscription.id,
+            status: subscription.status,
+            currentPeriodEnd: user.licenseExpiresAt,
+          });
         }
         
         await user.save();
@@ -749,6 +807,13 @@ export async function handleStripeWebhook(req, res) {
             await user.save();
             
             await syncEntitlementsFromLicense(user.id, user.licenseType, user.licenseExpiresAt);
+            await maybeSyncUnifiedBilling(user, {
+              licenseType,
+              stripeCustomerId: invoice.customer,
+              stripeSubscriptionId: invoice.subscription,
+              status: 'active',
+              currentPeriodEnd: user.licenseExpiresAt,
+            });
             
             logger.info('Recurring payment processed', {
               userId: user.id,
@@ -859,13 +924,32 @@ router.post('/webhook', handleStripeWebhook);
 
 // Stripe Customer Portal: manage subscription, payment method, invoices (Stripe-hosted)
 router.post('/customer-portal', requireAuth, async (req, res) => {
+  const user = await User.findByPk(req.user.id);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  try {
+    const unifiedPortal = await createUnifiedBillingPortal(
+      user,
+      `${getFrontendUrl()}/settings`,
+    );
+    if (unifiedPortal?.url) {
+      return res.json({ url: unifiedPortal.url, unified: true });
+    }
+  } catch (err) {
+    logger.debug('Unified billing portal fallback to SA Stripe', {
+      userId: user.id,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+
   if (!stripe) {
     return res.status(500).json({
       error: 'Stripe is not configured.',
     });
   }
-  const user = await User.findByPk(req.user.id);
-  if (!user || !user.stripeCustomerId) {
+  if (!user.stripeCustomerId) {
     return res.status(400).json({
       error: 'No billing customer found. Make a purchase or subscription first to manage billing.',
     });
@@ -902,6 +986,7 @@ router.get('/config-status', async (req, res) => {
     paymentEnabled: stripeConfigured,
     automaticProcessingEnabled: stripeConfigured && webhookConfigured,
     manualVerificationRequired: stripeConfigured && !webhookConfigured,
+    billingUnifiedAvailable: Boolean(process.env.DAKINIS_INTERNAL_SERVICE_KEY),
     message: stripeConfigured 
       ? (webhookConfigured 
           ? 'Stripe fully configured - automatic payment processing enabled'
@@ -912,15 +997,6 @@ router.get('/config-status', async (req, res) => {
 
 // Create subscription (recurring payment)
 router.post('/subscribe', requireAuth, validateBody(subscribeSchema), async (req, res) => {
-  if (!stripe) {
-    logger.error('Stripe not configured for subscription', {
-      hasStripeSecret: !!process.env.STRIPE_SECRET_KEY
-    });
-    return res.status(500).json({ 
-      error: 'Stripe is not configured. Please set STRIPE_SECRET_KEY in environment variables.'
-    });
-  }
-
   const requestedLicenseType = req.body?.licenseType || 'creator';
   const licenseType = normalizeLicenseTypeFromApi(requestedLicenseType);
 
@@ -928,6 +1004,23 @@ router.post('/subscribe', requireAuth, validateBody(subscribeSchema), async (req
     return res.status(400).json({
       error: 'Invalid or missing license type for subscription',
       details: 'Send licenseType: "creator" or "pro_monthly" (or legacy "monthly"/"quarterly") in the request body.',
+    });
+  }
+
+  const user = await User.findByPk(req.user.id);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  const unifiedCheckout = await tryUnifiedBillingCheckout(user, licenseType, req.body);
+  if (unifiedCheckout) {
+    return res.json(unifiedCheckout);
+  }
+
+  if (!stripe) {
+    logger.error('Stripe not configured for subscription', {
+      hasStripeSecret: !!process.env.STRIPE_SECRET_KEY
+    });
+    return res.status(500).json({ 
+      error: 'Stripe is not configured. Please set STRIPE_SECRET_KEY in environment variables.'
     });
   }
 
@@ -959,12 +1052,6 @@ router.post('/subscribe', requireAuth, validateBody(subscribeSchema), async (req
   }
 
   try {
-    // Ensure we have the latest user data with subscription fields
-    const user = await User.findByPk(req.user.id);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
     // Log user data for debugging
     logger.debug('User data for subscription', {
       userId: user.id,
