@@ -29,6 +29,7 @@ import userRoutes, {
 import contentRoutes from './routes/content.js';
 import platformsRoutes from './routes/platforms.js';
 import paymentsRoutes, { handleStripeWebhook } from './routes/payments.js';
+import internalBillingRoutes from './routes/internal-billing.js';
 import uploadsRoutes from './routes/uploads.js';
 import discordRoutes from './routes/discord.js';
 import akoenetRoutes from './routes/akoenet.js';
@@ -410,6 +411,7 @@ app.use('/api/instagram', instagramRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/platforms', platformsRoutes);
 app.use('/api/payments', paymentsRoutes);
+app.use('/api/internal/billing', internalBillingRoutes);
 // Apply uploadLimiter only to write operations (POST/PUT/DELETE). GET (stats, video-url) use apiLimiter only to avoid 429 on page load.
 app.use('/api/upload', (req, res, next) => {
   if (req.method === 'GET') return next();
