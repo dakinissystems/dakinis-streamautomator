@@ -2,6 +2,7 @@
  * Visual IF/THEN automation rule builder — flujo tipo n8n sin dependencias extra.
  */
 import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { ArrowDown, Plus, Trash2, X, Zap } from 'lucide-react';
 import {
   createAutomationRule,
@@ -10,6 +11,55 @@ import {
 } from '../api/creatorApi.js';
 
 const EMPTY_ACTION = { type: 'platform.notification', params: { title: 'StreamAutomator', body: '' } };
+
+const PLATFORM_EVENT_OPTIONS = [
+  'stream.started',
+  'stream.scheduled',
+  'stream.ended',
+  'stream.director.started',
+];
+
+function ActionParamField({ param, value, onChange }) {
+  const isLong = param.key === 'message' || param.key === 'body' || param.key === 'label';
+  const isEvent = param.key === 'event';
+
+  if (isEvent) {
+    return (
+      <select
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full mt-1.5 px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm"
+      >
+        <option value="">Evento por defecto</option>
+        {PLATFORM_EVENT_OPTIONS.map((ev) => (
+          <option key={ev} value={ev}>{ev}</option>
+        ))}
+      </select>
+    );
+  }
+
+  if (isLong) {
+    return (
+      <textarea
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={param.label}
+        rows={2}
+        className="w-full mt-1.5 px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm"
+      />
+    );
+  }
+
+  return (
+    <input
+      type="text"
+      value={value || ''}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={param.label}
+      className="w-full mt-1.5 px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm"
+    />
+  );
+}
 
 const TRIGGER_COLORS = {
   'stream.started': 'from-rose-500/20 to-orange-500/10 border-rose-400/40',
@@ -35,7 +85,9 @@ export default function AutomationRuleBuilder({ rule, onSaved, onCancel }) {
   const [actions, setActions] = useState(
     Array.isArray(rule?.actions) && rule.actions.length > 0 ? rule.actions : [{ ...EMPTY_ACTION }],
   );
+  const [enabled, setEnabled] = useState(rule?.enabled !== false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     getAutomationCatalog()
@@ -71,18 +123,23 @@ export default function AutomationRuleBuilder({ rule, onSaved, onCancel }) {
   const onSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
+    setError('');
     try {
       const body = {
         name: name.trim() || 'Nueva regla',
         triggerType,
         triggerConfig: platform.trim() ? { platform: platform.trim() } : null,
         actions: actions.filter((a) => a.type),
-        enabled: rule?.enabled !== false,
+        enabled,
       };
       const saved = rule?.id
         ? await updateAutomationRule(rule.id, body)
         : await createAutomationRule(body);
       onSaved?.(saved);
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message || 'No se pudo guardar la regla';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -112,6 +169,20 @@ export default function AutomationRuleBuilder({ rule, onSaved, onCancel }) {
           placeholder="Ej. Go live → Discord + X"
         />
       </div>
+
+      <label className="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+        <input
+          type="checkbox"
+          checked={enabled}
+          onChange={(e) => setEnabled(e.target.checked)}
+          className="rounded border-gray-300"
+        />
+        Regla activa
+      </label>
+
+      {error ? (
+        <p className="text-sm text-red-600 dark:text-red-400" role="alert">{error}</p>
+      ) : null}
 
       <div className="flex flex-col items-stretch max-w-md mx-auto">
         {/* IF node */}
@@ -174,13 +245,11 @@ export default function AutomationRuleBuilder({ rule, onSaved, onCancel }) {
                     <p className="text-xs text-gray-500 mb-2">{meta.description}</p>
                   ) : null}
                   {(meta?.params || []).map((param) => (
-                    <input
+                    <ActionParamField
                       key={param.key}
-                      type="text"
+                      param={param}
                       value={action.params?.[param.key] || ''}
-                      onChange={(e) => updateActionParam(index, param.key, e.target.value)}
-                      placeholder={param.label}
-                      className="w-full mt-1.5 px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm"
+                      onChange={(val) => updateActionParam(index, param.key, val)}
                     />
                   ))}
                 </div>

@@ -8,6 +8,7 @@ import { Rocket, Zap, BarChart3, CheckCircle2, AlertCircle, Calendar, Package } 
 import {
   getCalendarReadiness,
   getDirectorActive,
+  getAutomationRules,
   startDirector,
 } from '../api/creatorApi.js';
 import CreatorSmartSchedule from './CreatorSmartSchedule.js';
@@ -16,17 +17,25 @@ export default function CreatorSuiteCard() {
   const navigate = useNavigate();
   const [readiness, setReadiness] = useState(null);
   const [director, setDirector] = useState(null);
+  const [automationStats, setAutomationStats] = useState({ total: 0, enabled: 0 });
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [r, d] = await Promise.all([getCalendarReadiness(3), getDirectorActive()]);
+      const [r, d, rules] = await Promise.all([
+        getCalendarReadiness(3),
+        getDirectorActive(),
+        getAutomationRules().catch(() => []),
+      ]);
       setReadiness(r);
       setDirector(d);
+      const enabled = Array.isArray(rules) ? rules.filter((rule) => rule.enabled).length : 0;
+      setAutomationStats({ total: Array.isArray(rules) ? rules.length : 0, enabled });
     } catch {
       setReadiness(null);
       setDirector(null);
+      setAutomationStats({ total: 0, enabled: 0 });
     } finally {
       setLoading(false);
     }
@@ -78,7 +87,7 @@ export default function CreatorSuiteCard() {
         <p className="text-sm text-gray-500">Cargando…</p>
       ) : (
         <>
-          <div className="grid sm:grid-cols-2 gap-4 text-sm mb-4">
+          <div className="grid sm:grid-cols-3 gap-4 text-sm mb-4">
             <div className="rounded-lg bg-gray-50 dark:bg-gray-900/40 p-3">
               <p className="font-medium text-gray-800 dark:text-gray-200 mb-1">Próximo stream</p>
               {nextItem ? (
@@ -120,6 +129,21 @@ export default function CreatorSuiteCard() {
                 <p className="text-gray-500">Offline</p>
               )}
             </div>
+            <div className="rounded-lg bg-gray-50 dark:bg-gray-900/40 p-3">
+              <p className="font-medium text-gray-800 dark:text-gray-200 mb-1">Automatización</p>
+              {automationStats.total > 0 ? (
+                <>
+                  <p className="text-amber-600 dark:text-amber-400 font-medium">
+                    {automationStats.enabled} activa{automationStats.enabled === 1 ? '' : 's'}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {automationStats.total} regla{automationStats.total === 1 ? '' : 's'} IF/THEN
+                  </p>
+                </>
+              ) : (
+                <p className="text-gray-500">Sin reglas — crea la primera</p>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
@@ -139,9 +163,9 @@ export default function CreatorSuiteCard() {
               <Calendar className="w-3.5 h-3.5" />
               Calendario
             </Link>
-            <Link to="/creator/campaigns" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
-              <Package className="w-3.5 h-3.5" />
-              Nueva campaña
+            <Link to="/automation?create=1" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/30">
+              <Zap className="w-3.5 h-3.5" />
+              Nueva regla
             </Link>
           </div>
 
