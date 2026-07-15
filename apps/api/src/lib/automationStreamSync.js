@@ -19,6 +19,10 @@ function streamReadEnabled() {
   return process.env.AUTOMATION_READ_FROM_STREAM === "true";
 }
 
+export function isAutomationStreamReadEnabled() {
+  return streamReadEnabled();
+}
+
 /**
  * @param {number} legacyUserId
  */
