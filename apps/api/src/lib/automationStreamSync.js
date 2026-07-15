@@ -11,6 +11,10 @@ function getRepo() {
   return repo;
 }
 
+export function getAutomationRepository() {
+  return getRepo();
+}
+
 function streamReadEnabled() {
   return process.env.AUTOMATION_READ_FROM_STREAM === "true";
 }

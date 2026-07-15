@@ -4,7 +4,9 @@ import {
   syncAutomationRuleToStream,
   syncAutomationRuleDeleteToStream,
   readAutomationRulesFromStream,
+  getAutomationRepository,
 } from '../../../lib/automationStreamSync.js';
+import { publishPlatformOutbox } from '../../../lib/platformOutbox.js';
 
 const TRIGGER_TYPES = ['stream.started', 'stream.scheduled', 'stream.ended'];
 
@@ -66,14 +68,48 @@ export async function updateRule(userId, ruleId, patch) {
 }
 
 export async function deleteRule(userId, ruleId) {
-  const rule = await AutomationRule.findOne({ where: { id: ruleId, userId } });
-  if (!rule) {
-    const err = new Error('not_found');
-    err.status = 404;
-    throw err;
+  let legacyId = ruleId;
+
+  if (streamReadEnabled()) {
+    const repository = getAutomationRepository();
+    if (repository) {
+      const streamRef = await repository.findRuleRefForDelete(userId, ruleId);
+      if (streamRef?.legacy_id) legacyId = streamRef.legacy_id;
+      else if (streamRef && streamRef.legacy_id == null) {
+        await repository.deleteByStreamId(streamRef.id);
+        await publishPlatformOutbox({
+          aggregateType: 'automation_rule',
+          aggregateId: String(ruleId),
+          eventType: 'stream.automation.deleted',
+          payload: { streamId: streamRef.id, legacyId: null },
+        });
+        return;
+      }
+    }
   }
-  await AutomationRule.destroy({ where: { id: ruleId, userId } });
-  await syncAutomationRuleDeleteToStream(ruleId);
+
+  const rule = await AutomationRule.findOne({ where: { id: legacyId, userId } });
+  if (rule) {
+    await AutomationRule.destroy({ where: { id: legacyId, userId } });
+    await syncAutomationRuleDeleteToStream(legacyId);
+    return;
+  }
+
+  if (streamReadEnabled()) {
+    const repository = getAutomationRepository();
+    if (repository) {
+      const streamRow = await repository.findByLegacyId(legacyId);
+      if (streamRow) {
+        await repository.deleteByLegacyId(legacyId);
+        await syncAutomationRuleDeleteToStream(legacyId);
+        return;
+      }
+    }
+  }
+
+  const err = new Error('not_found');
+  err.status = 404;
+  throw err;
 }
 
 export async function seedDefaultRules(userId) {
