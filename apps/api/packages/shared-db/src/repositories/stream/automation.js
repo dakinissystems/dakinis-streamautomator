@@ -160,6 +160,32 @@ export class AutomationRuleRepository extends BaseRepository {
   }
 
   /**
+   * @param {number} legacyUserId
+   * @param {number} ruleId — legacy AutomationRules.id o stream.automation_rules.id
+   */
+  async findRuleRefForDelete(legacyUserId, ruleId) {
+    const userUuid = await this.resolveUserUuid(legacyUserId);
+    if (!userUuid) return null;
+    const { rows } = await this.query(
+      `SELECT id, legacy_id
+       FROM ${this.qualified}
+       WHERE user_id = $1::uuid
+         AND (legacy_id = $2 OR id = $2)
+       LIMIT 1`,
+      [userUuid, ruleId],
+    );
+    return rows[0] ?? null;
+  }
+
+  async deleteByStreamId(streamId) {
+    const { rowCount } = await this.query(
+      `DELETE FROM ${this.qualified} WHERE id = $1`,
+      [streamId],
+    );
+    return rowCount > 0;
+  }
+
+  /**
    * @param {number} legacyId
    */
   async deleteByLegacyId(legacyId) {
