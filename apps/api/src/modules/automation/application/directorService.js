@@ -7,6 +7,10 @@ import {
   buildDirectorStepHints,
   runDirectorStepSideEffects,
 } from './directorStepActions.js';
+import {
+  syncDirectorSessionToStream,
+  readActiveDirectorFromStream,
+} from '../../../lib/directorStreamSync.js';
 
 function normalizePlatform(value, fallback = 'twitch') {
   if (value == null || value === '') return fallback;
@@ -75,6 +79,9 @@ async function findUpcomingContent(userId) {
 }
 
 export async function getActiveDirectorSession(userId) {
+  const fromStream = await readActiveDirectorFromStream(userId);
+  if (fromStream) return fromStream;
+
   return StreamDirectorSession.findOne({
     where: { userId, status: 'live' },
     order: [['startedAt', 'DESC']],
@@ -99,7 +106,7 @@ export async function startDirectorForStream(user, opts = {}) {
   );
 
   try {
-    return await StreamDirectorSession.create({
+    const session = await StreamDirectorSession.create({
       userId,
       contentId: content?.id || null,
       title: String(title).slice(0, 500),
@@ -108,6 +115,8 @@ export async function startDirectorForStream(user, opts = {}) {
       steps: buildDefaultSteps({ title, platform, content }),
       startedAt: new Date(),
     });
+    await syncDirectorSessionToStream(session, 'stream.director.started');
+    return session;
   } catch (err) {
     const wrapped = new Error(err?.original?.message || err.message);
     wrapped.cause = err;
@@ -155,6 +164,7 @@ export async function completeDirectorStep(userId, sessionId, stepIdValue) {
 
   session.steps = updated;
   await session.save();
+  await syncDirectorSessionToStream(session, 'stream.director.step_completed');
 
   const plain = session.get({ plain: true });
   plain.lastStepEffects = sideEffects;
@@ -181,6 +191,7 @@ async function finalizeDirectorSession(session) {
     s.status === 'done' ? s : { ...s, status: s.status === 'active' ? 'skipped' : s.status },
   );
   await session.save();
+  await syncDirectorSessionToStream(session, 'stream.director.ended');
   return session;
 }
 
@@ -191,6 +202,11 @@ export async function endActiveDirectorSession(userId) {
   return finalizeDirectorSession(session);
 }
 
+function sessionToPlain(session) {
+  if (!session) return null;
+  return typeof session.get === 'function' ? session.get({ plain: true }) : session;
+}
+
 export async function getDirectorSummary(userId) {
   const session = await getActiveDirectorSession(userId);
   if (!session) return { active: false, session: null };
@@ -199,7 +215,7 @@ export async function getDirectorSummary(userId) {
   const done = steps.filter((s) => s.status === 'done').length;
 
   const user = await User.findByPk(userId);
-  const sessionPlain = session.get({ plain: true });
+  const sessionPlain = sessionToPlain(session);
   const activeStepWithHints = activeStep
     ? {
         ...activeStep,

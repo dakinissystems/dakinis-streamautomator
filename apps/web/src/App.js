@@ -225,7 +225,7 @@ function Sidebar({ user, open, onClose, adminUnreadMessageCount = 0, adminFinanc
                 Analytics
               </span>
             </Link>
-            <Link to="/creator/campaign-kits" className={getLinkClasses("/creator/campaign-kits")}>
+            <Link to="/creator/campaigns" className={getLinkClasses("/creator/campaigns")}>
               <span className="flex items-center gap-2">
                 <Package className="w-4 h-4 flex-shrink-0 opacity-90" aria-hidden />
                 Kits de campaña

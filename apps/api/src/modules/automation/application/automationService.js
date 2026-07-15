@@ -1,5 +1,10 @@
 import AutomationRule from '../infrastructure/AutomationRule.model.js';
 import { listSupportedAutomationActions } from './automationExecutor.js';
+import {
+  syncAutomationRuleToStream,
+  syncAutomationRuleDeleteToStream,
+  readAutomationRulesFromStream,
+} from '../../../lib/automationStreamSync.js';
 
 const TRIGGER_TYPES = ['stream.started', 'stream.scheduled', 'stream.ended'];
 
@@ -8,6 +13,9 @@ export function listTriggerTypes() {
 }
 
 export async function listRules(userId) {
+  const fromStream = await readAutomationRulesFromStream(userId);
+  if (fromStream) return fromStream;
+
   return AutomationRule.findAll({
     where: { userId },
     order: [['updatedAt', 'DESC']],
@@ -21,7 +29,7 @@ export async function createRule(userId, input) {
     err.status = 400;
     throw err;
   }
-  return AutomationRule.create({
+  const rule = await AutomationRule.create({
     userId,
     name: String(input.name || 'Automation').slice(0, 120),
     enabled: input.enabled !== false,
@@ -29,6 +37,8 @@ export async function createRule(userId, input) {
     triggerConfig: input.triggerConfig || null,
     actions: Array.isArray(input.actions) ? input.actions : [],
   });
+  await syncAutomationRuleToStream(rule, 'stream.automation.created');
+  return rule;
 }
 
 export async function updateRule(userId, ruleId, patch) {
@@ -51,23 +61,26 @@ export async function updateRule(userId, ruleId, patch) {
   if (patch.triggerConfig !== undefined) rule.triggerConfig = patch.triggerConfig;
   if (patch.actions !== undefined) rule.actions = Array.isArray(patch.actions) ? patch.actions : [];
   await rule.save();
+  await syncAutomationRuleToStream(rule, 'stream.automation.updated');
   return rule;
 }
 
 export async function deleteRule(userId, ruleId) {
-  const n = await AutomationRule.destroy({ where: { id: ruleId, userId } });
-  if (!n) {
+  const rule = await AutomationRule.findOne({ where: { id: ruleId, userId } });
+  if (!rule) {
     const err = new Error('not_found');
     err.status = 404;
     throw err;
   }
+  await AutomationRule.destroy({ where: { id: ruleId, userId } });
+  await syncAutomationRuleDeleteToStream(ruleId);
 }
 
 export async function seedDefaultRules(userId) {
   const existing = await AutomationRule.count({ where: { userId } });
   if (existing > 0) return { seeded: false, reason: 'already_has_rules' };
 
-  await AutomationRule.bulkCreate([
+  const created = await AutomationRule.bulkCreate([
     {
       userId,
       name: 'Go live → Discord + AkoeNet',
@@ -75,7 +88,7 @@ export async function seedDefaultRules(userId) {
       triggerType: 'stream.started',
       triggerConfig: null,
       actions: [
-        { type: 'akoenet.assistant', params: { type: 'stream.started' } },
+        { type: 'discord.announce', params: { message: '🔴 En directo' } },
         { type: 'platform.notification', params: { title: 'En directo', body: 'Tu stream ha comenzado' } },
       ],
     },
@@ -92,7 +105,11 @@ export async function seedDefaultRules(userId) {
     },
   ]);
 
-  return { seeded: true, count: 2 };
+  for (const rule of created) {
+    await syncAutomationRuleToStream(rule, 'stream.automation.created');
+  }
+
+  return { seeded: true, count: created.length };
 }
 
 const TRIGGER_LABELS = {

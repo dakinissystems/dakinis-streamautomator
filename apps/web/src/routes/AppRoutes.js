@@ -23,7 +23,7 @@ import StreamTimelinePage from '../features/app/pages/StreamTimelinePage';
 import DirectorPage from '../features/creator/pages/DirectorPage';
 import AutomationPage from '../features/creator/pages/AutomationPage';
 import CreatorAnalyticsPage from '../features/creator/pages/CreatorAnalyticsPage';
-import CampaignKitsPage from '../features/creator/pages/CampaignKitsPage';
+import CampaignCenterPage from '../features/creator/pages/CampaignCenterPage';
 import Privacy from '../features/legal/pages/PrivacyPage';
 import Terms from '../features/legal/pages/TermsPage';
 import LegalNotice from '../features/legal/pages/LegalNoticePage';
@@ -202,7 +202,15 @@ export function AppRoutes({ user, token, setAuth, setUser, signOut }) {
         path="/creator/campaign-kits"
         element={
           <PrivateRoute user={user}>
-            <CampaignKitsPage />
+            <Navigate to="/creator/campaigns" replace />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/creator/campaigns"
+        element={
+          <PrivateRoute user={user}>
+            <CampaignCenterPage />
           </PrivateRoute>
         }
       />

@@ -80,6 +80,14 @@ export default function DirectorPage() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem('sa_director_tried', '1');
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   const onStart = async () => {
     try {
       await startDirector({});

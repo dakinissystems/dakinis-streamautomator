@@ -33,6 +33,18 @@ import { getPlatformColors } from '../utils/platformColors';
 import { parsePastedPost } from '../utils/copyPastePost';
 import { TWITTER_MAX_CHARS, DISCORD_ICON_URL } from '../constants/platforms';
 import { devCatchLog } from '../utils/devCatchLog';
+import CreatorCopilotSuggest from '../features/creator/components/CreatorCopilotSuggest.js';
+import CreatorSmartSchedule from '../features/creator/components/CreatorSmartSchedule.js';
+
+function isoToLocalScheduleFields(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return {};
+  const pad = (n) => String(n).padStart(2, '0');
+  return {
+    scheduledFor: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+    scheduledTime: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+  };
+}
 
 function scheduleErrStr(v) {
   return typeof v === 'string' ? v : (v && typeof v.message === 'string' ? v.message : '');
@@ -217,6 +229,23 @@ const Schedule = ({ user, token }) => {
     toast.success(t('schedule.templateApplied', { name: template.name }));
     navigate(location.pathname, { replace: true, state: {} });
   }, [location.state?.applyTemplate, location.pathname, navigate, t]);
+
+  // Prefill from Smart Scheduler or other deep links (state.prefilled)
+  useEffect(() => {
+    const prefilled = location.state?.prefilled;
+    if (!prefilled || typeof prefilled !== 'object') return;
+    const dateFields = prefilled.scheduledFor ? isoToLocalScheduleFields(prefilled.scheduledFor) : {};
+    setFormData((prev) => ({
+      ...prev,
+      title: prefilled.title ?? prev.title,
+      content: prefilled.content ?? prefilled.title ?? prev.content,
+      contentType: prefilled.contentType || prev.contentType,
+      platforms: Array.isArray(prefilled.platforms) ? prefilled.platforms : prev.platforms,
+      ...dateFields,
+    }));
+    toast.success('Formulario cargado con la sugerencia');
+    navigate(location.pathname, { replace: true, state: {} });
+  }, [location.state?.prefilled, location.pathname, navigate]);
 
   // Load Discord guilds when Discord platform is selected
   const hasDiscordSelected = Array.isArray(formData.platforms) && formData.platforms.includes('discord');
@@ -931,16 +960,25 @@ const Schedule = ({ user, token }) => {
           </div>
         </div>
 
+        <CreatorSmartSchedule />
+
         {/* Form */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 sm:p-6 lg:p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Title */}
             <div className="title-input">
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {formData.contentType === 'event' 
-                  ? (formData.platforms.includes('discord') ? t('schedule.eventName') : t('schedule.contentTitle'))
-                  : t('schedule.contentTitle')} <span className="text-red-500">*</span>
-                    </label>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {formData.contentType === 'event' 
+                    ? (formData.platforms.includes('discord') ? t('schedule.eventName') : t('schedule.contentTitle'))
+                    : t('schedule.contentTitle')} <span className="text-red-500">*</span>
+                </label>
+                <CreatorCopilotSuggest
+                  type="title"
+                  prompt={formData.content}
+                  onApply={(text) => handleInputChange('title', text)}
+                />
+              </div>
               <div className="relative">
                     <input
                   id="title"
@@ -967,11 +1005,18 @@ const Schedule = ({ user, token }) => {
                   
             {/* Content */}
             <div className="content-textarea">
-              <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {formData.contentType === 'event' 
-                  ? (formData.platforms.includes('discord') ? t('schedule.eventDescription') : t('schedule.contentLabel'))
-                  : t('schedule.contentLabel')} <span className="text-red-500">*</span>
-                    </label>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {formData.contentType === 'event' 
+                    ? (formData.platforms.includes('discord') ? t('schedule.eventDescription') : t('schedule.contentLabel'))
+                    : t('schedule.contentLabel')} <span className="text-red-500">*</span>
+                </label>
+                <CreatorCopilotSuggest
+                  type="description"
+                  prompt={formData.title}
+                  onApply={(text) => handleInputChange('content', text)}
+                />
+              </div>
               <div className="relative">
                     <textarea
                   id="content"

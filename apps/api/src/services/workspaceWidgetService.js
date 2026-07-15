@@ -49,7 +49,7 @@ export async function buildWorkspaceWidgetPayload(userId) {
       { id: 'open-director', label: 'Modo Director', path: '/director' },
       { id: 'open-automation', label: 'Automatización', path: '/automation' },
       { id: 'open-schedule', label: 'Calendario', path: '/schedule' },
-      { id: 'open-campaigns', label: 'Campaign kits', path: '/creator/campaign-kits' },
+      { id: 'open-campaigns', label: 'Campaign Center', path: '/creator/campaigns' },
     ],
     widgets: {
       'streamautomator.next-stream': nextStream

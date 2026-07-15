@@ -2,7 +2,7 @@
  * Creator analytics — timeline heatmap + publication metrics.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, Lightbulb } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getCreatorAnalytics } from '../api/creatorApi.js';
 
@@ -43,6 +43,53 @@ function HeatmapGrid({ heatmap }) {
         ))}
       </div>
     </div>
+  );
+}
+
+function InsightsPanel({ insights }) {
+  if (!insights) return null;
+  const heatTips = insights.heatmap?.tips || [];
+  const pubTips = insights.publications?.tips || [];
+  const bestSlot = insights.heatmap?.bestSlot;
+  const topPlatform = insights.publications?.topPlatform;
+
+  if (!heatTips.length && !pubTips.length && !bestSlot && !topPlatform) return null;
+
+  return (
+    <section className="p-4 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20">
+      <h2 className="font-semibold mb-3 flex items-center gap-2">
+        <Lightbulb className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+        Insights
+      </h2>
+      <div className="grid sm:grid-cols-2 gap-4 text-sm">
+        {bestSlot && (
+          <div className="rounded-lg bg-white/80 dark:bg-gray-900/40 p-3">
+            <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Mejor franja</p>
+            <p className="font-medium text-gray-800 dark:text-gray-200">{bestSlot.label}</p>
+            <p className="text-xs text-gray-500 mt-1">{bestSlot.events} eventos registrados</p>
+          </div>
+        )}
+        {topPlatform && (
+          <div className="rounded-lg bg-white/80 dark:bg-gray-900/40 p-3">
+            <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Plataforma top</p>
+            <p className="font-medium text-gray-800 dark:text-gray-200 capitalize">{topPlatform}</p>
+            {insights.publications?.topSuccessRate != null && (
+              <p className="text-xs text-gray-500 mt-1">{insights.publications.topSuccessRate}% éxito</p>
+            )}
+          </div>
+        )}
+      </div>
+      {(heatTips.length > 0 || pubTips.length > 0) && (
+        <ul className="mt-3 space-y-1.5 text-sm text-gray-700 dark:text-gray-300">
+          {[...heatTips, ...pubTips].map((tip, i) => (
+            <li key={i} className="flex gap-2">
+              <span className="text-amber-500 shrink-0">•</span>
+              <span>{tip}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 
@@ -91,6 +138,8 @@ export default function CreatorAnalyticsPage() {
         <p className="text-gray-500">Cargando…</p>
       ) : (
         <div className="space-y-6">
+          <InsightsPanel insights={data?.insights} />
+
           <section className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
             <h2 className="font-semibold mb-3">Publicaciones por plataforma</h2>
             {pubs?.byPlatform?.length ? (

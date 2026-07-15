@@ -8,6 +8,7 @@ import { startDiscordSyncWorker } from '../services/discordQueueService.js';
 import { startDiscordGateway } from '../services/discordGatewayService.js';
 import { startReminderWorker } from '../services/reminderQueueService.js';
 import { handleReminderJob } from '../services/reminderWorker.js';
+import { startOutboxSyncWorker } from '../workers/outboxSyncWorker.js';
 import { dakinisInitSentry } from '../utils/sentry.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -54,6 +55,8 @@ export async function startWorkerProcess() {
       logger.debug('Reminder worker not started', { error: err.message })
     );
   }
+
+  startOutboxSyncWorker();
 
   const publicationOn = process.env.ENABLE_PUBLICATION_WORKER !== 'false';
   const remindersOn = process.env.ENABLE_REMINDER_WORKER !== 'false';

@@ -80,6 +80,16 @@ export async function getCampaignKits() {
   return data.items || [];
 }
 
+export async function previewCampaignKit(kitId, params = {}) {
+  const { data } = await apiClient.get(`/creator/campaign-kits/${kitId}/preview`, { params });
+  return data;
+}
+
+export async function getSchedulerSuggestions(days = 14) {
+  const { data } = await apiClient.get('/creator/scheduler/suggest', { params: { days } });
+  return data;
+}
+
 export async function applyCampaignKit(kitId, body = {}) {
   const { data } = await apiClient.post(`/creator/campaign-kits/${kitId}/apply`, body);
   return data;
