@@ -170,6 +170,7 @@ router.post('/stream/start', async (req, res) => {
         'username',
         'platformAuthSub',
         'akoenetServerId',
+        'akoenetAnnounceChannelId',
         'discordAnnounceWebhookUrl',
       ],
     });
@@ -205,7 +206,7 @@ router.post('/stream/end', async (req, res) => {
     }
 
     const fullUser = await User.findByPk(user.id, {
-      attributes: ['id', 'username', 'platformAuthSub', 'akoenetServerId'],
+      attributes: ['id', 'username', 'platformAuthSub', 'akoenetServerId', 'akoenetAnnounceChannelId'],
     });
 
     const title = (req.body?.title ?? req.body?.note ?? 'Stream ended').trim();

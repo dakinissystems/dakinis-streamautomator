@@ -10,6 +10,7 @@ import {
   getDirectorActive,
   startDirector,
 } from '../api/creatorApi.js';
+import CreatorSmartSchedule from './CreatorSmartSchedule.js';
 
 export default function CreatorSuiteCard() {
   const navigate = useNavigate();
@@ -66,7 +67,7 @@ export default function CreatorSuiteCard() {
             <BarChart3 className="w-4 h-4" />
             Analytics
           </Link>
-          <Link to="/creator/campaign-kits" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50">
+          <Link to="/creator/campaigns" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50">
             <Package className="w-4 h-4" />
             Campaigns
           </Link>
@@ -138,10 +139,14 @@ export default function CreatorSuiteCard() {
               <Calendar className="w-3.5 h-3.5" />
               Calendario
             </Link>
-            <Link to="/creator/campaign-kits" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+            <Link to="/creator/campaigns" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
               <Package className="w-3.5 h-3.5" />
               Nueva campaña
             </Link>
+          </div>
+
+          <div className="mt-4">
+            <CreatorSmartSchedule compact />
           </div>
         </>
       )}

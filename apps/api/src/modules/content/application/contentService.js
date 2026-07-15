@@ -11,6 +11,7 @@ import { parsePagination, formatPaginatedResponse } from '../../../utils/paginat
 import { enqueueDiscordSync } from '../../../services/discordQueueService.js';
 import { enqueueAkoeNetStreamScheduled } from '../../../services/akoeNetWebhookService.js';
 import { enqueuePlatformStreamScheduled } from '../../../services/platformIntegrationService.js';
+import { indexStreamContentInSearch, removeStreamContentFromSearch } from '../../../lib/search-platform-index.js';
 import { normalizeTenantId, scopedUserTenantWhere } from '../../../utils/tenantScope.js';
 
 function isDiscordEventContent(content) {
@@ -74,7 +75,10 @@ export class ContentService {
         attributes: ['id', 'username', 'platformAuthSub', 'akoenetServerId'],
       })
         .then((user) => {
-          if (user) enqueuePlatformStreamScheduled(user, c);
+          if (user) {
+            enqueuePlatformStreamScheduled(user, c);
+            indexStreamContentInSearch(c, user).catch(() => {});
+          }
         })
         .catch(() => {});
     }
@@ -183,6 +187,9 @@ export class ContentService {
       );
     }
     enqueueAkoeNetStreamScheduled(userId, content);
+    User.findByPk(userId, { attributes: ['id', 'username'] })
+      .then((user) => indexStreamContentInSearch(content, user).catch(() => {}))
+      .catch(() => {});
 
     return content;
   }
@@ -199,6 +206,7 @@ export class ContentService {
       await content.destroy();
       logger.info('Content deleted via service', { userId, contentId });
     }
+    removeStreamContentFromSearch(contentId).catch(() => {});
     return { message: 'Content deleted successfully' };
   }
 

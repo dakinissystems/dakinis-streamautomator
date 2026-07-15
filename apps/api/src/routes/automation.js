@@ -8,6 +8,12 @@ import {
   seedDefaultRules,
   getAutomationCatalog,
 } from '../modules/automation/application/automationService.js';
+import {
+  automationRuleCreateSchema,
+  automationRuleUpdateSchema,
+  parseOrThrow,
+} from '@dakinis/shared-validation/stream';
+import { mapToHttp } from '@dakinis/shared-error';
 import logger from '../utils/logger.js';
 
 const router = express.Router();
@@ -28,21 +34,23 @@ router.get('/rules', requireAuth, async (req, res) => {
 
 router.post('/rules', requireAuth, async (req, res) => {
   try {
-    const rule = await createRule(req.user.id, req.body || {});
+    const input = parseOrThrow(automationRuleCreateSchema, req.body || {});
+    const rule = await createRule(req.user.id, input);
     res.status(201).json(rule);
   } catch (err) {
-    const status = err.status || 500;
-    res.status(status).json({ error: err.message || 'create_failed' });
+    const mapped = mapToHttp(err);
+    res.status(mapped.status).json(mapped.body);
   }
 });
 
 router.patch('/rules/:id', requireAuth, async (req, res) => {
   try {
-    const rule = await updateRule(req.user.id, Number(req.params.id), req.body || {});
+    const patch = parseOrThrow(automationRuleUpdateSchema, req.body || {});
+    const rule = await updateRule(req.user.id, Number(req.params.id), patch);
     res.json(rule);
   } catch (err) {
-    const status = err.status || 500;
-    res.status(status).json({ error: err.message || 'update_failed' });
+    const mapped = mapToHttp(err);
+    res.status(mapped.status).json(mapped.body);
   }
 });
 

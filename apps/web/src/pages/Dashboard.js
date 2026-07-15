@@ -28,6 +28,7 @@ import { devCatchLog } from '../utils/devCatchLog';
 import TrialWarning from '../components/TrialWarning';
 import OnboardingChecklist from '../components/OnboardingChecklist';
 import CreatorSuiteCard from '../features/creator/components/CreatorSuiteCard';
+import CreatorNextStreamWidget from '../features/creator/components/CreatorNextStreamWidget';
 import { SearchAdvanced } from '../components/SearchAdvanced';
 import { 
   Calendar as CalendarIcon, 
@@ -798,6 +799,7 @@ const Dashboard = ({ user, token, ...props }) => {
           />
         )}
 
+        {!user?.isAdmin && <CreatorNextStreamWidget />}
         {!user?.isAdmin && <CreatorSuiteCard />}
 
         {/* Twitch: suscripciones, bits, donaciones (según preferencias del perfil) */}

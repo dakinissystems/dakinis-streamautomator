@@ -6,14 +6,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, Circle, X, ExternalLink, Loader2 } from 'lucide-react';
+import { CheckCircle, Circle, X, ExternalLink, Loader2, Rocket, Zap } from 'lucide-react';
 import { getConnectedAccounts, getOnboardingStatus, autoCreateFirstStream } from '../features/account/api';
+import { getAutomationRules, getDirectorActive } from '../features/creator/api/creatorApi.js';
 import { useLanguage } from '../contexts/LanguageContext';
 import toast from 'react-hot-toast';
 import { getPublicShareLinkQueryString } from '../shared/config/publicUrls';
 import { devCatchLog } from '../utils/devCatchLog';
 
 const STORAGE_KEY = 'streamer_scheduler_onboarding_dismissed';
+const DIRECTOR_TRIED_KEY = 'sa_director_tried';
 
 export default function OnboardingChecklist({ user, token, hasScheduledContent, onFirstStreamCreated }) {
   const { t } = useLanguage();
@@ -29,6 +31,7 @@ export default function OnboardingChecklist({ user, token, hasScheduledContent, 
   const [connectedAccounts, setConnectedAccounts] = useState(null);
   const [onboardingStatus, setOnboardingStatus] = useState(null);
   const [creatingExample, setCreatingExample] = useState(false);
+  const [creatorSteps, setCreatorSteps] = useState({ director: false, automation: false });
 
   useEffect(() => {
     if (!token || !user || user.isAdmin) return;
@@ -54,6 +57,29 @@ export default function OnboardingChecklist({ user, token, hasScheduledContent, 
     return () => { cancelled = true; };
   }, [token, user, hasScheduledContent]);
 
+  useEffect(() => {
+    if (!token || !user || user.isAdmin) return;
+    let cancelled = false;
+    Promise.all([getDirectorActive(), getAutomationRules()])
+      .then(([director, rules]) => {
+        if (cancelled) return;
+        let directorTried = false;
+        try {
+          directorTried = localStorage.getItem(DIRECTOR_TRIED_KEY) === '1';
+        } catch (e) {
+          devCatchLog('OnboardingChecklist.directorTried', e);
+        }
+        setCreatorSteps({
+          director: Boolean(director?.active) || directorTried,
+          automation: (rules?.length ?? 0) > 0,
+        });
+      })
+      .catch((e) => {
+        devCatchLog('OnboardingChecklist.creatorSteps', e);
+      });
+    return () => { cancelled = true; };
+  }, [token, user, hasScheduledContent]);
+
   const handleDismiss = () => {
     try {
       localStorage.setItem(STORAGE_KEY, 'true');
@@ -68,7 +94,9 @@ export default function OnboardingChecklist({ user, token, hasScheduledContent, 
   const twitchOk = connectedAccounts?.twitch === true;
   const discordOk = connectedAccounts?.discord === true;
   const scheduleOk = !!hasScheduledContent;
-  const allDone = twitchOk && discordOk && scheduleOk;
+  const directorOk = creatorSteps.director;
+  const automationOk = creatorSteps.automation;
+  const allDone = twitchOk && discordOk && scheduleOk && directorOk && automationOk;
 
   return (
     <div className="bg-accent/10 dark:bg-accent/20 border border-accent/30 rounded-lg p-4 sm:p-5 mb-6 relative">
@@ -159,6 +187,30 @@ export default function OnboardingChecklist({ user, token, hasScheduledContent, 
           >
             /streamer/{user?.username || 'you'}
           </button>
+        </li>
+        <li className="flex items-center gap-2">
+          {directorOk ? <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" /> : <Circle className="w-4 h-4 text-gray-400 flex-shrink-0" />}
+          <Rocket className="w-4 h-4 text-sky-500 flex-shrink-0" />
+          <span className={directorOk ? 'text-gray-600 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}>
+            Probar Modo Director
+          </span>
+          {!directorOk && (
+            <button type="button" onClick={() => navigate('/director')} className="text-accent hover:underline ml-1">
+              Director →
+            </button>
+          )}
+        </li>
+        <li className="flex items-center gap-2">
+          {automationOk ? <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" /> : <Circle className="w-4 h-4 text-gray-400 flex-shrink-0" />}
+          <Zap className="w-4 h-4 text-amber-500 flex-shrink-0" />
+          <span className={automationOk ? 'text-gray-600 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}>
+            Configurar automatización
+          </span>
+          {!automationOk && (
+            <button type="button" onClick={() => navigate('/automation')} className="text-accent hover:underline ml-1">
+              Automatización →
+            </button>
+          )}
         </li>
       </ul>
       {allDone && (

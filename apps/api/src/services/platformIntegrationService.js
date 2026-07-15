@@ -5,6 +5,7 @@
 
 import logger from '../utils/logger.js';
 import { dakinisInternalFetch, isDakinisInternalConfigured } from '../lib/dakinisInternalClient.js';
+import { buildPublicStreamerShareUrl } from '../utils/publicStreamerShareUrl.js';
 import { StreamTimelineEvent } from '../modules/content/infrastructure/models.js';
 import { runAutomationForTrigger } from '../modules/automation/application/automationExecutor.js';
 import { startDirectorForStream, endActiveDirectorSession } from '../modules/automation/application/directorService.js';
@@ -22,11 +23,23 @@ function platformUserId(user) {
 }
 
 function buildStreamPayload(user, extra = {}) {
+  const frontend =
+    process.env.FRONTEND_URL || process.env.PUBLIC_FRONTEND_URL || 'https://streamautomator.com';
+  const shareUrl =
+    user?.username && !extra.url
+      ? buildPublicStreamerShareUrl(frontend, user.username)
+      : extra.url || null;
+
   return {
     streamer: user?.username || null,
     scheduler_slug: user?.username || null,
     platformUserId: platformUserId(user),
+    channel_id: user?.akoenetAnnounceChannelId
+      ? Number(user.akoenetAnnounceChannelId) || user.akoenetAnnounceChannelId
+      : undefined,
+    server_id: user?.akoenetServerId ? Number(user.akoenetServerId) || user.akoenetServerId : undefined,
     ...extra,
+    url: extra.url || shareUrl || undefined,
   };
 }
 

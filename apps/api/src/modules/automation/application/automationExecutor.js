@@ -13,6 +13,7 @@ import {
 } from '../../../services/platformIntegrationService.js';
 import { announceStreamStarted } from '../../../utils/discordAnnounce.js';
 import { enqueueAkoeNetStreamScheduled } from '../../../services/akoeNetWebhookService.js';
+import { readAutomationRulesForTriggerFromStream } from '../../../lib/automationStreamSync.js';
 
 const SUPPORTED_ACTIONS = new Set([
   'platform.event',
@@ -81,10 +82,13 @@ async function runAction(user, action, ctx) {
  * @param {object} ctx
  */
 export async function runAutomationForTrigger(user, triggerType, ctx = {}) {
-  const rules = await AutomationRule.findAll({
-    where: { userId: user.id, enabled: true, triggerType },
-    order: [['id', 'ASC']],
-  });
+  let rules = await readAutomationRulesForTriggerFromStream(user.id, triggerType);
+  if (!rules) {
+    rules = await AutomationRule.findAll({
+      where: { userId: user.id, enabled: true, triggerType },
+      order: [['id', 'ASC']],
+    });
+  }
 
   const results = [];
   for (const rule of rules) {

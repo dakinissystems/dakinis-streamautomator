@@ -90,6 +90,20 @@ const CAMPAIGN_KITS = [
   },
 ];
 
+function resolveKitBaseDate(launchDate) {
+  const base = launchDate ? new Date(launchDate) : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+  if (Number.isNaN(base.getTime())) {
+    const err = new Error('invalid_launch_date');
+    err.status = 400;
+    throw err;
+  }
+  return base;
+}
+
+export function getCampaignKit(kitId) {
+  return CAMPAIGN_KITS.find((k) => k.id === kitId) || null;
+}
+
 export function listCampaignKits() {
   return CAMPAIGN_KITS.map(({ id, name, description, items }) => ({
     id,
@@ -97,6 +111,35 @@ export function listCampaignKits() {
     description,
     itemCount: items.length,
   }));
+}
+
+export function previewCampaignKit(kitId, { game, launchDate } = {}) {
+  const kit = getCampaignKit(kitId);
+  if (!kit) {
+    const err = new Error('kit_not_found');
+    err.status = 404;
+    throw err;
+  }
+
+  const gameName = String(game || 'Nuevo juego').slice(0, 120);
+  const base = resolveKitBaseDate(launchDate);
+
+  return {
+    kitId: kit.id,
+    name: kit.name,
+    game: gameName,
+    launchDate: base.toISOString(),
+    items: kit.items.map((item) => {
+      const scheduledFor = new Date(base.getTime() + item.offsetDays * 24 * 60 * 60 * 1000);
+      return {
+        offsetDays: item.offsetDays,
+        title: item.titleTemplate.replace(/\{game\}/g, gameName),
+        contentType: item.contentType,
+        platforms: item.platforms,
+        scheduledFor: scheduledFor.toISOString(),
+      };
+    }),
+  };
 }
 
 export async function applyCampaignKit(userId, kitId, { game, launchDate, tenantId } = {}) {
@@ -108,12 +151,7 @@ export async function applyCampaignKit(userId, kitId, { game, launchDate, tenant
   }
 
   const gameName = String(game || 'Nuevo juego').slice(0, 120);
-  const base = launchDate ? new Date(launchDate) : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
-  if (Number.isNaN(base.getTime())) {
-    const err = new Error('invalid_launch_date');
-    err.status = 400;
-    throw err;
-  }
+  const base = resolveKitBaseDate(launchDate);
 
   const created = [];
   for (const item of kit.items) {
