@@ -26,6 +26,9 @@
     "search:reindex": "node src/scripts/reindexSearch.js"
   },
   "dependencies": {
+    "@dakinis/shared-db": "file:./packages/shared-db",
+    "@dakinis/shared-error": "file:./packages/shared-error",
+    "@dakinis/shared-validation": "file:./packages/shared-validation",
     "@ffmpeg.wasm/core-mt": "^0.13.2",
     "@ffmpeg.wasm/main": "^0.13.1",
     "@sentry/node": "^9.47.1",

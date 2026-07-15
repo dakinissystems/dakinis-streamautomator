@@ -1,0 +1,29 @@
+{
+  "name": "@dakinis/shared-db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./pool": "./src/pool.js",
+    "./transaction": "./src/transaction.js",
+    "./transaction-manager": "./src/transaction-manager.js",
+    "./repositories/feature-flags": "./src/repositories/meta/feature-flags.js",
+    "./repositories/director": "./src/repositories/stream/director.js",
+    "./repositories/director-facade": "./src/repositories/stream/director-facade.js",
+    "./repositories/automation": "./src/repositories/stream/automation.js",
+    "./repositories/legacy-mapper": "./src/repositories/stream/legacy-mapper.js",
+    "./outbox": "./src/outbox/publisher.js",
+    "./outbox/processor": "./src/outbox/processor.js",
+    "./legacy/public-sync": "./src/legacy/public-sync.js"
+  },
+  "dependencies": {
+    "pg": "^8.22.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/outbox-publisher.test.js"
+  }
+}

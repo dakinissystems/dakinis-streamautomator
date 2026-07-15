@@ -1,0 +1,14 @@
+{
+  "name": "@dakinis/shared-error",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./express": "./src/express.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

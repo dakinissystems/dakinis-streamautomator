@@ -1,0 +1,22 @@
+{
+  "name": "@dakinis/shared-validation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./workspace": "./src/workspace.js",
+    "./stream": "./src/stream.js",
+    "./billing": "./src/billing.js",
+    "./akoenet": "./src/akoenet.js",
+    "./core": "./src/core.js",
+    "./events": "./src/events.js",
+    "./addon": "./src/addon.js"
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
