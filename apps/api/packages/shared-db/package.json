@@ -24,6 +24,6 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "node --test test/outbox-publisher.test.js"
+    "test": "vitest run --config ../../vitest.config.js test/outbox-publisher.test.js"
   }
 }
