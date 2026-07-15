@@ -241,6 +241,7 @@ router.post('/checkout', requireAuth, validateBody(checkoutSchema), async (req, 
       ? price.unit_amount / 100
       : plan.amount;
     const resolvedCurrency = (price.currency || plan.currency || 'usd').toUpperCase();
+    const isRecurring = price.type === 'recurring' || Boolean(price.recurring);
 
     // Check for existing pending payment for this user and license type
     const existingPending = await Payment.findOne({
@@ -299,10 +300,14 @@ router.post('/checkout', requireAuth, validateBody(checkoutSchema), async (req, 
       payment_method_types: ['card'],
       customer: customerId,
       line_items: [{ price: price.id, quantity: 1 }],
-      mode: 'payment',
+      mode: isRecurring ? 'subscription' : 'payment',
       locale: 'en',
-      success_url: `${getFrontendUrl()}/settings?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${getFrontendUrl()}/settings?payment=cancelled`,
+      success_url: isRecurring
+        ? `${getFrontendUrl()}/settings?subscription=success&session_id={CHECKOUT_SESSION_ID}`
+        : `${getFrontendUrl()}/settings?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: isRecurring
+        ? `${getFrontendUrl()}/settings?subscription=cancelled`
+        : `${getFrontendUrl()}/settings?payment=cancelled`,
       client_reference_id: payment.id.toString(),
       metadata: {
         userId: req.user.id.toString(),
