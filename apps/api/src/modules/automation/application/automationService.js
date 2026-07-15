@@ -5,6 +5,7 @@ import {
   syncAutomationRuleDeleteToStream,
   readAutomationRulesFromStream,
   getAutomationRepository,
+  isAutomationStreamReadEnabled,
 } from '../../../lib/automationStreamSync.js';
 import { publishPlatformOutbox } from '../../../lib/platformOutbox.js';
 
@@ -70,7 +71,7 @@ export async function updateRule(userId, ruleId, patch) {
 export async function deleteRule(userId, ruleId) {
   let legacyId = ruleId;
 
-  if (streamReadEnabled()) {
+  if (isAutomationStreamReadEnabled()) {
     const repository = getAutomationRepository();
     if (repository) {
       const streamRef = await repository.findRuleRefForDelete(userId, ruleId);
@@ -95,7 +96,7 @@ export async function deleteRule(userId, ruleId) {
     return;
   }
 
-  if (streamReadEnabled()) {
+  if (isAutomationStreamReadEnabled()) {
     const repository = getAutomationRepository();
     if (repository) {
       const streamRow = await repository.findByLegacyId(legacyId);
