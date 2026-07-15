@@ -1,11 +1,13 @@
 /**
  * IF/THEN automation rules for creator workflows.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Zap, ToggleLeft, ToggleRight, Plus, Pencil, Trash2 } from 'lucide-react';
 import {
   deleteAutomationRule,
+  getAutomationCatalog,
   getAutomationRules,
   seedAutomationDefaults,
   toggleAutomationRule,
@@ -19,15 +21,25 @@ const TRIGGER_LABELS = {
 };
 
 export default function AutomationPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [rules, setRules] = useState([]);
+  const [catalog, setCatalog] = useState({ triggers: [], actions: [] });
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
   const [creating, setCreating] = useState(false);
 
+  const actionLabels = useMemo(() => {
+    const map = {};
+    (catalog.actions || []).forEach((a) => { map[a.type] = a.label || a.type; });
+    return map;
+  }, [catalog]);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setRules(await getAutomationRules());
+      const [items, cat] = await Promise.all([getAutomationRules(), getAutomationCatalog()]);
+      setRules(items);
+      setCatalog(cat);
     } catch (err) {
       toast.error(err.response?.data?.error || 'Error al cargar reglas');
     } finally {
@@ -38,6 +50,19 @@ export default function AutomationPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    if (searchParams.get('create') === '1') {
+      setCreating(true);
+      setEditing(null);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
+  const formatActions = (ruleActions) => {
+    if (!Array.isArray(ruleActions) || ruleActions.length === 0) return '—';
+    return ruleActions.map((a) => actionLabels[a.type] || a.type).join(' → ');
+  };
 
   const onSeed = async () => {
     try {
@@ -128,7 +153,7 @@ export default function AutomationPage() {
                     {rule.triggerConfig?.platform ? ` · ${rule.triggerConfig.platform}` : ''}
                   </p>
                   <p className="text-xs text-sky-700 dark:text-sky-400 mt-0.5">
-                    THEN {Array.isArray(rule.actions) ? rule.actions.map((a) => a.type).join(' → ') : '—'}
+                    THEN {formatActions(rule.actions)}
                   </p>
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0">

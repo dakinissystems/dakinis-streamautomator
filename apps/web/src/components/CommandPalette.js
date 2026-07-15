@@ -13,6 +13,7 @@ const LOCAL_COMMANDS = [
   { id: 'schedule', label: 'Calendario / programar', path: '/schedule', group: 'create', keywords: ['calendario', 'stream', 'tweet'] },
   { id: 'director', label: 'Modo Director', path: '/director', group: 'create', keywords: ['live', 'directo', 'obs'] },
   { id: 'automation', label: 'Automatización IF/THEN', path: '/automation', group: 'create', keywords: ['reglas', 'zap', 'discord'] },
+  { id: 'automation-new', label: 'Nueva regla de automatización', path: '/automation?create=1', group: 'create', keywords: ['if then', 'trigger', 'crear regla'] },
   { id: 'campaigns', label: 'Campaign Center', path: '/creator/campaigns', group: 'create', keywords: ['campaña', 'kit', 'launch'] },
   { id: 'analytics', label: 'Analytics creador', path: '/creator/analytics', group: 'nav', keywords: ['estadísticas', 'heatmap'] },
   { id: 'templates', label: 'Plantillas', path: '/templates', group: 'nav', keywords: [] },
