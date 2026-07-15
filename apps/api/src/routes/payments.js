@@ -386,8 +386,6 @@ router.post('/verify-session', requireAuth, validateBody(verifySessionSchema), a
     // Subscription: webhook may not have run (e.g. wrong webhook URL). Create/update from session.
     if (session.mode === 'subscription' && session.subscription) {
       const licenseType = session.metadata?.licenseType || 'monthly';
-      const user = await User.findByPk(userId);
-      if (!user) return res.status(404).json({ error: 'User not found' });
       const subscription = await stripe.subscriptions.retrieve(session.subscription);
       user.stripeCustomerId = subscription.customer;
       user.stripeSubscriptionId = subscription.id;
@@ -451,7 +449,6 @@ router.post('/verify-session', requireAuth, validateBody(verifySessionSchema), a
     const licenseKey = generateLicenseKey('', 16);
     const expiryResult = resolveLicenseExpiry({ licenseType: payment.licenseType });
     const expiresAt = expiryResult.value;
-    const user = await User.findByPk(userId);
     user.licenseKey = licenseKey;
     user.licenseType = payment.licenseType;
     user.licenseExpiresAt = expiresAt;
