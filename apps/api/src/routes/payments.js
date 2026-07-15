@@ -14,7 +14,14 @@ import logger from '../utils/logger.js';
 import { sendPaymentSuccessNotification, sendPaymentFailedNotification } from '../utils/notifications.js';
 import { syncEntitlementsFromLicense } from '../modules/system/application/entitlementService.js';
 import { getPrimaryTenantIdForUser } from '../modules/tenants/application/tenantResolutionService.js';
-import { syncStreamAutomatorLicenseToUnifiedBilling, tryUnifiedBillingCheckout, createUnifiedBillingPortal, verifyUnifiedCheckoutSession } from '../lib/billingUnifiedSync.js';
+import {
+  syncStreamAutomatorLicenseToUnifiedBilling,
+  tryUnifiedBillingCheckout,
+  createUnifiedBillingPortal,
+  verifyUnifiedCheckoutSession,
+  isBillingUnifiedEnabled,
+} from '../lib/billingUnifiedSync.js';
+import { isDakinisInternalConfigured } from '../lib/dakinisInternalClient.js';
 
 const router = express.Router();
 
@@ -195,14 +202,29 @@ router.post('/checkout', requireAuth, validateBody(checkoutSchema), async (req, 
   if (!user) return res.status(404).json({ error: 'User not found' });
 
   const unifiedCheckout = await tryUnifiedBillingCheckout(user, licenseType, req.body);
-  if (unifiedCheckout) {
-    return res.json(unifiedCheckout);
+  if (unifiedCheckout?.ok) {
+    return res.json({
+      sessionId: unifiedCheckout.sessionId,
+      url: unifiedCheckout.url,
+      unified: true,
+    });
+  }
+  const unifiedFallbackReason = unifiedCheckout?.reason || 'unknown';
+  if (unifiedFallbackReason !== 'unknown') {
+    logger.info('Unified billing checkout skipped; using SA Stripe legacy', {
+      userId: user.id,
+      reason: unifiedFallbackReason,
+      platformAuthSub: user.platformAuthSub || null,
+      error: unifiedCheckout?.error || null,
+    });
   }
 
   if (!stripe) {
     return res.status(500).json({ 
       error: 'Stripe is not configured. Please set STRIPE_SECRET_KEY in environment variables.',
-      details: 'Payments require STRIPE_SECRET_KEY to be set. Webhook (STRIPE_WEBHOOK_SECRET) is optional but recommended for automatic payment processing.'
+      details: 'Payments require STRIPE_SECRET_KEY to be set. Webhook (STRIPE_WEBHOOK_SECRET) is optional but recommended for automatic payment processing.',
+      unified: false,
+      unifiedFallbackReason,
     });
   }
   
@@ -210,6 +232,8 @@ router.post('/checkout', requireAuth, validateBody(checkoutSchema), async (req, 
   if (!lookupKey) {
     return res.status(400).json({
       error: 'No Stripe Price configured for this license type. Ask the administrator to configure a lookup_key in Stripe.',
+      unified: false,
+      unifiedFallbackReason,
     });
   }
   
@@ -269,7 +293,9 @@ router.post('/checkout', requireAuth, validateBody(checkoutSchema), async (req, 
               sessionId: existingSession.id,
               url: existingSession.url,
               paymentId: existingPending.id,
-              existing: true
+              existing: true,
+              unified: false,
+              unifiedFallbackReason,
             });
           }
         } catch (err) {
@@ -335,6 +361,8 @@ router.post('/checkout', requireAuth, validateBody(checkoutSchema), async (req, 
       paymentId: payment.id,
       licenseType,
       requestedLicenseType,
+      unified: false,
+      unifiedFallbackReason,
     };
     
     if (!webhookConfigured) {
@@ -355,7 +383,12 @@ router.post('/checkout', requireAuth, validateBody(checkoutSchema), async (req, 
       ip: req.ip,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
-    res.status(500).json({ error: 'Failed to create checkout session', details: error.message });
+    res.status(500).json({
+      error: 'Failed to create checkout session',
+      details: error.message,
+      unified: false,
+      unifiedFallbackReason,
+    });
   }
 });
 
@@ -997,6 +1030,37 @@ router.get('/config-status', async (req, res) => {
   });
 });
 
+/** Auth diagnostics for unified billing cutover (smoke / support). */
+router.get('/unified-status', requireAuth, async (req, res) => {
+  const user = await User.findByPk(req.user.id);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  const platformAuthSub = user.platformAuthSub ? String(user.platformAuthSub).trim() : '';
+  let flagOn = false;
+  let flagError = null;
+  if (platformAuthSub && isDakinisInternalConfigured()) {
+    try {
+      flagOn = await isBillingUnifiedEnabled(platformAuthSub);
+    } catch (err) {
+      flagError = err instanceof Error ? err.message : String(err);
+    }
+  }
+
+  return res.json({
+    saUserId: user.id,
+    email: user.email || null,
+    hasPlatformAuthSub: Boolean(platformAuthSub),
+    platformAuthSubPrefix: platformAuthSub ? `${platformAuthSub.slice(0, 8)}…` : null,
+    internalConfigured: isDakinisInternalConfigured(),
+    billingUnifiedEnv: process.env.BILLING_UNIFIED === 'true',
+    billingUnifiedFlag: flagOn,
+    flagError,
+    wouldAttemptUnified: Boolean(
+      platformAuthSub && isDakinisInternalConfigured() && (flagOn || process.env.BILLING_UNIFIED === 'true'),
+    ),
+  });
+});
+
 // Create subscription (recurring payment)
 router.post('/subscribe', requireAuth, validateBody(subscribeSchema), async (req, res) => {
   const requestedLicenseType = req.body?.licenseType || 'creator';
@@ -1013,8 +1077,21 @@ router.post('/subscribe', requireAuth, validateBody(subscribeSchema), async (req
   if (!user) return res.status(404).json({ error: 'User not found' });
 
   const unifiedCheckout = await tryUnifiedBillingCheckout(user, licenseType, req.body);
-  if (unifiedCheckout) {
-    return res.json(unifiedCheckout);
+  if (unifiedCheckout?.ok) {
+    return res.json({
+      sessionId: unifiedCheckout.sessionId,
+      url: unifiedCheckout.url,
+      unified: true,
+    });
+  }
+  const unifiedFallbackReason = unifiedCheckout?.reason || 'unknown';
+  if (unifiedFallbackReason !== 'unknown') {
+    logger.info('Unified billing subscribe skipped; using SA Stripe legacy', {
+      userId: user.id,
+      reason: unifiedFallbackReason,
+      platformAuthSub: user.platformAuthSub || null,
+      error: unifiedCheckout?.error || null,
+    });
   }
 
   if (!stripe) {
@@ -1022,7 +1099,9 @@ router.post('/subscribe', requireAuth, validateBody(subscribeSchema), async (req
       hasStripeSecret: !!process.env.STRIPE_SECRET_KEY
     });
     return res.status(500).json({ 
-      error: 'Stripe is not configured. Please set STRIPE_SECRET_KEY in environment variables.'
+      error: 'Stripe is not configured. Please set STRIPE_SECRET_KEY in environment variables.',
+      unified: false,
+      unifiedFallbackReason,
     });
   }
 

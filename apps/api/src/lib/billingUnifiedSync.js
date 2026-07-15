@@ -271,24 +271,84 @@ export async function syncStreamAutomatorLicenseToUnifiedBilling(user, opts) {
  * @param {object} user
  * @param {string} licenseType
  * @param {object} [body] — optional successUrl/cancelUrl from request
+ * @returns {Promise<
+ *   | { ok: true; unified: true; sessionId: string; url: string }
+ *   | { ok: false; reason: string; saUserId?: number | null; platformAuthSub?: string | null; licenseType?: string; error?: string }
+ * >}
  */
 export async function tryUnifiedBillingCheckout(user, licenseType, body = {}) {
+  if (!isDakinisInternalConfigured()) {
+    return { ok: false, reason: 'internal_not_configured', saUserId: user?.id ?? null };
+  }
+  if (!user?.platformAuthSub) {
+    return { ok: false, reason: 'no_platform_auth_sub', saUserId: user?.id ?? null };
+  }
+
+  let flagOn = false;
+  try {
+    flagOn = await isBillingUnifiedEnabled(user.platformAuthSub);
+  } catch (err) {
+    logger.warn('billing.unified flag lookup failed during checkout', {
+      userId: user?.id,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return {
+      ok: false,
+      reason: 'billing_unified_flag_error',
+      saUserId: user.id,
+      platformAuthSub: user.platformAuthSub,
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
+  if (!flagOn) {
+    return {
+      ok: false,
+      reason: 'billing_unified_disabled',
+      saUserId: user.id,
+      platformAuthSub: user.platformAuthSub,
+    };
+  }
+
+  const planCode = mapLicenseTypeToBillingPlan(licenseType);
+  if (!planCode) {
+    return {
+      ok: false,
+      reason: 'no_plan_mapping',
+      saUserId: user.id,
+      licenseType: String(licenseType || ''),
+    };
+  }
+
   try {
     const session = await createUnifiedBillingCheckout(user, licenseType, {
       successUrl: body.successUrl,
       cancelUrl: body.cancelUrl,
     });
-    if (!session?.url) return null;
+    if (!session?.url) {
+      return {
+        ok: false,
+        reason: 'checkout_no_url',
+        saUserId: user.id,
+        platformAuthSub: user.platformAuthSub,
+      };
+    }
     return {
+      ok: true,
+      unified: true,
       sessionId: session.sessionId,
       url: session.url,
-      unified: true,
     };
   } catch (err) {
     logger.warn('Unified billing checkout failed, falling back to SA Stripe', {
       userId: user?.id,
       error: err instanceof Error ? err.message : String(err),
     });
-    return null;
+    return {
+      ok: false,
+      reason: 'checkout_error',
+      saUserId: user?.id ?? null,
+      platformAuthSub: user?.platformAuthSub ?? null,
+      error: err instanceof Error ? err.message : String(err),
+    };
   }
 }
