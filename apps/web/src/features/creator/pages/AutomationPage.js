@@ -4,11 +4,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Zap, ToggleLeft, ToggleRight, Plus, Pencil, Trash2 } from 'lucide-react';
+import { Zap, ToggleLeft, ToggleRight, Plus, Pencil, Trash2, History } from 'lucide-react';
 import {
   deleteAutomationRule,
   getAutomationCatalog,
   getAutomationRules,
+  getAutomationRuns,
   seedAutomationDefaults,
   toggleAutomationRule,
 } from '../api/creatorApi.js';
@@ -20,13 +21,24 @@ const TRIGGER_LABELS = {
   'stream.ended': 'Directo terminado',
 };
 
+function formatRunTime(value) {
+  if (!value) return '—';
+  try {
+    return new Date(value).toLocaleString();
+  } catch {
+    return String(value);
+  }
+}
+
 export default function AutomationPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [rules, setRules] = useState([]);
+  const [runs, setRuns] = useState([]);
   const [catalog, setCatalog] = useState({ triggers: [], actions: [] });
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
   const [creating, setCreating] = useState(false);
+  const [selectedRuleId, setSelectedRuleId] = useState(null);
 
   const actionLabels = useMemo(() => {
     const map = {};
@@ -34,12 +46,23 @@ export default function AutomationPage() {
     return map;
   }, [catalog]);
 
+  const ruleNameById = useMemo(() => {
+    const map = {};
+    rules.forEach((r) => { map[r.id] = r.name; });
+    return map;
+  }, [rules]);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [items, cat] = await Promise.all([getAutomationRules(), getAutomationCatalog()]);
+      const [items, cat, runItems] = await Promise.all([
+        getAutomationRules(),
+        getAutomationCatalog(),
+        getAutomationRuns({ limit: 30 }),
+      ]);
       setRules(items);
       setCatalog(cat);
+      setRuns(runItems);
     } catch (err) {
       toast.error(err.response?.data?.error || 'Error al cargar reglas');
     } finally {
@@ -89,6 +112,7 @@ export default function AutomationPage() {
       await deleteAutomationRule(rule.id);
       toast.success('Regla eliminada');
       if (editing?.id === rule.id) setEditing(null);
+      if (selectedRuleId === rule.id) setSelectedRuleId(null);
       load();
     } catch (err) {
       toast.error(err.response?.data?.error || 'Error al eliminar');
@@ -101,6 +125,10 @@ export default function AutomationPage() {
     setEditing(null);
     load();
   };
+
+  const filteredRuns = selectedRuleId
+    ? runs.filter((r) => Number(r.ruleId) === Number(selectedRuleId))
+    : runs;
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6">
@@ -157,6 +185,15 @@ export default function AutomationPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedRuleId((prev) => (prev === rule.id ? null : rule.id))}
+                    className={`p-2 ${selectedRuleId === rule.id ? 'text-accent' : 'text-gray-500 hover:text-accent'}`}
+                    aria-label="Ver ejecuciones"
+                    title="Ver ejecuciones"
+                  >
+                    <History className="w-4 h-4" />
+                  </button>
                   <button type="button" onClick={() => { setEditing(rule); setCreating(false); }} className="p-2 text-gray-500 hover:text-accent" aria-label="Editar">
                     <Pencil className="w-4 h-4" />
                   </button>
@@ -172,6 +209,51 @@ export default function AutomationPage() {
           ))}
         </ul>
       )}
+
+      <section className="mt-10">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+            <History className="w-5 h-5 text-accent" />
+            Últimas ejecuciones
+          </h2>
+          {selectedRuleId ? (
+            <button
+              type="button"
+              className="text-xs text-accent hover:underline"
+              onClick={() => setSelectedRuleId(null)}
+            >
+              Ver todas
+            </button>
+          ) : null}
+        </div>
+        {filteredRuns.length === 0 ? (
+          <p className="text-sm text-gray-500">
+            Aún no hay ejecuciones registradas. Se guardan cuando una regla dispara acciones.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {filteredRuns.map((run) => (
+              <li
+                key={run.id}
+                className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm bg-white/60 dark:bg-gray-800/60"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                    {ruleNameById[run.ruleId] || `Regla #${run.ruleId}`}
+                  </span>
+                  <span className={run.status === 'ok' ? 'text-emerald-600' : 'text-red-500'}>
+                    {run.status}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {TRIGGER_LABELS[run.triggerType] || run.triggerType} · {formatRunTime(run.createdAt)}
+                  {run.error ? ` · ${run.error}` : ''}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }

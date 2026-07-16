@@ -37,6 +37,7 @@ import ReminderSent from '../modules/reminders/infrastructure/ReminderSent.model
 import Tenant from '../modules/tenants/infrastructure/Tenant.model.js';
 import Membership from '../modules/tenants/infrastructure/Membership.model.js';
 import AutomationRule from '../modules/automation/infrastructure/AutomationRule.model.js';
+import AutomationRun from '../modules/automation/infrastructure/AutomationRun.model.js';
 import StreamDirectorSession from '../modules/automation/infrastructure/StreamDirectorSession.model.js';
 
 // 👤 User and 📝 Content are now defined in module infrastructure files.
@@ -120,6 +121,11 @@ StreamTimelineEvent.belongsTo(User, { foreignKey: 'userId' });
 User.hasMany(AutomationRule, { foreignKey: 'userId', onDelete: 'CASCADE' });
 AutomationRule.belongsTo(User, { foreignKey: 'userId' });
 
+User.hasMany(AutomationRun, { foreignKey: 'userId', onDelete: 'CASCADE' });
+AutomationRun.belongsTo(User, { foreignKey: 'userId' });
+AutomationRule.hasMany(AutomationRun, { foreignKey: 'ruleId', onDelete: 'CASCADE' });
+AutomationRun.belongsTo(AutomationRule, { foreignKey: 'ruleId' });
+
 User.hasMany(StreamDirectorSession, { foreignKey: 'userId', onDelete: 'CASCADE' });
 StreamDirectorSession.belongsTo(User, { foreignKey: 'userId' });
 Content.hasMany(StreamDirectorSession, { foreignKey: 'contentId', onDelete: 'SET NULL' });
@@ -168,5 +174,6 @@ export {
   Tenant,
   Membership,
   AutomationRule,
+  AutomationRun,
   StreamDirectorSession,
 };

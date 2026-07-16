@@ -7,6 +7,7 @@ import {
   deleteRule,
   seedDefaultRules,
   getAutomationCatalog,
+  listRuleRuns,
 } from '../modules/automation/application/automationService.js';
 import {
   automationRuleCreateSchema,
@@ -71,6 +72,32 @@ router.post('/rules/seed-defaults', requireAuth, async (req, res) => {
   } catch (err) {
     logger.error('Automation seed error', { error: err.message });
     res.status(500).json({ error: 'seed_failed' });
+  }
+});
+
+router.get('/runs', requireAuth, async (req, res) => {
+  try {
+    const items = await listRuleRuns(req.user.id, {
+      ruleId: req.query.ruleId,
+      limit: req.query.limit,
+    });
+    res.json({ items });
+  } catch (err) {
+    logger.error('Automation runs list error', { error: err.message });
+    res.status(500).json({ error: 'Failed to load automation runs' });
+  }
+});
+
+router.get('/rules/:id/runs', requireAuth, async (req, res) => {
+  try {
+    const items = await listRuleRuns(req.user.id, {
+      ruleId: req.params.id,
+      limit: req.query.limit,
+    });
+    res.json({ items });
+  } catch (err) {
+    logger.error('Automation rule runs list error', { error: err.message });
+    res.status(500).json({ error: 'Failed to load automation runs' });
   }
 });
 

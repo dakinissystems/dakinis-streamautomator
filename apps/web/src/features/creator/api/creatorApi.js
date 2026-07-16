@@ -50,6 +50,14 @@ export async function seedAutomationDefaults() {
   return data;
 }
 
+export async function getAutomationRuns({ ruleId, limit } = {}) {
+  const params = {};
+  if (ruleId != null) params.ruleId = ruleId;
+  if (limit != null) params.limit = limit;
+  const { data } = await apiClient.get('/automation/runs', { params });
+  return data.items || [];
+}
+
 export async function toggleAutomationRule(id, enabled) {
   const { data } = await apiClient.patch(`/automation/rules/${id}`, { enabled });
   return data;

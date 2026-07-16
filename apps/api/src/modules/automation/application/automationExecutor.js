@@ -4,6 +4,7 @@
 
 import logger from '../../../utils/logger.js';
 import AutomationRule from '../infrastructure/AutomationRule.model.js';
+import AutomationRun from '../infrastructure/AutomationRun.model.js';
 import { StreamTimelineEvent } from '../../content/infrastructure/models.js';
 import {
   emitPlatformEvent,
@@ -94,23 +95,64 @@ export async function runAutomationForTrigger(user, triggerType, ctx = {}) {
   for (const rule of rules) {
     if (!matchesTrigger(rule, triggerType, ctx)) continue;
     const actions = Array.isArray(rule.actions) ? rule.actions : [];
+    const ruleResults = [];
+    let hadError = false;
     for (const action of actions) {
       const actionType = String(action?.type || '');
       if (!SUPPORTED_ACTIONS.has(actionType)) continue;
       try {
         const result = await runAction(user, action, ctx);
+        ruleResults.push({ action: actionType, result });
         results.push({ ruleId: rule.id, action: actionType, result });
       } catch (err) {
+        hadError = true;
         logger.warn('Automation action error', {
           ruleId: rule.id,
           action: actionType,
           error: err.message,
         });
+        ruleResults.push({ action: actionType, error: err.message });
         results.push({ ruleId: rule.id, action: actionType, error: err.message });
+      }
+    }
+    if (ruleResults.length > 0) {
+      try {
+        await AutomationRun.create({
+          userId: user.id,
+          ruleId: rule.id,
+          triggerType,
+          status: hadError ? 'error' : 'ok',
+          result: { actions: ruleResults, context: { platform: ctx.platform || null } },
+          error: hadError
+            ? ruleResults.find((r) => r.error)?.error || 'action_failed'
+            : null,
+        });
+      } catch (persistErr) {
+        logger.warn('Automation run persist failed', {
+          ruleId: rule.id,
+          error: persistErr.message,
+        });
       }
     }
   }
   return results;
+}
+
+/**
+ * @param {number} userId
+ * @param {number} [ruleId]
+ * @param {number} [limit]
+ */
+export async function listAutomationRuns(userId, ruleId = null, limit = 20) {
+  const where = { userId };
+  if (ruleId != null && Number.isFinite(Number(ruleId))) {
+    where.ruleId = Number(ruleId);
+  }
+  return AutomationRun.findAll({
+    where,
+    order: [['createdAt', 'DESC']],
+    limit: Math.min(Math.max(Number(limit) || 20, 1), 100),
+  });
 }
 
 export function listSupportedAutomationActions() {
