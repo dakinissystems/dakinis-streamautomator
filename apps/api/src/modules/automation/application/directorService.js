@@ -1,4 +1,7 @@
 import { Op } from 'sequelize';
+import { DirectorSession } from '@dakinis/domain/director';
+import { publishDomainEvents } from '@dakinis/shared-db/outbox/domain-events';
+import { OutboxPublisher } from '@dakinis/shared-db/outbox';
 import StreamDirectorSession from '../infrastructure/StreamDirectorSession.model.js';
 import Content from '../../content/infrastructure/Content.model.js';
 import { CONTENT_STATUS } from '../../../constants/contentStatus.js';
@@ -11,6 +14,8 @@ import {
   syncDirectorSessionToStream,
   readActiveDirectorFromStream,
 } from '../../../lib/directorStreamSync.js';
+import { isPlatformPgConfigured, platformQuery } from '../../../lib/platformDb.js';
+import logger from '../../../utils/logger.js';
 
 function normalizePlatform(value, fallback = 'twitch') {
   if (value == null || value === '') return fallback;
@@ -83,9 +88,50 @@ export async function getActiveDirectorSession(userId) {
   if (fromStream) return fromStream;
 
   return StreamDirectorSession.findOne({
-    where: { userId, status: 'live' },
+    where: {
+      userId,
+      status: { [Op.in]: ['live', 'preparing', 'ready', 'post'] },
+    },
     order: [['startedAt', 'DESC']],
   });
+}
+
+/**
+ * Advance domain SM draft→preparing→ready→live (product still starts “live”).
+ * @param {{ userId: string|number; sessionId?: string }} opts
+ */
+function buildLiveDirectorAggregate(opts) {
+  const domain = DirectorSession.create({
+    id: opts.sessionId || crypto.randomUUID(),
+    userId: opts.userId != null ? String(opts.userId) : null,
+  });
+  domain.prepare();
+  domain.ready();
+  domain.start();
+  return domain;
+}
+
+async function publishDirectorDomainEvents(domain, legacyUserId, sessionId) {
+  if (!isPlatformPgConfigured()) return;
+  try {
+    const id = String(sessionId || domain.id);
+    const events = domain.pullDomainEvents().map((event) => ({
+      ...event,
+      aggregateId: id,
+      payload: {
+        ...event.payload,
+        legacyUserId,
+        sessionId: id,
+      },
+    }));
+    if (!events.length) return;
+    const publisher = new OutboxPublisher(platformQuery);
+    await publishDomainEvents(publisher, events);
+  } catch (err) {
+    logger.debug('director domain outbox skipped', {
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
 }
 
 export async function startDirectorForStream(user, opts = {}) {
@@ -106,15 +152,17 @@ export async function startDirectorForStream(user, opts = {}) {
   );
 
   try {
+    const domain = buildLiveDirectorAggregate({ userId });
     const session = await StreamDirectorSession.create({
       userId,
       contentId: content?.id || null,
       title: String(title).slice(0, 500),
-      status: 'live',
+      status: domain.status,
       platform,
       steps: buildDefaultSteps({ title, platform, content }),
       startedAt: new Date(),
     });
+    await publishDirectorDomainEvents(domain, userId, session.id);
     await syncDirectorSessionToStream(session, 'stream.director.started');
     return session;
   } catch (err) {
@@ -127,7 +175,11 @@ export async function startDirectorForStream(user, opts = {}) {
 
 export async function completeDirectorStep(userId, sessionId, stepIdValue) {
   const session = await StreamDirectorSession.findOne({
-    where: { id: sessionId, userId, status: 'live' },
+    where: {
+      id: sessionId,
+      userId,
+      status: { [Op.in]: ['live', 'preparing', 'ready', 'post'] },
+    },
   });
   if (!session) {
     const err = new Error('not_found');
@@ -173,7 +225,11 @@ export async function completeDirectorStep(userId, sessionId, stepIdValue) {
 
 export async function endDirectorSession(userId, sessionId) {
   const session = await StreamDirectorSession.findOne({
-    where: { id: sessionId, userId, status: 'live' },
+    where: {
+      id: sessionId,
+      userId,
+      status: { [Op.in]: ['live', 'preparing', 'ready', 'post'] },
+    },
   });
   if (!session) {
     const err = new Error('not_found');
@@ -184,6 +240,33 @@ export async function endDirectorSession(userId, sessionId) {
 }
 
 async function finalizeDirectorSession(session) {
+  const domain = DirectorSession.reconstitute({
+    id: String(session.id),
+    userId: session.userId != null ? String(session.userId) : null,
+    status: session.status || 'live',
+  });
+
+  try {
+    if (domain.status === 'draft') {
+      domain.prepare();
+      domain.ready();
+      domain.start();
+    } else if (domain.status === 'preparing') {
+      domain.ready();
+      domain.start();
+    } else if (domain.status === 'ready') {
+      domain.start();
+    }
+    if (domain.status === 'live') domain.end();
+    if (domain.status === 'post') domain.complete();
+  } catch (err) {
+    logger.warn('director finalize SM transition', {
+      sessionId: session.id,
+      status: session.status,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+
   session.status = 'completed';
   session.endedAt = new Date();
   const steps = Array.isArray(session.steps) ? session.steps : [];
@@ -191,6 +274,7 @@ async function finalizeDirectorSession(session) {
     s.status === 'done' ? s : { ...s, status: s.status === 'active' ? 'skipped' : s.status },
   );
   await session.save();
+  await publishDirectorDomainEvents(domain, session.userId, session.id);
   await syncDirectorSessionToStream(session, 'stream.director.ended');
   return session;
 }

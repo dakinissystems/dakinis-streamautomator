@@ -13,6 +13,10 @@ const PLATFORM_EVENT_MAP = {
   "stream.automation.updated": "stream.automation.changed",
   "stream.automation.deleted": "stream.automation.deleted",
   "workspace.addon_data.saved": "workspace.addon_data.saved",
+  "director.started.v1": "stream.director.started",
+  "director.ended.v1": "stream.director.ended",
+  "director.completed.v1": "stream.director.ended",
+  "invite.accepted.v1": "workspace.member.accepted",
 };
 
 /**
