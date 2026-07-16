@@ -8,6 +8,7 @@ export {
   createFeatureFlagRepository,
 } from "./repositories/meta/feature-flags.js";
 export { OutboxPublisher } from "./outbox/publisher.js";
+export { toOutboxInput, publishDomainEvents } from "./outbox/domain-events.js";
 export { processOutboxBatch, startOutboxPoller } from "./outbox/processor.js";
 export {
   DirectorSessionRepository,
