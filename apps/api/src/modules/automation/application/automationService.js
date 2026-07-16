@@ -1,5 +1,8 @@
 import AutomationRule from '../infrastructure/AutomationRule.model.js';
-import { listSupportedAutomationActions } from './automationExecutor.js';
+import {
+  listSupportedAutomationActions,
+  listAutomationRuns,
+} from './automationExecutor.js';
 import {
   syncAutomationRuleToStream,
   syncAutomationRuleDeleteToStream,
@@ -205,4 +208,23 @@ export function getAutomationCatalog() {
     })),
     actions: ACTION_CATALOG.filter((a) => listSupportedAutomationActions().includes(a.type)),
   };
+}
+
+/**
+ * @param {number} userId
+ * @param {{ ruleId?: number|string|null, limit?: number|string }} [opts]
+ */
+export async function listRuleRuns(userId, opts = {}) {
+  const ruleId = opts.ruleId != null && opts.ruleId !== '' ? Number(opts.ruleId) : null;
+  const limit = opts.limit != null ? Number(opts.limit) : 20;
+  const rows = await listAutomationRuns(userId, ruleId, limit);
+  return rows.map((r) => ({
+    id: r.id,
+    ruleId: r.ruleId,
+    triggerType: r.triggerType,
+    status: r.status,
+    result: r.result,
+    error: r.error,
+    createdAt: r.createdAt,
+  }));
 }
