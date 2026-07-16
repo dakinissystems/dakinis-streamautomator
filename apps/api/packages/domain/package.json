@@ -1,0 +1,20 @@
+{
+  "name": "@dakinis/domain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Dakinis domain layer — aggregates, value objects, policies, domain events",
+  "exports": {
+    ".": "./src/index.js",
+    "./invite": "./src/invite/index.js",
+    "./director": "./src/director/index.js",
+    "./automation": "./src/automation/index.js",
+    "./shared": "./src/shared/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/**/*.test.js"
+  }
+}

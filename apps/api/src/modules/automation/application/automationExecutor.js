@@ -5,6 +5,7 @@
 import logger from '../../../utils/logger.js';
 import AutomationRule from '../infrastructure/AutomationRule.model.js';
 import AutomationRun from '../infrastructure/AutomationRun.model.js';
+import { AutomationRun as AutomationRunAggregate } from '@dakinis/domain/automation';
 import { StreamTimelineEvent } from '../../content/infrastructure/models.js';
 import {
   emitPlatformEvent,
@@ -117,15 +118,27 @@ export async function runAutomationForTrigger(user, triggerType, ctx = {}) {
     }
     if (ruleResults.length > 0) {
       try {
+        const run = AutomationRunAggregate.start({
+          ruleId: rule.id,
+          userId: user.id,
+          triggerType,
+        });
+        if (hadError) {
+          run.fail(
+            ruleResults.find((r) => r.error)?.error || 'action_failed',
+            { actions: ruleResults, context: { platform: ctx.platform || null } }
+          );
+        } else {
+          run.succeed({ actions: ruleResults, context: { platform: ctx.platform || null } });
+        }
+        const snap = run.toPersistence();
         await AutomationRun.create({
           userId: user.id,
           ruleId: rule.id,
           triggerType,
-          status: hadError ? 'error' : 'ok',
-          result: { actions: ruleResults, context: { platform: ctx.platform || null } },
-          error: hadError
-            ? ruleResults.find((r) => r.error)?.error || 'action_failed'
-            : null,
+          status: snap.status,
+          result: snap.result,
+          error: snap.error,
         });
       } catch (persistErr) {
         logger.warn('Automation run persist failed', {

@@ -26,6 +26,7 @@
     "search:reindex": "node src/scripts/reindexSearch.js"
   },
   "dependencies": {
+    "@dakinis/domain": "file:./packages/domain",
     "@dakinis/shared-db": "file:./packages/shared-db",
     "@dakinis/shared-error": "file:./packages/shared-error",
     "@dakinis/shared-validation": "file:./packages/shared-validation",
