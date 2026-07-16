@@ -64,7 +64,14 @@ async function handleOutboxEvent(pool, event, log, opts = {}) {
 
   const type = String(event.event_type || "");
 
-  if (type.startsWith("stream.director.") || type.startsWith("workspace.addon_data.") || type.startsWith("stream.automation.")) {
+  if (
+    type.startsWith("stream.director.") ||
+    type.startsWith("workspace.addon_data.") ||
+    type.startsWith("stream.automation.") ||
+    type.startsWith("invite.") ||
+    type.startsWith("director.") ||
+    type.startsWith("automation.")
+  ) {
     log("outbox_event_handled", {
       id: event.id,
       eventType: type,
