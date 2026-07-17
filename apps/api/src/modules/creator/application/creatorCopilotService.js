@@ -1,4 +1,4 @@
-import { dakinisInternalFetch, isDakinisInternalConfigured } from '../../../lib/dakinisInternalClient.js';
+import { getPlatform, isDakinisInternalConfigured } from '../../../lib/dakinis-platform.js';
 import { Content } from '../../content/infrastructure/models.js';
 
 const LOCAL_SUGGESTIONS = {
@@ -37,12 +37,10 @@ export async function suggestCopilot(userId, { type = 'title', contentId, prompt
 
   if (isDakinisInternalConfigured()) {
     try {
-      const result = await dakinisInternalFetch('/knowledge/query', {
-        method: 'POST',
-        body: {
-          query,
-          context: { product: 'streamautomator', type: normalizedType, userId },
-        },
+      const platform = getPlatform();
+      const result = await platform.knowledge.query({
+        query,
+        context: { product: 'streamautomator', type: normalizedType, userId },
       });
       const answer = result?.answer || result?.text || result?.results?.[0]?.text;
       if (answer) {
