@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import { test } from "vitest";
 import { WorkspaceInvite, Email, UserId, canAcceptInvite, canInviteMembers } from "../src/index.js";
 import { DomainError } from "../src/shared/domain-error.js";
 
