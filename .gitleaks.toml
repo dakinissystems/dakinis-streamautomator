@@ -1,0 +1,29 @@
+# Gitleaks — allowlist for false positives (examples / placeholders).
+# Docs: https://github.com/gitleaks/gitleaks
+title = "dakinis gitleaks"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Test fixtures, examples, and documentation placeholders"
+paths = [
+  '''(^|/)\.env\.example$''',
+  '''(^|/)\.env\..*\.example$''',
+  '''(^|/).*\.dakinis-keys\.example\.json$''',
+  '''(^|/)docs/.*\.md$''',
+  '''(^|/).*README.*\.md$''',
+  '''(^|/)package-lock\.json$''',
+  '''(^|/)pnpm-lock\.yaml$''',
+  '''(^|/)yarn\.lock$''',
+  '''(^|/)node_modules/''',
+  '''(^|/)backups/''',
+  '''(^|/)\.git/''',
+]
+regexes = [
+  '''(?i)example[_-]?key''',
+  '''(?i)your[_-]?api[_-]?key''',
+  '''(?i)changeme''',
+  '''(?i)placeholder''',
+  '''sk_test_placeholder''',
+]

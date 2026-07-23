@@ -1,0 +1,8 @@
+# Local secret scan before commit (pairs with CI Gitleaks workflow).
+# Install once: pip install pre-commit && pre-commit install
+# Or: winget install Gitleaks.Gitleaks && gitleaks detect
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.2
+    hooks:
+      - id: gitleaks
