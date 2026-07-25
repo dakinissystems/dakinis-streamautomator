@@ -45,7 +45,9 @@ jobs:
       - name: Run Gitleaks
         run: |
           set -euo pipefail
-          args=(detect --source . --verbose --redact --exit-code 1)
+          # HEAD only: ignore stale PR refs / other branches that may still
+          # reach pre-purge history (GitHub keeps refs/pull/*/head).
+          args=(detect --source . --verbose --redact --exit-code 1 --log-opts="HEAD")
           if [ -f .gitleaks.toml ]; then
             args+=(--config .gitleaks.toml)
             echo "Using .gitleaks.toml"
