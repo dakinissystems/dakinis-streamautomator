@@ -1,5 +1,6 @@
 # Gitleaks — allowlist for false positives (examples / placeholders).
 # Docs: https://github.com/gitleaks/gitleaks
+# Real secrets in git history must be rotated + purged — allowlist is NOT enough.
 title = "dakinis gitleaks"
 
 [extend]
@@ -13,6 +14,7 @@ paths = [
   '''(^|/).*\.dakinis-keys\.example\.json$''',
   '''(^|/)docs/.*\.md$''',
   '''(^|/).*README.*\.md$''',
+  '''(^|/)API_READY\.md$''',
   '''(^|/)package-lock\.json$''',
   '''(^|/)pnpm-lock\.yaml$''',
   '''(^|/)yarn\.lock$''',
@@ -26,4 +28,10 @@ regexes = [
   '''(?i)changeme''',
   '''(?i)placeholder''',
   '''sk_test_placeholder''',
+  # Local/dev sample API keys in docs
+  '''(?i)dakinis-(dev|read)-key''',
+  # Spanish placeholder values in old deploy guides (tu-…)
+  '''(?i)tu-[a-z0-9._-]{4,}''',
+  # Password-generation alphabet (not a secret)
+  '''ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789''',
 ]
