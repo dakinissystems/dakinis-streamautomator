@@ -56,6 +56,11 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, 'src'),
+        '@dakinis/shared-theme': path.resolve(__dirname, '../../../../packages/shared-theme/src'),
+        '@dakinis/shared-foundation': path.resolve(
+          __dirname,
+          '../../../../packages/shared-foundation/src'
+        ),
       },
     },
     server: {

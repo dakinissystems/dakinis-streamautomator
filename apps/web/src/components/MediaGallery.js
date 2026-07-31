@@ -228,12 +228,12 @@ export default function MediaGallery({ user, onSelect, selectedUrls = [], showDe
         </button>
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
         {mediaFiles.map((file, index) => (
           <div
             key={file.id || index}
             onClick={() => handleSelect(file)}
-            className={`relative group cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
+            className={`relative group cursor-pointer rounded-lg overflow-hidden border-2 transition-all min-w-0 ${
               isSelected(file.url)
                 ? 'border-blue-500 ring-2 ring-blue-200'
                 : 'border-gray-200 dark:border-gray-700 hover:border-blue-400'
@@ -262,6 +262,7 @@ export default function MediaGallery({ user, onSelect, selectedUrls = [], showDe
                     controls
                     preload="metadata"
                     playsInline
+                    onClick={(e) => e.stopPropagation()}
                     onError={(e) => {
                       // Show fallback if video fails to load
                       e.target.style.display = 'none';
@@ -297,19 +298,19 @@ export default function MediaGallery({ user, onSelect, selectedUrls = [], showDe
             )}
             
             {isSelected(file.url) && (
-              <div className="absolute inset-0 bg-blue-500/20 flex items-center justify-center">
+              <div className="absolute inset-0 bg-blue-500/20 flex items-center justify-center pointer-events-none">
                 <div className="bg-blue-500 rounded-full p-2">
                   <Check className="w-5 h-5 text-white" />
                 </div>
               </div>
             )}
 
-            {/* Delete button */}
+            {/* Delete: always visible on touch/mobile; hover-reveal on sm+ */}
             {showDeleteButton && (
               <button type="button"
                 onClick={(e) => handleDelete(e, file)}
                 disabled={deletingId === file.id}
-                className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+                className="absolute top-2 right-2 z-20 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 p-2 sm:p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity disabled:opacity-50 flex items-center justify-center"
                 title={t('media.deleteFile')}
               >
                 {deletingId === file.id ? (
@@ -320,7 +321,7 @@ export default function MediaGallery({ user, onSelect, selectedUrls = [], showDe
               </button>
             )}
             
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 min-w-0">
               <p className="text-xs text-white truncate">{file.fileName}</p>
             </div>
           </div>

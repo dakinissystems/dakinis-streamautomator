@@ -43,8 +43,13 @@ function darkenHex(hex, factor = 0.12) {
  */
 export function applyAccentColor(id) {
   const colors = ACCENT_COLORS[id] || ACCENT_COLORS.blue;
-  document.documentElement.style.setProperty('--accent', colors.hex);
-  document.documentElement.style.setProperty('--accent-hover', colors.hexHover);
+  const root = document.documentElement;
+  root.style.setProperty('--accent', colors.hex);
+  root.style.setProperty('--accent-hover', colors.hexHover);
+  // DES Theme Engine aliases (keep product accent in sync)
+  root.style.setProperty('--dakinis-accent', colors.hex);
+  root.style.setProperty('--dakinis-accent-dark', colors.hexHover);
+  root.style.setProperty('--dakinis-accent-hover', colors.hexHover);
   try {
     localStorage.setItem(STORAGE_KEY, id);
   } catch (e) {

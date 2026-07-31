@@ -137,8 +137,8 @@ export default function FileUpload({ user, onUploadComplete, uploadStats }) {
       )}
 
       {/* Upload Area */}
-      <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 hover:border-blue-400 dark:hover:border-blue-600 transition-colors">
-        <label className="cursor-pointer flex flex-col items-center justify-center space-y-4">
+      <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-4 sm:p-6 hover:border-blue-400 dark:hover:border-blue-600 transition-colors">
+        <label className="cursor-pointer flex flex-col items-center justify-center space-y-3 sm:space-y-4 min-h-[44px]">
           <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
             {uploading ? (
               <Loader2 className="w-8 h-8 animate-spin" />
@@ -146,7 +146,7 @@ export default function FileUpload({ user, onUploadComplete, uploadStats }) {
               <Upload className="w-8 h-8" />
             )}
           </div>
-          <div className="text-center">
+          <div className="text-center px-1">
             <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {uploading ? t('media.uploading') : t('media.clickToUpload')}
             </p>
@@ -173,16 +173,16 @@ export default function FileUpload({ user, onUploadComplete, uploadStats }) {
           {uploadedFiles.map((file) => (
             <div
               key={file.url || file.path || `${file.fileName}-${file.bucket}`}
-              className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg min-w-0"
             >
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 min-w-0">
                 {file.bucket === 'images' ? (
-                  <Image className="w-5 h-5 text-blue-500" />
+                  <Image className="w-5 h-5 text-blue-500 flex-shrink-0" />
                 ) : (
-                  <Video className="w-5 h-5 text-purple-500" />
+                  <Video className="w-5 h-5 text-purple-500 flex-shrink-0" />
                 )}
-                <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                     {file.fileName}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -194,7 +194,7 @@ export default function FileUpload({ user, onUploadComplete, uploadStats }) {
                 href={file.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                className="text-blue-600 dark:text-blue-400 hover:underline text-sm flex-shrink-0 self-start sm:self-auto"
               >
                 {t('media.view')}
               </a>

@@ -466,14 +466,20 @@ function AppContent() {
   useEffect(() => {
     const applyTheme = () => {
       const storedTheme = localStorage.getItem('theme') || 'light';
+      let appearance = 'light';
       if (storedTheme === 'dark') {
         document.documentElement.classList.add('dark');
+        appearance = 'dark';
       } else if (storedTheme === 'auto') {
         const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         document.documentElement.classList.toggle('dark', prefersDark);
+        appearance = prefersDark ? 'dark' : 'light';
       } else {
         document.documentElement.classList.remove('dark');
+        appearance = 'light';
       }
+      document.documentElement.setAttribute('data-theme', appearance);
+      document.documentElement.setAttribute('data-product', 'streamautomator');
       window.dispatchEvent(new CustomEvent(THEME_CHANGE_EVENT));
     };
 
@@ -496,7 +502,7 @@ function AppContent() {
     <>
       <Toaster position="top-right" />
       <CommandPalette open={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} />
-      <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 min-w-0">
+      <div className="dakinis-shell dakinis-shell--stack flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 min-w-0 bg-surface-0">
         <div className="flex flex-1 min-w-0">
           {showAppShell && (
             <Sidebar
