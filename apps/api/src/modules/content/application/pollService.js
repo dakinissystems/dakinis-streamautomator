@@ -11,6 +11,14 @@ import logger from '../../../utils/logger.js';
 
 const pollsByUser = new Map();
 
+/** Safe voter key (chat username); rejects prototype pollution keys. */
+function normalizeVoterKey(username) {
+  const key = String(username || '').trim().toLowerCase();
+  if (!key || key.length > 64) return null;
+  if (key === '__proto__' || key === 'constructor' || key === 'prototype') return null;
+  return key;
+}
+
 function emptyPoll(userId) {
   return {
     id: null,
@@ -22,8 +30,8 @@ function emptyPoll(userId) {
     /** Points delivered to each voter of the winning option */
     prizePoints: 0,
     status: /** @type {PollStatus} */ ('draft'),
-    /** @type {Record<string, { optionIndex: number, username: string, prizeStatus: PrizeStatus }>} */
-    votes: {},
+    /** @type {Map<string, { optionIndex: number, username: string, prizeStatus: PrizeStatus }>} */
+    votes: new Map(),
     winningOptionIndex: null,
     closedAt: null,
     createdAt: null,
@@ -40,14 +48,14 @@ function getPoll(userId) {
 
 function optionCounts(poll) {
   const counts = poll.options.map(() => 0);
-  for (const v of Object.values(poll.votes)) {
+  for (const v of poll.votes.values()) {
     if (v.optionIndex >= 0 && v.optionIndex < counts.length) counts[v.optionIndex] += 1;
   }
   return counts;
 }
 
 function totalVotes(poll) {
-  return Object.keys(poll.votes).length;
+  return poll.votes.size;
 }
 
 export function getPublicState(userId) {
@@ -77,7 +85,7 @@ export function getPublicState(userId) {
 export function getAdminState(userId) {
   const poll = getPoll(userId);
   const publicState = getPublicState(userId);
-  const votes = Object.values(poll.votes).map((v) => ({
+  const votes = [...poll.votes.values()].map((v) => ({
     username: v.username,
     optionIndex: v.optionIndex,
     optionLabel: poll.options[v.optionIndex] || '',
@@ -119,7 +127,7 @@ export function create(userId, { question, options, entryCost = 0, prizePoints =
     entryCost: cost,
     prizePoints: prize,
     status: 'draft',
-    votes: {},
+    votes: new Map(),
     winningOptionIndex: null,
     closedAt: null,
     createdAt: now,
@@ -171,10 +179,10 @@ export function vote(userId, username, optionRaw) {
     return { ok: false, error: 'poll_not_open', state: getPublicState(userId) };
   }
   const name = String(username || '').trim();
-  if (!name) return { ok: false, error: 'username_required', state: getPublicState(userId) };
+  const key = normalizeVoterKey(name);
+  if (!key) return { ok: false, error: 'username_required', state: getPublicState(userId) };
 
-  const key = name.toLowerCase();
-  if (poll.votes[key]) {
+  if (poll.votes.has(key)) {
     return { ok: false, error: 'already_voted', state: getPublicState(userId) };
   }
 
@@ -196,11 +204,12 @@ export function vote(userId, username, optionRaw) {
     return { ok: false, error: 'invalid_option', state: getPublicState(userId) };
   }
 
-  poll.votes[key] = {
+  // Map avoids remote property injection on dynamic object keys
+  poll.votes.set(key, {
     username: name,
     optionIndex,
     prizeStatus: 'pending',
-  };
+  });
   poll.updatedAt = new Date().toISOString();
   logger.debug('Poll vote', { userId, username: name, optionIndex });
   return { ok: true, state: getPublicState(userId) };
@@ -234,9 +243,9 @@ export function awardPrizes(userId, { username } = {}) {
     throw new Error('prizePoints is 0 — set prize points when creating the poll');
   }
 
-  const target = username ? String(username).trim().toLowerCase() : null;
+  const target = username ? normalizeVoterKey(username) : null;
   const awarded = [];
-  for (const [key, v] of Object.entries(poll.votes)) {
+  for (const [key, v] of poll.votes.entries()) {
     if (v.optionIndex !== poll.winningOptionIndex) continue;
     if (v.prizeStatus !== 'pending') continue;
     if (target && key !== target) continue;
@@ -260,9 +269,9 @@ export function refundPrizes(userId, { username, losersOnly = false } = {}) {
     throw new Error('entryCost is 0 — nothing to refund');
   }
 
-  const target = username ? String(username).trim().toLowerCase() : null;
+  const target = username ? normalizeVoterKey(username) : null;
   const refunded = [];
-  for (const [key, v] of Object.entries(poll.votes)) {
+  for (const [key, v] of poll.votes.entries()) {
     if (v.prizeStatus !== 'pending') continue;
     if (target && key !== target) continue;
     if (losersOnly && poll.winningOptionIndex != null && v.optionIndex === poll.winningOptionIndex) {

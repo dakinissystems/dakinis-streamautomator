@@ -26,6 +26,13 @@ function settingsRedirect(query) {
   return `${FRONTEND_URL.replace(/\/$/, '')}/settings${q ? `?${q}` : ''}`;
 }
 
+/** Only allow short safe error tokens in redirects (no raw provider / exception text). */
+function kickErrorParam(value) {
+  const raw = String(value || 'unknown').slice(0, 120);
+  const safe = raw.replace(/[^a-zA-Z0-9._\- ]/g, '_').trim() || 'unknown';
+  return safe;
+}
+
 /**
  * GET /api/kick/connect
  * Auth via requireAuth (Bearer or ?token=).
@@ -55,25 +62,25 @@ router.get('/connect', requireAuth, (req, res) => {
       userId: req.user?.id,
       error: error.message,
     });
-    res.redirect(settingsRedirect({ kick_error: error.message }));
+    res.redirect(settingsRedirect({ kick_error: kickErrorParam(error.message) }));
   }
 });
 router.get('/callback', async (req, res) => {
   try {
-    const { code, state, error, error_description: errorDescription } = req.query;
-    if (error) {
-      logger.warn('Kick OAuth error', { error, errorDescription });
-      return res.redirect(
-        settingsRedirect({ kick_error: String(errorDescription || error) })
-      );
-    }
-    if (!code || !state) {
-      return res.redirect(settingsRedirect({ kick_error: 'missing_code_or_state' }));
+    const oauthError = typeof req.query.error === 'string' ? req.query.error : null;
+    const errorDescription =
+      typeof req.query.error_description === 'string' ? req.query.error_description : null;
+    const code = typeof req.query.code === 'string' ? req.query.code : '';
+    const stateRaw = typeof req.query.state === 'string' ? req.query.state : '';
+
+    // Cryptographic gate first (signed state from /connect) — not bypassable via query flags.
+    if (!stateRaw) {
+      return res.redirect(settingsRedirect({ kick_error: 'missing_state' }));
     }
 
     let decoded;
     try {
-      decoded = jwt.verify(state, JWT_SECRET);
+      decoded = jwt.verify(stateRaw, JWT_SECRET);
     } catch (e) {
       logger.warn('Kick callback invalid state', { error: e.message });
       return res.redirect(settingsRedirect({ kick_error: 'invalid_state' }));
@@ -82,9 +89,20 @@ router.get('/callback', async (req, res) => {
       return res.redirect(settingsRedirect({ kick_error: 'invalid_state' }));
     }
 
+    if (oauthError) {
+      logger.warn('Kick OAuth error', { error: oauthError, errorDescription });
+      return res.redirect(
+        settingsRedirect({ kick_error: kickErrorParam(errorDescription || oauthError) })
+      );
+    }
+
+    if (!code) {
+      return res.redirect(settingsRedirect({ kick_error: 'missing_code' }));
+    }
+
     const kick = new KickService();
     const tokens = await kick.exchangeCode({
-      code: String(code),
+      code,
       codeVerifier: decoded.codeVerifier,
       redirectUri: getKickRedirectUri(),
     });
@@ -178,7 +196,7 @@ router.get('/callback', async (req, res) => {
       stack: error.stack,
       query: req.query,
     });
-    return res.redirect(settingsRedirect({ kick_error: error.message }));
+    return res.redirect(settingsRedirect({ kick_error: kickErrorParam(error.message) }));
   }
 });
 router.post('/disconnect', requireAuth, async (req, res) => {

@@ -3,7 +3,7 @@
  * Mount with express.raw so signature verification uses the exact body bytes.
  */
 
-import { User } from '../../models/index.js';
+import { User } from '../../modules/users/infrastructure/models.js';
 import { Integration } from '../../modules/integrations/infrastructure/models.js';
 import { KickService } from '../../modules/integrations/application/kickService.js';
 import { handleStreamStarted, handleStreamEnded } from '../../services/platformIntegrationService.js';
