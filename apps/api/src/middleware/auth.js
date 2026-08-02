@@ -59,7 +59,7 @@ function legacyNumericTenantFromPayload(payload) {
 /**
  * Middleware to authenticate requests using JWT
  * Attaches user object to req.user if token is valid.
- * For GET /api/user/twitch/connect, also accepts token in query (redirect flow has no Authorization header).
+ * For OAuth browser redirects (no Authorization header), accept token in query on connect paths.
  *
  * Supports Dakinis platform/auth tokens (UUID `sub`, tenant slug in `tenantId`) and legacy app tokens (numeric sub).
  */
@@ -67,8 +67,12 @@ export function authenticateToken(req, res, next) {
   const authHeader = req.headers.authorization;
   let token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
   if (!token && req.method === 'GET' && req.query?.token) {
-    const url = req.originalUrl || req.url || '';
-    if (url.startsWith('/api/user/twitch/connect') || url.startsWith('/api/youtube/connect')) {
+    const url = (req.originalUrl || req.url || '').split('?')[0];
+    if (
+      url === '/api/user/twitch/connect' ||
+      url === '/api/youtube/connect' ||
+      url === '/api/kick/connect'
+    ) {
       token = req.query.token;
     }
   }
