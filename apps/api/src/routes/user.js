@@ -1602,6 +1602,22 @@ export async function connectedAccountsHandler(req, res) {
     accountInfo.slack.connected = slackConnected;
     accountInfo.slack.username = slackDisplayName;
 
+    const kickIntegration = await Integration.findOne({
+      where: { userId, provider: 'kick', status: 'active' },
+      attributes: ['id', 'metadata', 'providerUserId'],
+    });
+    const kickConnected = !!kickIntegration;
+    const kickDisplayName =
+      kickIntegration?.metadata?.channelTitle ||
+      kickIntegration?.metadata?.kickUserName ||
+      kickIntegration?.metadata?.channelSlug ||
+      null;
+    if (!accountInfo.kick) {
+      accountInfo.kick = { connected: false, username: null };
+    }
+    accountInfo.kick.connected = kickConnected;
+    accountInfo.kick.username = kickDisplayName;
+
     // Build result object safely
     const result = {
       google: accountInfo?.google?.connected || false,
@@ -1610,6 +1626,7 @@ export async function connectedAccountsHandler(req, res) {
       twitter: accountInfo?.twitter?.connected || false,
       youtube: accountInfo?.youtube?.connected || false,
       slack: accountInfo?.slack?.connected || false,
+      kick: accountInfo?.kick?.connected || false,
       email: accountInfo?.email?.connected || false,
       twitterTokenMissing: !!twitterTokenMissing,
       twitchPublishConnected,
@@ -1620,6 +1637,7 @@ export async function connectedAccountsHandler(req, res) {
         twitter: accountInfo?.twitter?.username || null,
         youtube: accountInfo?.youtube?.username || null,
         slack: accountInfo?.slack?.username || null,
+        kick: accountInfo?.kick?.username || null,
       }
     };
     

@@ -12,6 +12,7 @@ import { getRedis } from '../utils/redisConnection.js';
 
 let io = null;
 let rouletteNs = null;
+let pollNs = null;
 let wsAvailable = false;
 let wsPubSubEnabled = false;
 
@@ -88,7 +89,7 @@ export async function initWebSocket(server) {
         }
         socket.join(`user:${user.id}`);
         socket.userId = user.id;
-        const rouletteService = (await import('./rouletteService.js')).default;
+        const rouletteService = (await import('../modules/content/application/rouletteService.js')).default;
         const players = rouletteService.getState(user.id);
         socket.emit('roulette_players', { players });
         logger.debug('Roulette overlay joined room', { userId: user.id, socketId: socket.id, playersCount: players.length });
@@ -99,8 +100,36 @@ export async function initWebSocket(server) {
       socket.on('disconnect', () => {});
     });
 
+    pollNs = io.of('/poll');
+    pollNs.on('connection', async (socket) => {
+      const key = (socket.handshake.query?.key || socket.handshake.auth?.key || '').trim();
+      if (!key) {
+        socket.disconnect(true);
+        return;
+      }
+      try {
+        const user = await User.findOne({
+          where: { nightbotApiKey: key },
+          attributes: ['id'],
+        });
+        if (!user) {
+          socket.disconnect(true);
+          return;
+        }
+        socket.join(`user:${user.id}`);
+        socket.userId = user.id;
+        const pollService = (await import('../modules/content/application/pollService.js')).default;
+        socket.emit('poll_state', pollService.getPublicState(user.id));
+        logger.debug('Poll overlay joined room', { userId: user.id, socketId: socket.id });
+      } catch (err) {
+        logger.warn('Poll overlay auth failed', { error: err.message });
+        socket.disconnect(true);
+      }
+      socket.on('disconnect', () => {});
+    });
+
     wsAvailable = true;
-    logger.info('WebSocket service initialized (main + roulette)');
+    logger.info('WebSocket service initialized (main + roulette + poll)');
   } catch (error) {
     logger.warn('WebSocket not available (socket.io not installed)', { error: error.message });
   }
@@ -119,6 +148,19 @@ export function emitRouletteToUser(userId, event, data) {
     logger.debug('Roulette event emitted', { userId, event });
   } catch (error) {
     logger.warn('Roulette emit error', { userId, event, error: error.message });
+  }
+}
+
+export function emitPollToUser(userId, event, data) {
+  if (!wsAvailable || !pollNs) {
+    logger.debug('Poll WebSocket not available', { userId, event });
+    return;
+  }
+  try {
+    pollNs.to(`user:${userId}`).emit(event, data);
+    logger.debug('Poll event emitted', { userId, event });
+  } catch (error) {
+    logger.warn('Poll emit error', { userId, event, error: error.message });
   }
 }
 

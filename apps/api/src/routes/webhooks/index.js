@@ -26,7 +26,8 @@ import {
 } from './shared.js';
 import { handleStreamStarted, handleStreamEnded } from '../../services/platformIntegrationService.js';
 import rouletteService from '../../modules/content/application/rouletteService.js';
-import { emitRouletteToUser } from '../../services/websocketService.js';
+import pollService from '../../modules/content/application/pollService.js';
+import { emitRouletteToUser, emitPollToUser } from '../../services/websocketService.js';
 import { buildPublicStreamerShareUrl } from '../../utils/publicStreamerShareUrl.js';
 import { ensureDefaultTenantForUser, getPrimaryTenantIdForUser } from '../../modules/tenants/application/tenantResolutionService.js';
 
@@ -1113,6 +1114,69 @@ router.post('/roulette/leave', async (req, res) => {
   } catch (err) {
     logger.error('Webhook roulette leave error', { error: err.message });
     res.status(500).json({ error: 'Could not remove from roulette.' });
+  }
+});
+
+/**
+ * POST /api/webhooks/poll/vote — viewer votes (bot: !vote 1 / !vote Option)
+ * Body: { user, option } — option is 1-based index or option text.
+ * Also charges entry via bot separately; response includes entryCost for bot scripts.
+ */
+router.post('/poll/vote', async (req, res) => {
+  try {
+    const streamer = await getUserByApiKey(req);
+    if (!streamer) {
+      return res.status(401).json({ error: 'Invalid or missing API key.' });
+    }
+    const username = (req.body?.user ?? req.body?.username ?? req.query?.user ?? '').trim();
+    const option = req.body?.option ?? req.body?.choice ?? req.query?.option ?? '';
+    if (!username) {
+      return res.status(400).json({ error: 'Missing user. Send { "user": "username", "option": "1" }.' });
+    }
+    const result = pollService.vote(streamer.id, username, option);
+    emitPollToUser(streamer.id, 'poll_state', result.state);
+    if (!result.ok) {
+      return res.status(400).json({
+        ok: false,
+        error: result.error,
+        entryCost: result.state.entryCost,
+        message:
+          result.error === 'already_voted'
+            ? 'Already voted.'
+            : result.error === 'poll_not_open'
+              ? 'No open poll.'
+              : 'Invalid option. Use !vote 1 or the option text.',
+        ...result.state,
+      });
+    }
+    res.json({
+      ok: true,
+      entryCost: result.state.entryCost,
+      prizePoints: result.state.prizePoints,
+      message: result.state.entryCost
+        ? `Vote recorded. Entry cost: ${result.state.entryCost} points.`
+        : 'Vote recorded.',
+      ...result.state,
+    });
+  } catch (err) {
+    logger.error('Webhook poll vote error', { error: err.message });
+    res.status(500).json({ error: 'Could not record vote.' });
+  }
+});
+
+/**
+ * GET /api/webhooks/poll/state — overlay fallback / bot status (?key=)
+ */
+router.get('/poll/state', async (req, res) => {
+  try {
+    const streamer = await getUserByApiKey(req);
+    if (!streamer) {
+      return res.status(401).json({ error: 'Invalid or missing API key.' });
+    }
+    res.json(pollService.getPublicState(streamer.id));
+  } catch (err) {
+    logger.error('Webhook poll state error', { error: err.message });
+    res.status(500).json({ error: 'Could not get poll state.' });
   }
 });
 

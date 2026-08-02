@@ -8,7 +8,8 @@ export const PLATFORMS = {
   TWITTER: 'twitter',
   INSTAGRAM: 'instagram',
   DISCORD: 'discord',
-  YOUTUBE: 'youtube'
+  YOUTUBE: 'youtube',
+  KICK: 'kick'
 };
 
 export const PLATFORM_VALUES = Object.values(PLATFORMS);
@@ -18,7 +19,8 @@ export const PLATFORM_LABELS = {
   [PLATFORMS.TWITTER]: 'Twitter',
   [PLATFORMS.INSTAGRAM]: 'Instagram',
   [PLATFORMS.DISCORD]: 'Discord',
-  [PLATFORMS.YOUTUBE]: 'YouTube'
+  [PLATFORMS.YOUTUBE]: 'YouTube',
+  [PLATFORMS.KICK]: 'Kick'
 };
 
 /** Max characters for a single tweet (X/Twitter). */

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getDiscordDashboardStats } from '../features/discord/api';
-import { cancelContent, getRouletteState, rouletteSpin, rouletteReset } from '../features/scheduler/api';
+import { cancelContent, getRouletteState, rouletteSpin, rouletteReset, getPollState, createPoll, openPoll, closePoll, resetPoll, awardPollPrizes, refundPollPrizes } from '../features/scheduler/api';
 import { apiClient } from '../shared/api/client';
 import { getTwitchDashboardStats, getTwitchSubs, getTwitchBits, getTwitchDonations } from '../features/twitchBits/api';
 import { io } from 'socket.io-client';
@@ -53,7 +53,8 @@ import {
   Paperclip,
   ExternalLink,
   CircleDot,
-  RotateCw
+  RotateCw,
+  BarChart3,
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { DISCORD_ICON_URL } from '../constants/platforms';
@@ -128,6 +129,16 @@ const Dashboard = ({ user, token, ...props }) => {
   const [roulettePlayers, setRoulettePlayers] = useState([]);
   const [rouletteLoading, setRouletteLoading] = useState(false);
   const [rouletteSpinLoading, setRouletteSpinLoading] = useState(false);
+  const [pollState, setPollState] = useState(null);
+  const [pollLoading, setPollLoading] = useState(false);
+  const [pollBusy, setPollBusy] = useState(false);
+  const [pollForm, setPollForm] = useState({
+    question: '',
+    optionsText: 'Sí\nNo',
+    entryCost: '10',
+    prizePoints: '50',
+  });
+  const [pollCommands, setPollCommands] = useState([]);
   const [calendarView, setCalendarView] = useState(() =>
     typeof window !== 'undefined' && window.innerWidth < 640 ? 'day' : 'week'
   );
@@ -301,6 +312,76 @@ const Dashboard = ({ user, token, ...props }) => {
     }
   };
 
+  const fetchPoll = useCallback(async () => {
+    if (!token) return;
+    setPollLoading(true);
+    try {
+      const data = await getPollState(token);
+      setPollState(data);
+    } catch (e) {
+      devCatchLog('Dashboard.fetchPoll', e);
+      setPollState(null);
+    } finally {
+      setPollLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (!token || !user || user.isAdmin) return undefined;
+    fetchPoll();
+    const id = setInterval(fetchPoll, 8000);
+    return () => clearInterval(id);
+  }, [token, user, fetchPoll]);
+
+  const handlePollCreate = async () => {
+    if (!token || pollBusy) return;
+    const options = pollForm.optionsText
+      .split(/\n|,/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    setPollBusy(true);
+    setPollCommands([]);
+    try {
+      const data = await createPoll(token, {
+        question: pollForm.question.trim(),
+        options,
+        entryCost: Number(pollForm.entryCost) || 0,
+        prizePoints: Number(pollForm.prizePoints) || 0,
+      });
+      setPollState(data);
+      toast.success(t('dashboard.pollCreated') || 'Poll created. Click Open to accept votes.');
+    } catch (e) {
+      toast.error(e.response?.data?.error || (t('dashboard.pollCreateFailed') || 'Could not create poll'));
+    } finally {
+      setPollBusy(false);
+    }
+  };
+
+  const runPollAction = async (fn, okMsg) => {
+    if (!token || pollBusy) return;
+    setPollBusy(true);
+    try {
+      const data = await fn();
+      if (data?.state) setPollState(data.state);
+      else setPollState(data);
+      if (Array.isArray(data?.commands) && data.commands.length) {
+        setPollCommands(data.commands);
+        try {
+          await navigator.clipboard.writeText(data.commands.join('\n'));
+          toast.success(`${okMsg || 'Done'} · ${t('dashboard.pollCommandsCopied') || 'commands copied'}`);
+        } catch {
+          toast.success(okMsg || 'Done');
+        }
+      } else {
+        setPollCommands([]);
+        toast.success(okMsg || 'Done');
+      }
+    } catch (e) {
+      toast.error(e.response?.data?.error || e.message || 'Action failed');
+    } finally {
+      setPollBusy(false);
+    }
+  };
 
   const handleDeleteContent = useCallback(async (contentId) => {
     if (!window.confirm(t('dashboard.deleteContentConfirm') || 'Are you sure you want to delete this content?')) return;
@@ -1096,6 +1177,186 @@ const Dashboard = ({ user, token, ...props }) => {
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Poll / encuesta — puntos, overlay, entregar / devolver premios */}
+        {user && !user.isAdmin && (
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6 border-t-4 border-emerald-500 mb-6 sm:mb-8">
+            <h3 className="text-base sm:text-lg font-bold text-emerald-600 dark:text-emerald-400 mb-2 flex items-center">
+              <BarChart3 className="w-5 h-5 mr-2" />
+              {t('dashboard.pollTitle') || 'Poll / encuesta'}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              {t('dashboard.pollHint') ||
+                'Crea la encuesta con coste de entrada y premio en puntos. Overlay en Settings → Bots. Chat: !vote 1. Al cerrar, entrega premios o devuelve puntos (comandos !points para el bot).'}
+            </p>
+
+            <div className="grid gap-3 sm:grid-cols-2 mb-4">
+              <label className="block text-sm sm:col-span-2">
+                <span className="text-gray-700 dark:text-gray-300">{t('dashboard.pollQuestion') || 'Pregunta'}</span>
+                <input
+                  className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm"
+                  value={pollForm.question}
+                  onChange={(e) => setPollForm((p) => ({ ...p, question: e.target.value }))}
+                  placeholder="¿Qué jugamos hoy?"
+                />
+              </label>
+              <label className="block text-sm sm:col-span-2">
+                <span className="text-gray-700 dark:text-gray-300">{t('dashboard.pollOptions') || 'Opciones (una por línea)'}</span>
+                <textarea
+                  className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm min-h-[72px]"
+                  value={pollForm.optionsText}
+                  onChange={(e) => setPollForm((p) => ({ ...p, optionsText: e.target.value }))}
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="text-gray-700 dark:text-gray-300">{t('dashboard.pollEntryCost') || 'Coste entrada (pts)'}</span>
+                <input
+                  type="number"
+                  min="0"
+                  className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm"
+                  value={pollForm.entryCost}
+                  onChange={(e) => setPollForm((p) => ({ ...p, entryCost: e.target.value }))}
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="text-gray-700 dark:text-gray-300">{t('dashboard.pollPrize') || 'Premio ganadores (pts)'}</span>
+                <input
+                  type="number"
+                  min="0"
+                  className="mt-1 w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm"
+                  value={pollForm.prizePoints}
+                  onChange={(e) => setPollForm((p) => ({ ...p, prizePoints: e.target.value }))}
+                />
+              </label>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <button
+                type="button"
+                onClick={handlePollCreate}
+                disabled={pollBusy || !pollForm.question.trim()}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-medium"
+              >
+                {t('dashboard.pollCreateBtn') || 'Crear encuesta'}
+              </button>
+              <button
+                type="button"
+                onClick={() => runPollAction(() => openPoll(token), t('dashboard.pollOpened') || 'Poll abierta')}
+                disabled={pollBusy || !pollState?.id || pollState?.status === 'open' || pollState?.status === 'closed'}
+                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium"
+              >
+                {t('dashboard.pollOpenBtn') || 'Abrir votos'}
+              </button>
+              <button
+                type="button"
+                onClick={() => runPollAction(() => closePoll(token), t('dashboard.pollClosed') || 'Poll cerrada')}
+                disabled={pollBusy || pollState?.status !== 'open'}
+                className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-sm font-medium"
+              >
+                {t('dashboard.pollCloseBtn') || 'Cerrar'}
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  runPollAction(
+                    () => awardPollPrizes(token),
+                    t('dashboard.pollAwarded') || 'Premios marcados'
+                  )
+                }
+                disabled={pollBusy || pollState?.status !== 'closed' || !(pollState?.prizePoints > 0)}
+                className="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-sm font-medium"
+              >
+                {t('dashboard.pollAwardBtn') || 'Entregar premios'}
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  runPollAction(
+                    () => refundPollPrizes(token, { losersOnly: true }),
+                    t('dashboard.pollRefundedLosers') || 'Devolución perdedores'
+                  )
+                }
+                disabled={pollBusy || !pollState?.id || !(pollState?.entryCost > 0)}
+                className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
+              >
+                {t('dashboard.pollRefundLosersBtn') || 'Devolver a perdedores'}
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  runPollAction(
+                    () => refundPollPrizes(token, { losersOnly: false }),
+                    t('dashboard.pollRefundedAll') || 'Devolución a todos pendientes'
+                  )
+                }
+                disabled={pollBusy || !pollState?.id || !(pollState?.entryCost > 0)}
+                className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
+              >
+                {t('dashboard.pollRefundAllBtn') || 'Devolver pendientes'}
+              </button>
+              <button
+                type="button"
+                onClick={() => runPollAction(() => resetPoll(token), t('dashboard.pollReset') || 'Poll reset')}
+                disabled={pollBusy}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-medium disabled:opacity-50"
+              >
+                <Trash2 className="w-4 h-4" />
+                {t('dashboard.pollResetBtn') || 'Reset'}
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/settings?tab=bots')}
+                className="text-sm text-emerald-600 dark:text-emerald-400 hover:underline"
+              >
+                {t('dashboard.pollOverlayUrl') || 'Overlay URL (Settings → Bots)'}
+              </button>
+            </div>
+
+            {pollLoading && !pollState?.id ? (
+              <p className="text-sm text-gray-500">{t('common.loading') || 'Loading...'}</p>
+            ) : pollState?.id ? (
+              <div className="rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4">
+                <div className="flex flex-wrap gap-2 text-xs mb-2">
+                  <span className="px-2 py-1 rounded bg-gray-200 dark:bg-gray-700">{pollState.status}</span>
+                  <span className="px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200">
+                    Entrada: {pollState.entryCost} pts
+                  </span>
+                  <span className="px-2 py-1 rounded bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200">
+                    Premio: {pollState.prizePoints} pts
+                  </span>
+                  <span className="px-2 py-1 rounded bg-gray-100 dark:bg-gray-800">
+                    Votos: {pollState.totalVotes || 0}
+                  </span>
+                </div>
+                <p className="font-semibold text-gray-900 dark:text-gray-100 mb-3">{pollState.question}</p>
+                <ul className="space-y-2 mb-3">
+                  {(pollState.options || []).map((opt) => (
+                    <li key={opt.index} className="text-sm text-gray-700 dark:text-gray-300">
+                      <span className="font-medium">
+                        {opt.index + 1}. {opt.label}
+                        {pollState.winningOptionIndex === opt.index ? ' ★' : ''}
+                      </span>
+                      <span className="text-gray-500 ml-2">
+                        {opt.votes} ({opt.pct}%)
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                {pollState.pendingAwards > 0 ? (
+                  <p className="text-xs text-violet-600 dark:text-violet-300 mb-1">
+                    Premios pendientes: {pollState.pendingAwards}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+
+            {pollCommands.length > 0 ? (
+              <div className="mt-3 rounded-lg bg-gray-900 text-gray-100 p-3 text-xs font-mono whitespace-pre-wrap">
+                {pollCommands.join('\n')}
+              </div>
+            ) : null}
           </div>
         )}
 
