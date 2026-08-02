@@ -53,7 +53,7 @@ export default function MediaUpload({ user, token }) {
       </div>
 
       {uploadStats && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6 mb-6">
           <div className="flex items-center space-x-2 mb-4">
             <BarChart3 className="w-5 h-5 text-blue-500" />
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -117,11 +117,11 @@ export default function MediaUpload({ user, token }) {
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6 mb-6">
         <FileUpload user={user} uploadStats={uploadStats} onUploadComplete={handleUploadComplete} />
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
           {t('media.uploadedFiles')}
         </h2>

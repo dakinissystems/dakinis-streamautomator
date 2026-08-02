@@ -22,11 +22,13 @@ import {
   startTwitchPublishConnect,
   startTwitterLink,
   startYoutubeConnect,
+  startKickConnect,
   disconnectGoogle,
   disconnectTwitch,
   disconnectTwitter,
   disconnectDiscord,
   disconnectYoutube,
+  disconnectKick,
 } from '../../features/account/api';
 import { apiClient } from '../../shared/api/client';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -265,6 +267,8 @@ export default function Settings({ user, token, setUser, setAuth }) {
     const twitchError = searchParams.get('twitch_error');
     const youtubeConnected = searchParams.get('youtube_connected');
     const youtubeError = searchParams.get('youtube_error');
+    const kickConnected = searchParams.get('kick_connected');
+    const kickError = searchParams.get('kick_error');
     const errorParam = searchParams.get('error');
     if (linked) {
       setActiveTab('platforms');
@@ -301,6 +305,20 @@ export default function Settings({ user, token, setUser, setAuth }) {
       setSearchParams({}, { replace: true });
       fetchConnectedAccounts();
     }
+    if (kickConnected) {
+      setActiveTab('platforms');
+      setConnectingKey(null);
+      toast.success(t('settings.kickConnected') || 'Kick connected. Live status and webhooks are available.');
+      setSearchParams({}, { replace: true });
+      fetchConnectedAccounts();
+    }
+    if (kickError) {
+      setActiveTab('platforms');
+      setConnectingKey(null);
+      toast.error(decodeURIComponent(kickError));
+      setSearchParams({}, { replace: true });
+      fetchConnectedAccounts();
+    }
     if (errorParam) {
       setActiveTab('platforms');
       setConnectingKey(null);
@@ -328,7 +346,7 @@ export default function Settings({ user, token, setUser, setAuth }) {
       setConnectedAccounts(data);
     } catch (err) {
       console.error('Error fetching connected accounts:', err);
-      setConnectedAccounts({ google: false, twitch: false, discord: false, twitter: false, youtube: false, email: false });
+      setConnectedAccounts({ google: false, twitch: false, discord: false, twitter: false, youtube: false, kick: false, email: false });
     } finally {
       setConnectedAccountsLoading(false);
     }
@@ -451,6 +469,7 @@ export default function Settings({ user, token, setUser, setAuth }) {
     else if (key === 'discord') startDiscordLink(token);
     else if (key === 'twitter') startTwitterLink(token);
     else if (key === 'youtube') startYoutubeConnect(token);
+    else if (key === 'kick') startKickConnect(token);
     else if (key === 'akoenet') {
       setConnectingKey(null);
       navigate('/akoenet/connect');
@@ -465,6 +484,7 @@ export default function Settings({ user, token, setUser, setAuth }) {
       else if (key === 'discord') await disconnectDiscord();
       else if (key === 'twitter') await disconnectTwitter();
       else if (key === 'youtube') await disconnectYoutube();
+      else if (key === 'kick') await disconnectKick();
       toast.success(t('settings.disconnected') || 'Disconnected');
     } catch (err) {
       toast.error(err.response?.data?.error || err.message || t('settings.linkFailed'));

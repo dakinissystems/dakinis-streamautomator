@@ -31,6 +31,16 @@ const YouTubeIcon = () => (
   </svg>
 );
 
+const KickIcon = () => (
+  <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" aria-hidden>
+    <rect width="24" height="24" rx="4" fill="#53FC18" />
+    <path
+      fill="#0B0E0F"
+      d="M6.5 5h3.2v5.1L14.4 5H18l-5.2 5.8L18.2 19h-3.7l-4.1-5.6V19H6.5V5z"
+    />
+  </svg>
+);
+
 const MailIcon = () => (
   <svg className="w-5 h-5 flex-shrink-0 text-gray-600 dark:text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
@@ -48,6 +58,7 @@ export const PLATFORM_ICONS = {
   discord: DiscordIcon,
   twitter: TwitterIcon,
   youtube: YouTubeIcon,
+  kick: KickIcon,
   email: MailIcon,
   akoenet: AkoenetIcon,
 };
@@ -60,6 +71,7 @@ export const PLATFORMS_ACCOUNT = [
   { key: 'twitch', label: 'Twitch' },
   { key: 'twitter', label: 'X (Twitter)' },
   { key: 'youtube', label: 'YouTube' },
+  { key: 'kick', label: 'Kick', connectLabel: 'Conectar Kick' },
   { key: 'email', labelKey: 'settings.emailPassword', noConnect: true },
 ];
 

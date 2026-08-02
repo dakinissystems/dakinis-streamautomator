@@ -237,6 +237,19 @@ export default function SettingsBotsIntegrationsPanel({
           </div>
         </div>
       </div>
+
+      <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-900/20 p-5 sm:p-6">
+        <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          {t('bots.pollTitle') || 'Poll / encuesta (puntos)'}
+        </h4>
+        <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">
+          {t('bots.pollIntro') ||
+            'Crea la encuesta en el Dashboard (coste de entrada + premio). Overlay en Overlays → Poll. Viewers votan con !vote 1. Al cerrar, usa Entregar / Devolver para generar comandos !points.'}
+        </p>
+        <pre className="bg-white dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded p-3 text-xs overflow-x-auto whitespace-pre-wrap break-all text-gray-800 dark:text-gray-200">
+          {`POST ${API_BASE}/api/webhooks/poll/vote\nHeader: X-API-Key: YOUR_KEY\nBody: { "user": "viewer", "option": "1" }`}
+        </pre>
+      </div>
     </>
   );
 }

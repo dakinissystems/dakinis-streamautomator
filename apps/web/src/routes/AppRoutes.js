@@ -41,6 +41,7 @@ import { PrivateRoute, AdminRoute, UserRoute } from './routeGuards';
 // Generic overlay: single lazy-loaded component for all overlay types (nextstream, goal, week, quote, suggestions)
 const Overlay = lazy(() => import('../pages/Overlay'));
 const OverlayRoulette = lazy(() => import('../pages/OverlayRoulette'));
+const OverlayPoll = lazy(() => import('../pages/OverlayPoll'));
 
 export function AppRoutes({ user, token, setAuth, setUser, signOut }) {
   return (
@@ -67,6 +68,8 @@ export function AppRoutes({ user, token, setAuth, setUser, signOut }) {
       <Route path="/akoenet/connect" element={<AkoenetConnectEntry user={user} />} />
       {/* Roulette wheel overlay: /overlay/roulette?key=API_KEY — viewers !join, streamer !spin or dashboard */}
       <Route path="/overlay/roulette" element={<Suspense fallback={null}><OverlayRoulette /></Suspense>} />
+      {/* Poll overlay: /overlay/poll?key=API_KEY */}
+      <Route path="/overlay/poll" element={<Suspense fallback={null}><OverlayPoll /></Suspense>} />
       {/* Public overlays for OBS/Streamlabs: /overlay/:type?key=API_KEY (nextstream, goal, week, quote, suggestions) */}
       <Route path="/overlay/:type" element={<Suspense fallback={null}><Overlay /></Suspense>} />
       <Route

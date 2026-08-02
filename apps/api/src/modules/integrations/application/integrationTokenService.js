@@ -7,6 +7,7 @@ import logger from '../../../utils/logger.js';
 import { Integration } from '../infrastructure/models.js';
 import { Op } from 'sequelize';
 import { TwitchService } from './twitchService.js';
+import { KickService } from './kickService.js';
 import axios from 'axios';
 
 const REFRESH_THRESHOLD_MS = 10 * 60 * 1000;
@@ -127,6 +128,35 @@ async function refreshDiscordToken(integration) {
   return integration;
 }
 
+async function refreshKickToken(integration) {
+  if (!integration.refreshToken) {
+    throw new Error('No refresh token available for Kick');
+  }
+
+  const kickService = new KickService();
+  const refreshed = await kickService.refreshUserAccessToken(integration.refreshToken);
+
+  if (!refreshed || !refreshed.accessToken) {
+    throw new Error('Failed to refresh Kick token');
+  }
+
+  integration.accessToken = refreshed.accessToken;
+  // Kick rotates refresh tokens — always persist the new one when present.
+  if (refreshed.refreshToken) {
+    integration.refreshToken = refreshed.refreshToken;
+  }
+  integration.expiresAt = refreshed.expiresAt || null;
+  integration.status = 'active';
+  await integration.save();
+
+  logger.info('Kick token refreshed', {
+    userId: integration.userId,
+    provider: integration.provider,
+  });
+
+  return integration;
+}
+
 export async function refreshIntegrationToken(userId, platform) {
   const integration = await Integration.findOne({
     where: {
@@ -164,6 +194,8 @@ export async function refreshIntegrationToken(userId, platform) {
         return await refreshTwitterToken(integration);
       case 'discord':
         return await refreshDiscordToken(integration);
+      case 'kick':
+        return await refreshKickToken(integration);
       default:
         logger.warn('Token refresh not implemented for platform', { platform });
         return integration;

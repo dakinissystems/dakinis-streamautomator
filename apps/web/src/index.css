@@ -2,8 +2,79 @@
 @tailwind components;
 @tailwind utilities;
 
+/* DES — light-first product; foundations + accent from Theme Engine */
+html[data-product="streamautomator"] {
+  color-scheme: light dark;
+}
+
+@layer components {
+  /* Map legacy SA primary buttons → DES semantic primary */
+  .btn-primary,
+  .dakinis-btn--primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dakinis-space-xs, 0.25rem);
+    font-weight: 600;
+    border-radius: var(--dakinis-radius-sm, 8px);
+    border: 1px solid transparent;
+    background: var(--dakinis-accent, var(--accent, #3b82f6));
+    color: #fff;
+    transition: background var(--dakinis-motion-hover, 150ms) var(--dakinis-ease, ease);
+  }
+  .btn-primary:hover,
+  .dakinis-btn--primary:hover {
+    background: var(--dakinis-accent-hover, var(--accent-hover, #2563eb));
+  }
+  .btn-primary:disabled,
+  .dakinis-btn--primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .dakinis-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    border-radius: var(--dakinis-radius-sm, 8px);
+    border: 1px solid transparent;
+    cursor: pointer;
+  }
+  .dakinis-btn--sm {
+    font-size: 0.78rem;
+    padding: 0.35rem 0.65rem;
+  }
+  .dakinis-btn--md {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.9rem;
+  }
+  .dakinis-card {
+    background: var(--dakinis-surface-1, #fff);
+    border: 1px solid var(--dakinis-line, #e2e8f0);
+    border-radius: var(--dakinis-radius-card, 16px);
+    box-shadow: var(--dakinis-shadow-card, 0 8px 32px rgba(15, 23, 42, 0.08));
+    padding: var(--dakinis-space-base, 16px);
+  }
+}
+
 /* Accent and part colors (set by themeUtils; Appearance can assign custom colors per part) */
 :root {
+  --dakinis-accent: var(--accent, #3b82f6);
+  --dakinis-accent-dark: var(--accent-hover, #2563eb);
+  --dakinis-accent-hover: var(--accent-hover, #2563eb);
+  --dakinis-radius-sm: 8px;
+  --dakinis-radius-md: 12px;
+  --dakinis-radius-lg: 16px;
+  --dakinis-radius-card: 16px;
+  --dakinis-font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --dakinis-space-xs: 4px;
+  --dakinis-space-sm: 8px;
+  --dakinis-space-base: 16px;
+  --dakinis-space-lg: 24px;
+  --dakinis-motion-hover: 150ms;
+  --dakinis-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
   --accent: #3b82f6;
   --accent-hover: #2563eb;
   /* Light tints derived from accent – update when user selects accent color */

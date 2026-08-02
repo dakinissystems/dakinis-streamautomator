@@ -18,7 +18,7 @@ export default function SettingsPlatformsRow({
   onOpenAkoenetAutoConnect,
 }) {
   const navigate = useNavigate();
-  const { key, label, labelKey, noConnect } = platform;
+  const { key, label, labelKey, noConnect, connectLabel } = platform;
   const labelText = label || t(labelKey);
   const connected = key === 'akoenet' ? akoenetConnected : connectedAccounts[key];
   const username = connectedAccounts.usernames?.[key];
@@ -53,7 +53,9 @@ export default function SettingsPlatformsRow({
             disabled={connectingKey === key}
             className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60 disabled:cursor-wait flex-shrink-0"
           >
-            {connectingKey === key ? (t('common.loading') || '...') : (t('settings.connect') || 'Connect')}
+            {connectingKey === key
+              ? (t('common.loading') || '...')
+              : (connectLabel || t('settings.connect') || 'Connect')}
           </button>
         )}
         {key === 'akoenet' && (
@@ -127,6 +129,17 @@ export default function SettingsPlatformsRow({
       {key === 'youtube' && connected && (
         <p className="text-xs text-green-600 dark:text-green-400 pl-8">
           {t('settings.youtubePublishConnected') || 'Connected for video uploads.'}
+        </p>
+      )}
+      {key === 'kick' && connected && (
+        <p className="text-xs text-green-600 dark:text-green-400 pl-8">
+          {t('settings.kickConnectedHint') || 'Connected for live status and Kick webhooks.'}
+        </p>
+      )}
+      {key === 'kick' && !connected && (
+        <p className="text-xs text-gray-600 dark:text-gray-400 pl-8">
+          {t('settings.kickConnectHint') ||
+            'Conecta tu cuenta Kick (OAuth) para live status, webhooks y futuros rewards/puntos.'}
         </p>
       )}
       {key === 'akoenet' && connected && (

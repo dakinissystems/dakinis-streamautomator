@@ -66,6 +66,12 @@ export function startYoutubeConnect(token) {
   window.location.href = `${base}/youtube/connect?token=${encodeURIComponent(token)}`;
 }
 
+export function startKickConnect(token) {
+  if (!token) return;
+  const base = apiClient.defaults.baseURL;
+  window.location.href = `${base}/kick/connect?token=${encodeURIComponent(token)}`;
+}
+
 export function startSlackLink(token) {
   if (!token) return;
   const base = apiClient.defaults.baseURL;
@@ -77,6 +83,7 @@ export async function disconnectTwitch() { return (await apiClient.post('/user/d
 export async function disconnectTwitter() { return (await apiClient.post('/user/disconnect-twitter')).data; }
 export async function disconnectDiscord() { return (await apiClient.post('/user/disconnect-discord')).data; }
 export async function disconnectYoutube() { return (await apiClient.post('/youtube/disconnect')).data; }
+export async function disconnectKick() { return (await apiClient.post('/kick/disconnect')).data; }
 export async function disconnectSlack() { return (await apiClient.post('/user/disconnect-slack')).data; }
 
 /** SaaS workspaces (tenants) for the current user */

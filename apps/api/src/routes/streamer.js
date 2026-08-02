@@ -16,9 +16,12 @@ import { Op } from 'sequelize';
 import { CONTENT_STATUS } from '../constants/contentStatus.js';
 import logger from '../utils/logger.js';
 import { TwitchService } from '../modules/integrations/application/twitchService.js';
+import { KickService } from '../modules/integrations/application/kickService.js';
+import { refreshIntegrationToken } from '../modules/integrations/application/integrationTokenService.js';
 
 const router = express.Router();
 const twitchService = new TwitchService();
+const kickService = new KickService();
 
 const UPCOMING_STATUSES = [
   CONTENT_STATUS.SCHEDULED,
@@ -113,6 +116,10 @@ async function handlePublicStreamerEvents(req, res) {
     let twitchStreamUrl = null;
     let twitchStreamTitle = null;
     let twitchProfileUrl = null;
+    let liveOnKick = false;
+    let kickStreamUrl = null;
+    let kickStreamTitle = null;
+    let kickProfileUrl = null;
 
     try {
       const integration = integrationsByProvider.twitch;
@@ -137,9 +144,46 @@ async function handlePublicStreamerEvents(req, res) {
       });
     }
 
+    try {
+      const kickMeta = integrationsByProvider.kick;
+      if (kickMeta?.providerUserId) {
+        const slug = kickMeta.metadata?.channelSlug;
+        if (slug) kickProfileUrl = `https://kick.com/${slug}`;
+        let kickIntegration = await Integration.findOne({
+          where: { userId: user.id, provider: 'kick', status: 'active' },
+        });
+        if (kickIntegration?.accessToken) {
+          try {
+            kickIntegration = (await refreshIntegrationToken(user.id, 'kick')) || kickIntegration;
+          } catch {
+            // keep existing token
+          }
+          const liveInfo = await kickService.getLivestreamByUserId(
+            kickIntegration.accessToken,
+            kickIntegration.providerUserId
+          );
+          if (liveInfo.live) {
+            liveOnKick = true;
+            kickStreamTitle = liveInfo.title || null;
+            kickStreamUrl = liveInfo.slug
+              ? `https://kick.com/${liveInfo.slug}`
+              : kickProfileUrl;
+          }
+        }
+      }
+    } catch (kickErr) {
+      logger.warn('Kick live check failed for public streamer page', {
+        username,
+        error: kickErr.message,
+      });
+    }
+
     const socialLinks = [];
     if (twitchProfileUrl) {
       socialLinks.push({ platform: 'twitch', label: 'Twitch', url: twitchProfileUrl });
+    }
+    if (kickProfileUrl) {
+      socialLinks.push({ platform: 'kick', label: 'Kick', url: kickProfileUrl });
     }
     if (user.twitterId) {
       socialLinks.push({ platform: 'twitter', label: 'X', url: `https://x.com/i/user/${user.twitterId}` });
@@ -168,6 +212,9 @@ async function handlePublicStreamerEvents(req, res) {
       liveOnTwitch,
       twitchStreamUrl,
       twitchStreamTitle,
+      liveOnKick,
+      kickStreamUrl,
+      kickStreamTitle,
       socialLinks,
     });
   } catch (err) {

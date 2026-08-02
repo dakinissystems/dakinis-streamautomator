@@ -1222,7 +1222,8 @@ const Schedule = ({ user, token }) => {
                             <button
                               type="button"
                               onClick={() => handleMediaSelect(url, isVideo || url.includes('videos') ? 'videos' : 'images')}
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="absolute -top-2 -right-2 z-10 min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 bg-red-500 text-white rounded-full p-2 sm:p-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                              aria-label="Remove media"
                             >
                               <X className="w-3 h-3" />
                             </button>

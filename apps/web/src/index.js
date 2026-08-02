@@ -6,6 +6,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { bootstrapDesAppearance } from './des/bootstrap.js';
 import './index.css';
 import App from './App';
 import { saInitSentryBrowser, Sentry } from './lib/sentry.js';
@@ -13,6 +14,7 @@ import DevSentryErrorButton from './components/DevSentryErrorButton.js';
 import { dakinisCopyrightNotice } from './constants/copyright';
 
 if (typeof document !== 'undefined') {
+  bootstrapDesAppearance({ product: 'streamautomator', defaultMode: 'system' });
   const meta = document.querySelector('meta[name="copyright"]');
   const notice = dakinisCopyrightNotice();
   if (meta) meta.setAttribute('content', notice);

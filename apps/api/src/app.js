@@ -34,6 +34,7 @@ import uploadsRoutes from './routes/uploads.js';
 import discordRoutes from './routes/discord.js';
 import akoenetRoutes from './routes/akoenet.js';
 import youtubeRoutes from './routes/youtube.js';
+import kickRoutes from './routes/kick.js';
 import instagramRoutes from './routes/instagram.js';
 import healthRoutes from './routes/health.js';
 import integrationPublicRoutes from './routes/integrationPublic.js';
@@ -43,6 +44,7 @@ import nightbotRoutes from './routes/nightbot.js';
 import streamerRoutes, { publicStreamerUpcomingRouter } from './routes/streamer.js';
 import webhooksRoutes from './routes/webhooks/index.js';
 import rouletteRoutes from './routes/roulette.js';
+import pollRoutes from './routes/poll.js';
 import streamItemsRoutes from './routes/streamItems.js';
 import suggestionsRoutes from './routes/suggestions.js';
 import cronRoutes, { runStreamReminders } from './routes/cron.js';
@@ -70,6 +72,7 @@ import { isProbeRequest } from './utils/isProbeRequest.js';
 import { getPublicAdminDashboardUrl } from './utils/publicFrontendUrl.js';
 import platformConfigService from './modules/system/application/platformConfigService.js';
 import { handleTwitchEventSub } from './routes/twitchWebhook.js';
+import { handleKickWebhook } from './routes/webhooks/kickWebhook.js';
 import { PLATFORM_VALUES } from './constants/platforms.js';
 import { dakinisCopyrightNotice } from './constants/copyright.js';
 import path from 'path';
@@ -186,6 +189,12 @@ app.use('/api/webhooks/twitch/eventsub', express.raw({ type: 'application/json' 
   handleTwitchEventSub(req, res).catch((err) => {
     logger.error('Twitch EventSub webhook error', { error: err.message });
     res.status(500).end();
+  });
+});
+app.use('/api/webhooks/kick', express.raw({ type: 'application/json' }), (req, res) => {
+  handleKickWebhook(req, res).catch((err) => {
+    logger.error('Kick webhook error', { error: err.message });
+    if (!res.headersSent) res.status(500).end();
   });
 });
 
@@ -406,6 +415,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/discord', discordRoutes);
 app.use('/api/akoenet', akoenetRoutes);
 app.use('/api/youtube', youtubeRoutes);
+app.use('/api/kick', kickRoutes);
 app.use('/api/instagram', instagramRoutes);
 // CSRF disabled for content until frontend sends X-CSRF-Token (GET /api/csrf-token)
 app.use('/api/content', contentRoutes);
@@ -425,6 +435,7 @@ app.use('/api/streamer', streamerRoutes);
 app.use('/api/public/streamer', publicStreamerUpcomingRouter);
 app.use('/api/webhooks', webhookLimiter, webhooksRoutes);
 app.use('/api/roulette', rouletteRoutes);
+app.use('/api/poll', pollRoutes);
 app.use('/api/stream-items', streamItemsRoutes);
 app.use('/api/suggestions', suggestionsRoutes);
 app.use('/api/cron', cronRoutes);
@@ -571,6 +582,8 @@ async function initServer() {
       backendPublicUrl: backendPublic,
       frontendPublicUrl: frontendPublic,
       twitchCallback: `${backendPublic}/api/user/auth/twitch/callback`,
+      kickCallback: `${backendPublic}/api/kick/callback`,
+      kickWebhook: `${backendPublic}/api/webhooks/kick`,
     });
     if (nodeEnv === 'production' && /localhost|127\.0\.0\.1/.test(backendPublic)) {
       logger.error(

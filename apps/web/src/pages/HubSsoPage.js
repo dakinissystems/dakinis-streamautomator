@@ -75,7 +75,7 @@ export default function HubSsoPage({ setAuth }) {
         {error ? (
           <>
             <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
-            <button type="button" className="btn btn-primary" onClick={() => navigate('/login', { replace: true })}>
+          <button type="button" className="btn btn-primary dakinis-btn dakinis-btn--primary" onClick={() => navigate('/login', { replace: true })}>
               {t('login.title') || 'Login'}
             </button>
           </>
