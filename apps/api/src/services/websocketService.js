@@ -58,11 +58,45 @@ export async function initWebSocket(server) {
     });
     await configureRedisPubSubAdapter(io);
 
-    io.on('connection', (socket) => {
-      logger.info('WebSocket client connected', { socketId: socket.id });
-      socket.on('join', (userId) => {
-        socket.join(`user:${userId}`);
-        logger.debug('User joined room', { userId, socketId: socket.id });
+    io.on('connection', async (socket) => {
+      const token = String(
+        socket.handshake.auth?.token || socket.handshake.query?.token || ''
+      ).trim();
+      if (!token) {
+        logger.debug('WebSocket connection rejected: missing token', { socketId: socket.id });
+        socket.disconnect(true);
+        return;
+      }
+
+      try {
+        const { verifyStreamautomatorAccessToken } = await import('../utils/jwtAccess.js');
+        const jwtSecret = process.env.JWT_SECRET || 'dev-jwt-secret';
+        const payload = verifyStreamautomatorAccessToken(token, jwtSecret);
+        const uidRaw = payload.id !== undefined ? payload.id : payload.sub;
+        const userId = Number(uidRaw);
+        if (!Number.isFinite(userId) || userId <= 0) {
+          socket.disconnect(true);
+          return;
+        }
+        const user = await User.findByPk(userId, { attributes: ['id', 'isDisabled'] });
+        if (!user || user.isDisabled) {
+          socket.disconnect(true);
+          return;
+        }
+        socket.userId = user.id;
+        socket.join(`user:${user.id}`);
+        logger.info('WebSocket client connected', { socketId: socket.id, userId: user.id });
+      } catch (err) {
+        logger.debug('WebSocket auth failed', { socketId: socket.id, error: err.message });
+        socket.disconnect(true);
+        return;
+      }
+
+      // Compat: old clients emit join(userId); only allow own room.
+      socket.on('join', (requestedId) => {
+        if (socket.userId != null && String(requestedId) === String(socket.userId)) {
+          socket.join(`user:${socket.userId}`);
+        }
       });
       socket.on('disconnect', () => {
         logger.info('WebSocket client disconnected', { socketId: socket.id });

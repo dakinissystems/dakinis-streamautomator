@@ -194,7 +194,6 @@ router.get('/callback', async (req, res) => {
     logger.error('Kick OAuth callback error', {
       error: error.message,
       stack: error.stack,
-      query: req.query,
     });
     return res.redirect(settingsRedirect({ kick_error: kickErrorParam(error.message) }));
   }
