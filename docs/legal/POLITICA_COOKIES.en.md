@@ -1,38 +1,25 @@
-# Cookie policy and local storage — Dakinis StreamAutomator
-Last updated: 2026-04-06
+# Cookie policy — StreamAutomator
 
-This page explains how cookies and similar technologies (including local browser storage and, in some cases, session storage) are used in the Dakinis StreamAutomator web app, in accordance with applicable regulations.
+Last updated: 2026-08-04
 
-1. Controller
-The data controller is the one indicated in the Privacy Policy (`/legal/privacidad`).
+## Summary
 
-2. What cookies and local storage are
-Cookies are small files that a website may store on your device. Local storage allows the service to keep data persistently or for the session.
+StreamAutomator does **not** load Google Analytics, Meta Pixel, or advertising cookies by default.
 
-3. What we store (summary)
-The application uses storage for:
-- keeping your session (for example, `token` and `refresh_token`)
-- remembering preferences (for example, language and theme preference)
-- managing cookie consent via:
-  - `akoenet_cookie_consent_v1` (legacy)
-  - `akoenet_cookie_consent_v2` (JSON consent format)
+## Necessary storage
 
-At the moment, third-party analytics cookies are not loaded by default in the default bundle.
+We use local storage / session cookies for:
 
-4. How to manage your choice
-When you first visit the site, a cookie banner lets you:
-- accept all categories
-- reject non-essential categories
-- configure optional categories (when available)
+- authentication token
+- interface preferences
 
-You can also block or delete cookies through your browser settings.
+No analytics consent banner is required because we do not use analytics cookies.
 
-5. Retention
-Session data is kept as long as necessary for the described purpose (for example, until you log out or a token expires). Cookie consent is kept so we do not ask you again on every visit, unless there are relevant changes to this policy.
+## OAuth
 
-6. More information
-Privacy policy: `/legal/privacidad`
-Terms of service: `/legal/terminos`
+When signing in or connecting Google, Twitch, Discord, YouTube, X, or Kick, you are redirected to their domain; their policies apply.
 
-Note: This document is for information purposes and may be updated.
+## More information
 
+- Privacy: https://streamautomator.com/privacy
+- Contact: privacy@streamautomator.com
