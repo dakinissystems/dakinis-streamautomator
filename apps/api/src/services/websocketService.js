@@ -9,6 +9,7 @@
 import logger from '../utils/logger.js';
 import { User } from '../modules/users/infrastructure/models.js';
 import { getRedis } from '../utils/redisConnection.js';
+import { Op } from 'sequelize';
 
 let io = null;
 let rouletteNs = null;
@@ -114,7 +115,9 @@ export async function initWebSocket(server) {
       }
       try {
         const user = await User.findOne({
-          where: { nightbotApiKey: key },
+          where: {
+            [Op.or]: [{ overlayApiKey: key }, { nightbotApiKey: key }],
+          },
           attributes: ['id'],
         });
         if (!user) {
@@ -143,7 +146,9 @@ export async function initWebSocket(server) {
       }
       try {
         const user = await User.findOne({
-          where: { nightbotApiKey: key },
+          where: {
+            [Op.or]: [{ overlayApiKey: key }, { nightbotApiKey: key }],
+          },
           attributes: ['id'],
         });
         if (!user) {

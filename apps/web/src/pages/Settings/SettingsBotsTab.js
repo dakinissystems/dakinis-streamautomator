@@ -8,6 +8,7 @@ import { useStreamMode } from '../../contexts/StreamModeContext';
 import { BOTS_SUB_IDS, FRONTEND_ORIGIN } from './bots/constants';
 import { useSettingsBotsAkoeenet } from './bots/useSettingsBotsAkoeenet';
 import { useSettingsBotsNightbot } from './bots/useSettingsBotsNightbot';
+import { useSettingsBotsOverlayKey } from './bots/useSettingsBotsOverlayKey';
 import { buildChatCommands } from './bots/chatCommands';
 import { buildOverlayItems } from './bots/overlayItems';
 import SettingsBotsHeader from './bots/SettingsBotsHeader';
@@ -38,12 +39,16 @@ export default function SettingsBotsTab({ user, token, t, setUser }) {
 
   const akoenet = useSettingsBotsAkoeenet({ user, token, t, setUser, streamMode });
   const nightbot = useSettingsBotsNightbot({ token, t, streamMode });
+  const overlayKey = useSettingsBotsOverlayKey({ token, t, streamMode });
 
   const copyLabel = t('bots.copy') || 'Copy';
   const copiedMessage = t('bots.copied') || 'Copied';
   const chatCommands = buildChatCommands(t);
   const overlayItems = buildOverlayItems(t);
-  const getOverlayUrl = (path) => !streamMode && nightbot.key && FRONTEND_ORIGIN ? `${FRONTEND_ORIGIN}/overlay/${path}?key=${encodeURIComponent(nightbot.key)}` : '';
+  const getOverlayUrl = (path) =>
+    !streamMode && overlayKey.rawKey && FRONTEND_ORIGIN
+      ? `${FRONTEND_ORIGIN}/overlay/${path}?key=${encodeURIComponent(overlayKey.rawKey)}`
+      : '';
 
   const scrollToId = (id) => {
     if (!id) return;
@@ -106,7 +111,11 @@ export default function SettingsBotsTab({ user, token, t, setUser }) {
         <SettingsBotsOverlaysPanel
           t={t}
           streamMode={streamMode}
-          apiKey={nightbot.key}
+          apiKey={overlayKey.rawKey}
+          legacyFallback={overlayKey.legacyFallback}
+          overlayKeyLoading={overlayKey.loading}
+          overlayKeyGenerating={overlayKey.generating}
+          onGenerateOverlayKey={overlayKey.handleGenerate}
           overlaySectionOpen={overlaySectionOpen}
           setOverlaySectionOpen={setOverlaySectionOpen}
           overlayItems={overlayItems}

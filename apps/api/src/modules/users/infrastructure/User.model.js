@@ -181,6 +181,12 @@ const User = sequelize.define('User', {
     unique: true,
     comment: 'API key for Nightbot custom commands (e.g. !todo) to create todos in this account',
   },
+  overlayApiKey: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true,
+    comment: 'OBS overlay key (read-only); prefer over nightbotApiKey for browser sources',
+  },
   discordAnnounceWebhookUrl: {
     type: DataTypes.STRING,
     allowNull: true,
