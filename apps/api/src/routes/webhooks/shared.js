@@ -86,6 +86,22 @@ async function getUserByApiKey(req) {
   return user;
 }
 
+/**
+ * Overlay / OBS auth: accepts dedicated overlayApiKey, or legacy nightbotApiKey for transition.
+ * Must NOT be used for mutating bot webhooks (todos, stream start, etc.).
+ */
+async function getUserByOverlayKey(req) {
+  const key = getApiKey(req);
+  if (!key) return null;
+  const user = await User.findOne({
+    where: {
+      [Op.or]: [{ overlayApiKey: key }, { nightbotApiKey: key }],
+    },
+    attributes: ['id', 'username', 'overlayApiKey', 'nightbotApiKey'],
+  });
+  return user;
+}
+
 export {
   User,
   Todo,
@@ -106,4 +122,5 @@ export {
   sendText,
   getApiKey,
   getUserByApiKey,
+  getUserByOverlayKey,
 };

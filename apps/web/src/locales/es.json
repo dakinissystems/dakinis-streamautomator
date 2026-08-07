@@ -1290,7 +1290,7 @@
   "cookies": {
     "title": "Política de cookies",
     "backToApp": "Volver a la app",
-    "lastUpdated": "Última actualización: mayo 2026",
+    "lastUpdated": "Última actualización: 4 agosto 2026",
     "summaryTitle": "Resumen",
     "summaryBody": "StreamAutomator no carga por defecto Google Analytics, Meta Pixel ni cookies de publicidad.",
     "necessaryTitle": "Almacenamiento necesario",
@@ -1299,7 +1299,7 @@
     "necessaryUi": "preferencias de interfaz",
     "necessaryNote": "No requiere banner de consentimiento para analítica porque no la usamos.",
     "oauthTitle": "OAuth",
-    "oauthBody": "Al iniciar sesión con Google, Twitch u otras plataformas, serás redirigido a su dominio; aplican sus políticas.",
+    "oauthBody": "Al iniciar sesión o conectar Google, Twitch, Discord, YouTube, X o Kick, serás redirigido a su dominio; aplican sus políticas.",
     "moreTitle": "Más información"
   },
   "faq": {
@@ -1335,17 +1335,17 @@
   "privacy": {
     "backToApp": "Volver a la app",
     "title": "Política de Privacidad",
-    "lastUpdated": "Última actualización: enero 2026"
+    "lastUpdated": "Última actualización: 4 agosto 2026"
   },
   "terms": {
     "backToApp": "Volver a la app",
     "title": "Términos y condiciones",
-    "lastUpdated": "Última actualización: enero 2026"
+    "lastUpdated": "Última actualización: 4 agosto 2026"
   },
   "legalNotice": {
     "backToApp": "Volver a la app",
     "title": "Aviso legal",
-    "lastUpdated": "Última actualización: abril 2026"
+    "lastUpdated": "Última actualización: 4 agosto 2026"
   },
   "messagesPage": {
     "title": "Mensajes y notificaciones",

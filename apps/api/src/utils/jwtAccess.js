@@ -23,7 +23,10 @@ export function getStreamautomatorJwtAudience() {
 }
 
 function isStrictIssAud() {
-  return String(process.env.JWT_STRICT_ISS_AUD || '').toLowerCase() === 'true';
+  const env = String(process.env.JWT_STRICT_ISS_AUD || '').toLowerCase();
+  if (env === 'true') return true;
+  if (env === 'false') return false;
+  return process.env.NODE_ENV === 'production';
 }
 
 /**

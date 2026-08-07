@@ -3239,6 +3239,35 @@ router.post('/nightbot-key', requireAuth, async (req, res) => {
   }
 });
 
+/** OBS overlay key (read-only overlays). Separate from Nightbot admin key. */
+router.get('/overlay-key', requireAuth, async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id, { attributes: ['overlayApiKey', 'nightbotApiKey'] });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json({
+      key: user.overlayApiKey || null,
+      legacyNightbotKeyAccepted: !user.overlayApiKey && !!user.nightbotApiKey,
+    });
+  } catch (err) {
+    logger.error('Overlay key get error', { error: err.message, userId: req.user?.id });
+    res.status(500).json({ error: 'Failed to get overlay key' });
+  }
+});
+
+router.post('/overlay-key', requireAuth, async (req, res) => {
+  try {
+    const key = crypto.randomBytes(24).toString('hex');
+    const user = await User.findByPk(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    user.overlayApiKey = key;
+    await user.save();
+    res.json({ key });
+  } catch (err) {
+    logger.error('Overlay key generate error', { error: err.message, userId: req.user?.id });
+    res.status(500).json({ error: 'Failed to generate overlay key' });
+  }
+});
+
 // Get available license types configuration (admin)
 router.get('/admin/license-config', requireAdmin, async (req, res) => {
   try {

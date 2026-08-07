@@ -6,6 +6,10 @@ export default function SettingsBotsOverlaysPanel({
   t,
   streamMode,
   apiKey,
+  legacyFallback,
+  overlayKeyLoading,
+  overlayKeyGenerating,
+  onGenerateOverlayKey,
   overlaySectionOpen,
   setOverlaySectionOpen,
   overlayItems,
@@ -30,6 +34,26 @@ export default function SettingsBotsOverlaysPanel({
       </p>
       {overlaySectionOpen && (
         <>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={onGenerateOverlayKey}
+              disabled={overlayKeyLoading || overlayKeyGenerating || streamMode}
+              className="px-4 py-2 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+            >
+              {overlayKeyGenerating
+                ? (t('common.loading') || '...')
+                : apiKey && !legacyFallback
+                  ? (t('bots.regenerateOverlayKey') || 'Regenerate overlay key')
+                  : (t('bots.generateOverlayKey') || 'Generate overlay key')}
+            </button>
+            {legacyFallback && (
+              <span className="text-xs text-amber-700 dark:text-amber-300">
+                {t('bots.overlayUsingLegacyNightbotKey') ||
+                  'Using Nightbot key for overlays (legacy). Generate an overlay key so OBS URLs cannot run bot commands.'}
+              </span>
+            )}
+          </div>
           <div className="mt-4 p-4 rounded-lg bg-white dark:bg-gray-800/70 border border-indigo-100 dark:border-indigo-900/50">
             <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">{t('bots.overlaysStepsTitle') || 'How to add in OBS'}</p>
             <ol className="space-y-2 text-sm text-gray-700 dark:text-gray-300 list-decimal list-inside">
@@ -56,7 +80,7 @@ export default function SettingsBotsOverlaysPanel({
                     ) : streamMode && apiKey ? (
                       <span className="text-gray-500 dark:text-gray-400 text-xs">{t('common.streamModeHidden') || 'Hidden (stream mode is on)'}</span>
                     ) : (
-                      <span className="text-amber-600 dark:text-amber-400 text-xs">{t('bots.generateKeyFirst') || 'Generate a key above first.'}</span>
+                      <span className="text-amber-600 dark:text-amber-400 text-xs">{t('bots.generateOverlayKeyFirst') || 'Generate an overlay key above first.'}</span>
                     )}
                   </div>
                 </div>

@@ -31,3 +31,13 @@ export async function generateNightbotKey() {
   return res.data?.key ?? null;
 }
 
+export async function getOverlayKey() {
+  const res = await apiClient.get('/user/overlay-key');
+  return res.data?.key ?? null;
+}
+
+export async function generateOverlayKey() {
+  const res = await apiClient.post('/user/overlay-key');
+  return res.data?.key ?? null;
+}
+

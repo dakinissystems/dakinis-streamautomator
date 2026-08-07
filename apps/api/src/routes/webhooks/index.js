@@ -23,6 +23,7 @@ import {
   formatCountdown,
   sendText,
   getUserByApiKey,
+  getUserByOverlayKey,
 } from './shared.js';
 import { handleStreamStarted, handleStreamEnded } from '../../services/platformIntegrationService.js';
 import rouletteService from '../../modules/content/application/rouletteService.js';
@@ -304,7 +305,7 @@ router.post('/clipidea/add', addStreamItemHandler('clipidea'));
 /** GET /api/webhooks/nextstream — "Next stream: Friday 20:00 Minecraft" */
 router.get('/nextstream', async (req, res) => {
   try {
-    const user = await getUserByApiKey(req);
+    const user = await getUserByOverlayKey(req);
     if (!user) {
       sendText(res, 'Add your API key in Settings → Bots to use !nextstream.');
       return;
@@ -325,7 +326,7 @@ router.get('/nextstream', async (req, res) => {
 /** GET /api/webhooks/countdown — "Next stream in: 3h 14m" for !countdown */
 router.get('/countdown', async (req, res) => {
   try {
-    const user = await getUserByApiKey(req);
+    const user = await getUserByOverlayKey(req);
     if (!user) {
       sendText(res, 'Add your API key in Settings → Bots to use !countdown.');
       return;
@@ -346,7 +347,7 @@ router.get('/countdown', async (req, res) => {
 /** GET /api/webhooks/week — "This week's streams: Friday — Minecraft ..." — also /schedule alias */
 async function handleWeekSchedule(req, res) {
   try {
-    const user = await getUserByApiKey(req);
+    const user = await getUserByOverlayKey(req);
     if (!user) {
       sendText(res, 'Add your API key in Settings → Bots to use !schedule.');
       return;
@@ -437,7 +438,7 @@ router.get('/quote/random', async (req, res) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   res.set('Pragma', 'no-cache');
   try {
-    const user = await getUserByApiKey(req);
+    const user = await getUserByOverlayKey(req);
     if (!user) {
       sendText(res, 'Add your API key to use !quote random.');
       return;
@@ -467,7 +468,7 @@ router.get('/quote/random', async (req, res) => {
 /** GET /api/webhooks/idea/random — random idea for !randomidea */
 router.get('/idea/random', async (req, res) => {
   try {
-    const user = await getUserByApiKey(req);
+    const user = await getUserByOverlayKey(req);
     if (!user) {
       sendText(res, 'Add your API key to use !randomidea.');
       return;
@@ -487,7 +488,7 @@ router.get('/idea/random', async (req, res) => {
 /** GET /api/webhooks/idea/latest — latest idea for overlays / chat suggestion widgets */
 router.get('/idea/latest', async (req, res) => {
   try {
-    const user = await getUserByApiKey(req);
+    const user = await getUserByOverlayKey(req);
     if (!user) {
       sendText(res, 'Add your API key to use idea overlays.');
       return;
@@ -1010,7 +1011,7 @@ router.get('/uptimeweek', async (req, res) => {
 /** GET /api/webhooks/goal — "Follower goal: 500. Current: 421" for !goal */
 router.get('/goal', async (req, res) => {
   try {
-    const user = await getUserByApiKey(req);
+    const user = await getUserByOverlayKey(req);
     if (!user) {
       sendText(res, 'Add your API key in Settings → Bots to use !goal.');
       return;
@@ -1169,7 +1170,7 @@ router.post('/poll/vote', async (req, res) => {
  */
 router.get('/poll/state', async (req, res) => {
   try {
-    const streamer = await getUserByApiKey(req);
+    const streamer = await getUserByOverlayKey(req);
     if (!streamer) {
       return res.status(401).json({ error: 'Invalid or missing API key.' });
     }

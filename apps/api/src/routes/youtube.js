@@ -5,38 +5,55 @@
  */
 
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import { google } from 'googleapis';
 import { Integration } from '../modules/integrations/infrastructure/models.js';
-import { authenticateToken, requireAuth } from '../middleware/auth.js';
+import { requireAuth } from '../middleware/auth.js';
 import logger from '../utils/logger.js';
+import { getFrontendPublicUrl } from '../utils/publicUrls.js';
 
 const router = express.Router();
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-jwt-secret';
+const FRONTEND_URL = getFrontendPublicUrl();
 
 // Base URL without trailing slash so callback URI never has double slash
 const backendBaseUrl = (process.env.BACKEND_URL || 'http://localhost:5000').replace(/\/$/, '');
 
-// Initialize OAuth2 client
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
   process.env.YOUTUBE_REDIRECT_URI || `${backendBaseUrl}/api/youtube/callback`
 );
 
+function settingsRedirect(query) {
+  const q = new URLSearchParams(query).toString();
+  return `${FRONTEND_URL.replace(/\/$/, '')}/settings${q ? `?${q}` : ''}`;
+}
+
+function youtubeErrorParam(value) {
+  const raw = String(value || 'unknown').slice(0, 120);
+  return raw.replace(/[^a-zA-Z0-9._\- ]/g, '_').trim() || 'unknown';
+}
+
 /**
  * GET /api/youtube/connect
- * Initiates YouTube OAuth flow
- * Redirects user to Google OAuth consent screen
+ * Initiates YouTube OAuth flow (signed state JWT, same pattern as Kick/Twitch).
  */
 router.get('/connect', requireAuth, (req, res) => {
   try {
+    const state = jwt.sign(
+      { userId: req.user.id, purpose: 'youtube_connect' },
+      JWT_SECRET,
+      { expiresIn: '10m' }
+    );
     const url = oauth2Client.generateAuthUrl({
-      access_type: 'offline', // Required to get refresh_token
+      access_type: 'offline',
       scope: [
         'https://www.googleapis.com/auth/youtube.upload',
-        'https://www.googleapis.com/auth/youtube.readonly'
+        'https://www.googleapis.com/auth/youtube.readonly',
       ],
-      prompt: 'consent', // Force consent screen to ensure refresh_token
-      state: req.user.id.toString() // Pass user ID in state for security
+      prompt: 'consent',
+      state,
     });
 
     logger.info('YouTube OAuth flow initiated', { userId: req.user.id });
@@ -44,68 +61,69 @@ router.get('/connect', requireAuth, (req, res) => {
   } catch (error) {
     logger.error('Failed to initiate YouTube OAuth', {
       userId: req.user.id,
-      error: error.message
+      error: error.message,
     });
-    res.status(500).json({ error: 'Failed to initiate YouTube connection', details: error.message });
+    res.status(500).json({ error: 'Failed to initiate YouTube connection' });
   }
 });
 
 /**
  * GET /api/youtube/callback
- * Handles OAuth callback from Google
- * Receives authorization code and exchanges it for tokens
  */
 router.get('/callback', async (req, res) => {
   try {
-    const { code, state, error } = req.query;
+    const oauthError = typeof req.query.error === 'string' ? req.query.error : null;
+    const code = typeof req.query.code === 'string' ? req.query.code : '';
+    const stateRaw = typeof req.query.state === 'string' ? req.query.state : '';
 
-    if (error) {
-      logger.error('YouTube OAuth error', { error, state });
-      return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/settings?youtube_error=${encodeURIComponent(error)}`);
+    if (!stateRaw) {
+      return res.redirect(settingsRedirect({ youtube_error: 'missing_state' }));
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(stateRaw, JWT_SECRET);
+    } catch (e) {
+      logger.warn('YouTube callback invalid state', { error: e.message });
+      return res.redirect(settingsRedirect({ youtube_error: 'invalid_state' }));
+    }
+    if (decoded.purpose !== 'youtube_connect' || !decoded.userId) {
+      return res.redirect(settingsRedirect({ youtube_error: 'invalid_state' }));
+    }
+
+    if (oauthError) {
+      logger.warn('YouTube OAuth error', { error: oauthError });
+      return res.redirect(settingsRedirect({ youtube_error: youtubeErrorParam(oauthError) }));
     }
 
     if (!code) {
-      logger.error('YouTube OAuth callback missing code', { query: req.query });
-      return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/settings?youtube_error=missing_code`);
+      logger.warn('YouTube OAuth callback missing code');
+      return res.redirect(settingsRedirect({ youtube_error: 'missing_code' }));
     }
 
-    // Exchange code for tokens
     const { tokens } = await oauth2Client.getToken(code);
 
     if (!tokens.refresh_token) {
       logger.warn('YouTube OAuth: No refresh_token received', {
-        hasAccessToken: !!tokens.access_token,
-        hasIdToken: !!tokens.id_token
+        hasAccessToken: Boolean(tokens.access_token),
       });
-      // If no refresh_token, user may need to disconnect and reconnect
-      return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/settings?youtube_error=no_refresh_token`);
+      return res.redirect(settingsRedirect({ youtube_error: 'no_refresh_token' }));
     }
 
-    // Get user info from YouTube API
     oauth2Client.setCredentials(tokens);
     const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
     const channelResponse = await youtube.channels.list({
       part: ['snippet', 'contentDetails'],
-      mine: true
+      mine: true,
     });
 
     const channel = channelResponse.data.items?.[0];
     const providerUserId = channel?.id || null;
     const channelTitle = channel?.snippet?.title || 'YouTube Channel';
+    const userId = Number(decoded.userId);
 
-    // Get user ID from state (passed during OAuth initiation)
-    const userId = state ? parseInt(state, 10) : null;
-    if (!userId) {
-      logger.error('YouTube OAuth callback missing user ID in state');
-      return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/settings?youtube_error=invalid_state`);
-    }
-
-    // Save or update integration
     const [integration, created] = await Integration.findOrCreate({
-      where: {
-        userId,
-        provider: 'youtube'
-      },
+      where: { userId, provider: 'youtube' },
       defaults: {
         userId,
         provider: 'youtube',
@@ -113,31 +131,38 @@ router.get('/callback', async (req, res) => {
         accessToken: tokens.access_token,
         refreshToken: tokens.refresh_token,
         expiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
-        scopes: tokens.scope ? (Array.isArray(tokens.scope) ? tokens.scope : tokens.scope.split(' ')) : null,
+        scopes: tokens.scope
+          ? Array.isArray(tokens.scope)
+            ? tokens.scope
+            : tokens.scope.split(' ')
+          : null,
         status: 'active',
         metadata: {
           channelId: providerUserId,
           channelTitle,
-          connectedAt: new Date().toISOString()
-        }
-      }
+          connectedAt: new Date().toISOString(),
+        },
+      },
     });
 
     if (!created) {
-      // Update existing integration
       await integration.update({
         providerUserId,
         accessToken: tokens.access_token,
         refreshToken: tokens.refresh_token,
         expiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
-        scopes: tokens.scope ? (Array.isArray(tokens.scope) ? tokens.scope : tokens.scope.split(' ')) : null,
+        scopes: tokens.scope
+          ? Array.isArray(tokens.scope)
+            ? tokens.scope
+            : tokens.scope.split(' ')
+          : null,
         status: 'active',
         metadata: {
           ...integration.metadata,
           channelId: providerUserId,
           channelTitle,
-          connectedAt: new Date().toISOString()
-        }
+          connectedAt: new Date().toISOString(),
+        },
       });
     }
 
@@ -145,65 +170,57 @@ router.get('/callback', async (req, res) => {
       userId,
       providerUserId,
       channelTitle,
-      created
+      created,
     });
 
-    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/settings?youtube_connected=true`);
+    res.redirect(settingsRedirect({ youtube_connected: 'true' }));
   } catch (error) {
     logger.error('YouTube OAuth callback error', {
       error: error.message,
       stack: error.stack,
-      query: req.query
     });
-    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/settings?youtube_error=${encodeURIComponent(error.message)}`);
+    res.redirect(settingsRedirect({ youtube_error: youtubeErrorParam(error.message) }));
   }
 });
 
 /**
  * POST /api/youtube/disconnect
- * Disconnects YouTube integration
  */
 router.post('/disconnect', requireAuth, async (req, res) => {
   try {
     const integration = await Integration.findOne({
-      where: {
-        userId: req.user.id,
-        provider: 'youtube'
-      }
+      where: { userId: req.user.id, provider: 'youtube' },
     });
 
     if (!integration) {
       return res.status(404).json({ error: 'YouTube not connected' });
     }
 
-    await integration.update({ status: 'revoked' });
-    // Optionally delete instead of marking as revoked
-    // await integration.destroy();
+    await integration.update({
+      status: 'revoked',
+      accessToken: null,
+      refreshToken: null,
+    });
 
     logger.info('YouTube integration disconnected', { userId: req.user.id });
     res.json({ message: 'YouTube disconnected successfully' });
   } catch (error) {
     logger.error('Failed to disconnect YouTube', {
       userId: req.user.id,
-      error: error.message
+      error: error.message,
     });
-    res.status(500).json({ error: 'Failed to disconnect YouTube', details: error.message });
+    res.status(500).json({ error: 'Failed to disconnect YouTube' });
   }
 });
 
 /**
  * GET /api/youtube/status
- * Returns YouTube connection status
  */
 router.get('/status', requireAuth, async (req, res) => {
   try {
     const integration = await Integration.findOne({
-      where: {
-        userId: req.user.id,
-        provider: 'youtube',
-        status: 'active'
-      },
-      attributes: ['id', 'provider', 'providerUserId', 'status', 'metadata', 'expiresAt', 'createdAt']
+      where: { userId: req.user.id, provider: 'youtube', status: 'active' },
+      attributes: ['id', 'provider', 'providerUserId', 'status', 'metadata', 'expiresAt', 'createdAt'],
     });
 
     if (!integration) {
@@ -213,16 +230,13 @@ router.get('/status', requireAuth, async (req, res) => {
     res.json({
       connected: true,
       channelId: integration.providerUserId,
-      channelTitle: integration.metadata?.channelTitle,
+      channelTitle: integration.metadata?.channelTitle || null,
       expiresAt: integration.expiresAt,
-      connectedAt: integration.metadata?.connectedAt
+      connectedAt: integration.metadata?.connectedAt || null,
     });
   } catch (error) {
-    logger.error('Failed to get YouTube status', {
-      userId: req.user.id,
-      error: error.message
-    });
-    res.status(500).json({ error: 'Failed to get YouTube status', details: error.message });
+    logger.error('YouTube status error', { userId: req.user.id, error: error.message });
+    res.status(500).json({ error: 'Failed to get YouTube status' });
   }
 });
 

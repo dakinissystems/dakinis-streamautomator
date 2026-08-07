@@ -38,6 +38,16 @@ export async function handleKickWebhook(req, res) {
   const eventType = req.get('Kick-Event-Type') || '';
   const rawBody = rawBodyToString(req.body);
 
+  // Reject stale / future-skewed timestamps (replay window ~10 minutes).
+  if (timestamp) {
+    const tsMs = Date.parse(timestamp);
+    const skewMs = Math.abs(Date.now() - (Number.isFinite(tsMs) ? tsMs : 0));
+    if (!Number.isFinite(tsMs) || skewMs > 10 * 60 * 1000) {
+      logger.warn('Kick webhook rejected: timestamp skew', { messageId, timestamp, skewMs });
+      return res.status(401).json({ error: 'Invalid timestamp' });
+    }
+  }
+
   try {
     const kick = new KickService();
     const ok = await kick.verifyWebhookSignature({

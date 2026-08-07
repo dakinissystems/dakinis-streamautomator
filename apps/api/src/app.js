@@ -482,11 +482,24 @@ app.get('/', (req, res) => {
 
 // 404 handler - Always return JSON, never HTML
 app.use((req, res) => {
+  const redactQuery = (q) => {
+    if (!q || typeof q !== 'object') return undefined;
+    const out = {};
+    for (const [k, v] of Object.entries(q)) {
+      const key = String(k).toLowerCase();
+      if (['token', 'key', 'secret', 'code', 'state', 'access_token', 'refresh_token'].includes(key)) {
+        out[k] = '[redacted]';
+      } else {
+        out[k] = v;
+      }
+    }
+    return out;
+  };
   const meta = {
     path: req.path,
-    originalUrl: req.originalUrl,
+    originalUrl: (req.originalUrl || '').split('?')[0],
     method: req.method,
-    query: req.query,
+    query: redactQuery(req.query),
   };
   if (isProbeRequest(req.path)) {
     logger.debug('404 probe scan', meta);
@@ -496,7 +509,7 @@ app.use((req, res) => {
   res.status(404).json({
     error: 'Endpoint not found',
     path: req.path,
-    originalUrl: req.originalUrl,
+    originalUrl: req.path,
     method: req.method
   });
 });

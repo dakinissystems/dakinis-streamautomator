@@ -1,82 +1,60 @@
-﻿# Privacy Policy — Dakinis StreamAutomator
-Last updated: 2026-05-08
+﻿# Privacy Policy — StreamAutomator
 
-This policy explains how Dakinis StreamAutomator collects, uses, and protects personal data.
+Last updated: 2026-08-04
 
-1. Data controller
-Controller: Christian
-Contact: privacy@streamautomator.com
-Country/Jurisdiction: Spain
+**Public URL (OAuth / Google review):** https://streamautomator.com/privacy
 
-2. Data we may collect
-- Account data: username, email (if applicable), and OAuth identifiers.
-- Content data: messages, files, and related metadata.
-- Connection and security data: IP address, access logs, session identifiers, and relevant security events.
-- User configuration data: preferences, settings, and permissions inside the app.
+## 1. Controller
 
-3. Purposes of processing
-- Create and manage accounts.
-- Provide real-time communication features of the platform.
-- Moderation, security, fraud prevention, and legal compliance.
-- Technical and operational improvements to the service.
+Dakinis Systems (trading name of Christian David Villar Colodro) — Spain  
+Privacy: privacy@streamautomator.com · Legal: legal@streamautomator.com  
+Corporate privacy: privacy@dakinissystems.com
 
-4. Legal basis
-We process data under the following legal grounds, as applicable:
-- performance of the contract (service provision)
-- legitimate interests (security, abuse prevention, service improvement)
-- compliance with legal obligations
-- consent when required
+## 2. Data we process
 
-5. Data retention
-We keep data while your account is active or as long as needed for operational, legal, or security purposes.
-We may keep limited/blocked records when there is a legal obligation or a dispute.
+- Account: username, email, profile.
+- OAuth: tokens and identifiers from Google, Twitch, Discord, YouTube, X (Twitter), and **Kick** when you connect those platforms.
+- Content: scheduled posts, events, media you upload, poll/overlay configuration tied to your streamer account.
+- Technical: logs, IP, security diagnostics.
+- Bot/overlay API key: used to authenticate Nightbot-style webhooks and OBS overlays.
 
-6. Data sharing
-We may share data with:
-- infrastructure providers (hosting, database, storage)
-- competent authorities when there is a legal requirement
-We do not sell personal data.
+## 3. Google (login and YouTube)
 
-7. International transfers
-If international transfers occur, we apply appropriate safeguards under applicable law.
+If you use **Google sign-in** or **YouTube**, we comply with the [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy).
 
-8. Your rights (GDPR)
-Depending on the circumstances, you can exercise:
-- access
-- rectification
-- deletion
-- objection
-- restriction of processing
-- data portability
+**Minimum scopes:**
 
-To exercise rights: use the DPO channel in `/legal/dpo` (DPO form).
-Identity verification may be required before executing requests.
+- Login: `profile`, `email`
+- YouTube: `youtube.upload`, `youtube.readonly` (only for agreed publish/manage features)
 
-9. Security
-We implement reasonable technical and organizational measures to protect personal data from unauthorized access, alteration, or loss.
+We do not sell Google data or use it for behavioural advertising. You can disconnect integrations in Settings and revoke access at https://myaccount.google.com/permissions
 
-10. Minors
-The service is not directed to children under 14. If we detect minors’ data without a applicable legal basis, we may restrict or delete the account.
+## 4. Other platforms (Twitch, Discord, X, Kick)
 
-11. Cookies and local storage
-The app uses local storage/cookies for session and preferences.
-For details: `/legal/cookies`.
+Twitch, Discord, X, and Kick are processed only for the features you enable (e.g. live status, webhooks, publishing, chat bots). You must also comply with their terms. Kick uses OAuth 2.1 with PKCE; livestream event webhooks may be received when you connect Kick.
 
-12. EU actions (GDPR / DSA)
-If we operate with users in the EU:
-- we apply processes for GDPR rights management
-- we provide mechanisms to report illegal content
-- we publish moderation and transparency information where required
+## 5. Processors
 
-13. Updates
-We may update this policy. We will publish the current version with its update date.
+Hosting, database (e.g. Railway / PostgreSQL / Supabase when configured), email (Resend / Cloudflare email routing where applicable), and payment providers (e.g. Stripe) acting as processors under GDPR. We do not sell personal data.
 
-14. Contact
-Privacy inquiries: privacy@akoenet.local
+## 6. Retention and security
 
-15. DPO and copyright notices
-- DPO / data protection: `/legal/dpo`
-- Copyright removal (DMCA): `/legal/dmca`
+Data while the account is active or as required by law. Reasonable technical measures (HTTPS, access control, encrypted integration tokens where applicable).
 
-Note: This document does not constitute professional legal advice.
+## 7. Rights (GDPR / LOPDGDD)
 
+Access, rectification, erasure, objection, restriction, and portability: privacy@streamautomator.com  
+You may also write to privacy@dakinissystems.com. We do not appoint a DPO; this is our privacy requests channel.
+
+## 8. Account deletion
+
+- In the app: Settings → delete account.
+- By email: privacy@streamautomator.com
+
+## 9. Cookies
+
+See the cookie policy at https://streamautomator.com/cookies. We do not load third-party analytics by default.
+
+## 10. Changes
+
+We publish the current version with an update date.
