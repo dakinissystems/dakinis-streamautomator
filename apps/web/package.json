@@ -1,6 +1,6 @@
 {
   "name": "streamautomator-web",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -20,6 +20,7 @@
     "@sentry/react": "^9.47.1",
     "@supabase/supabase-js": "^2.93.1",
     "axios": "^1.16.1",
+    "dakinis-streamautomator": "file:../..",
     "date-fns": "^2.30.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",

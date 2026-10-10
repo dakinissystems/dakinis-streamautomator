@@ -466,7 +466,7 @@ setupSwagger(app);
 app.get('/', (req, res) => {
   res.json({ 
     message: 'StreamAutomator API',
-    version: '2.3.1',
+    version: '2.4.0',
     status: 'running',
     endpoints: {
       health: '/api/health',

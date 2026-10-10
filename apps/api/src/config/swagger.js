@@ -9,7 +9,7 @@ export const swaggerOptions = {
     openapi: '3.0.0',
     info: {
       title: 'StreamAutomator API',
-      version: '2.3.1',
+      version: '2.4.0',
       description: 'API for managing scheduled content across multiple platforms',
       contact: {
         name: 'API Support',
