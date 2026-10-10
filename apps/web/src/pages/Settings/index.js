@@ -1041,7 +1041,7 @@ export default function Settings({ user, token, setUser, setAuth }) {
               </nav>
             </div>
 
-            <div className="lg:col-span-3 p-4 sm:p-6 min-w-0 overflow-x-hidden">
+            <div className="lg:col-span-3 p-4 sm:p-6 min-w-0 overflow-x-hidden text-gray-900 dark:text-gray-100">
               {renderTabContent()}
               {['profile', 'notifications', 'publicPage'].includes(activeTab) && (
                 <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">

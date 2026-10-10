@@ -307,18 +307,26 @@ If you have any questions, please contact our support team.
 }
 
 /**
- * Send password reset email
+ * Send password reset email (admin or self-service forgot-password).
  * @param {Object} user - User object
  * @param {string} tempPassword - Temporary password generated
+ * @param {{ requestedByUser?: boolean }} [opts]
  */
-export async function sendPasswordResetEmail(user, tempPassword) {
-  const subject = 'StreamAutomator: administrator password reset';
+export async function sendPasswordResetEmail(user, tempPassword, opts = {}) {
+  const selfServe = opts.requestedByUser === true;
+  const subject = selfServe
+    ? 'StreamAutomator: restablecer contraseña'
+    : 'StreamAutomator: administrator password reset';
   const loginHref = `${baseFrontendUrl()}/login`;
+  const heading = selfServe ? 'Restablecer contraseña' : 'Password reset by an admin';
+  const lead = selfServe
+    ? 'Recibimos una solicitud para restablecer la contraseña de tu cuenta StreamAutomator.'
+    : 'An administrator generated a new temporary password for your StreamAutomator account.';
 
   const html = `
-          <h2 style="margin:0 0 16px;color:#2563eb;font-size:20px;">Password reset by an admin</h2>
+          <h2 style="margin:0 0 16px;color:#2563eb;font-size:20px;">${heading}</h2>
           <p>Hello ${user.username},</p>
-          <p>An administrator generated a new temporary password for your StreamAutomator account.</p>
+          <p>${lead}</p>
           <p style="background:#f4f4f5;padding:16px;border-radius:8px;border-left:4px solid #2563eb;margin:20px 0;">
             <strong>Temporary password</strong><br>
             <code style="font-size:17px;font-weight:700;color:#18181b;word-break:break-all;">${tempPassword}</code>
@@ -334,9 +342,11 @@ export async function sendPasswordResetEmail(user, tempPassword) {
   `;
 
   const text = `
-StreamAutomator — administrator password reset
+StreamAutomator — password reset
 
 Hello ${user.username},
+
+${lead}
 
 Temporary password: ${tempPassword}
 

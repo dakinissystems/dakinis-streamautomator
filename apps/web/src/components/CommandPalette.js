@@ -18,7 +18,7 @@ const LOCAL_COMMANDS = [
   { id: 'analytics', label: 'Analytics creador', path: '/creator/analytics', group: 'nav', keywords: ['estadísticas', 'heatmap'] },
   { id: 'templates', label: 'Plantillas', path: '/templates', group: 'nav', keywords: [] },
   { id: 'media', label: 'Subir media', path: '/media', group: 'nav', keywords: ['upload'] },
-  { id: 'timeline', label: 'Timeline de contenido', path: '/stream-timeline', group: 'nav', keywords: ['historial'] },
+  { id: 'timeline', label: 'Línea de tiempo', path: '/stream-timeline', group: 'nav', keywords: ['historial', 'timeline'] },
   { id: 'settings', label: 'Ajustes', path: '/settings', group: 'nav', keywords: ['config'] },
   { id: 'hub', label: 'Abrir Hub Dakinis', href: 'https://dakinissystems.com/hub', group: 'ecosystem', keywords: ['dakinis', 'mi día'] },
   { id: 'core', label: 'Abrir Dakinis One', href: 'https://dakinissystems.com/core', group: 'ecosystem', keywords: ['erp', 'factura'] },

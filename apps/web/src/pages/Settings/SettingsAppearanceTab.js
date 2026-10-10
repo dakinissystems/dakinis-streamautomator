@@ -185,12 +185,12 @@ export default function SettingsAppearanceTab({
             <Palette className="w-4 h-4 text-accent" />
             {tt('appearance.customColors', 'customColors')}
           </h4>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-700 dark:text-gray-300">
             {tt('appearance.customColorsHelp', 'customColorsHelp')}
           </p>
 
           <div>
-            <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">{tt('appearance.yourPalette', 'yourPalette')}</p>
+            <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">{tt('appearance.yourPalette', 'yourPalette')}</p>
             <div className="flex flex-wrap gap-3 items-center">
               {PRESET_COLOR_OPTIONS.map((opt) => (
                 <div key={opt.id} className="flex items-center gap-1.5">
@@ -199,7 +199,7 @@ export default function SettingsAppearanceTab({
                     style={{ backgroundColor: ACCENT_COLORS[opt.id]?.hex || '#3b82f6' }}
                     title={opt.name}
                   />
-                  <span className="text-xs text-gray-600 dark:text-gray-400 hidden sm:inline">{opt.name}</span>
+                  <span className="text-xs text-gray-700 dark:text-gray-300 hidden sm:inline">{opt.name}</span>
                 </div>
               ))}
               {(config.swatches || []).map((swatch) => (
@@ -270,7 +270,7 @@ export default function SettingsAppearanceTab({
           </div>
 
           <div>
-            <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-3">{tt('appearance.applyToParts', 'applyToParts')}</p>
+            <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-3">{tt('appearance.applyToParts', 'applyToParts')}</p>
             <div className="space-y-2">
               {COLOR_PARTS.map((part) => (
                 <div key={part.id} className="flex flex-wrap items-center justify-between gap-2 py-1.5 border-b border-gray-200 dark:border-gray-600 last:border-0">
@@ -278,7 +278,7 @@ export default function SettingsAppearanceTab({
                     <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                       {partLabel(part)}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-gray-700 dark:text-gray-300">
                       {partDesc(part)}
                     </p>
                   </div>
@@ -286,7 +286,7 @@ export default function SettingsAppearanceTab({
                     aria-label={partLabel(part)}
                     value={config.assignments?.[part.id] || 'blue'}
                     onChange={(e) => handlePartAssignment(part.id, e.target.value)}
-                    className="text-sm px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 min-w-[120px]"
+                    className="text-sm px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 min-w-[120px] [color-scheme:light] dark:[color-scheme:dark]"
                   >
                     {colorOptions.map((opt) => (
                       <option key={opt.id} value={opt.id}>
@@ -312,7 +312,7 @@ export default function SettingsAppearanceTab({
             <Palette className="w-5 h-5 text-gray-600 dark:text-gray-400 flex-shrink-0" />
             <div className="min-w-0">
               <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{tt('settings.compactMode', 'compactMode')}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{tt('settings.compactModeDesc', 'compactModeDesc')}</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300">{tt('settings.compactModeDesc', 'compactModeDesc')}</p>
             </div>
           </div>
           <button type="button"
@@ -326,7 +326,7 @@ export default function SettingsAppearanceTab({
 
         <div>
           <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">{t('settings.platformColors') || 'Platform colors'}</h4>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{t('settings.platformColorsHelp') || 'Colors used to identify each platform in the calendar and content list.'}</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">{t('settings.platformColorsHelp') || 'Colors used to identify each platform in the calendar and content list.'}</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {PLATFORM_IDS.map((id) => (
               <div key={id} className="flex items-center gap-2">

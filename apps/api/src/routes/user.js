@@ -211,11 +211,13 @@ async function ensureTwitchEventSubSubscription(broadcasterUserId) {
  */
 async function processTwitchOAuthUser(accessToken, refreshToken, twitchUser) {
   const twitchIdStr = String(twitchUser.id);
-  let email = twitchUser.email;
   const displayName = twitchUser.display_name || twitchUser.login || 'User';
-  if (!email) {
-    logger.warn('Twitch OAuth: no email in Helix user', { twitchId: twitchUser.id });
-    throw new Error('No email provided by Twitch. Please ensure your Twitch account has a verified email and the app has the user:read:email scope.');
+  // Twitch may omit email if the account has none verified; keep a stable synthetic inbox so login still works.
+  const email = twitchUser.email
+    ? String(twitchUser.email).trim().toLowerCase()
+    : `twitch_${twitchIdStr}@users.streamautomator.local`;
+  if (!twitchUser.email) {
+    logger.warn('Twitch OAuth: no email in Helix user; using synthetic email', { twitchId: twitchUser.id });
   }
   let user = await User.findOne({
     where: {
@@ -223,6 +225,8 @@ async function processTwitchOAuthUser(accessToken, refreshToken, twitchUser) {
         { email },
         { twitchId: twitchIdStr },
         { oauthId: twitchIdStr, oauthProvider: 'twitch' },
+        { email: `twitch_${twitchIdStr}@twitch.local` },
+        { email: { [Op.like]: `twitch_${twitchIdStr}%` } },
       ],
     },
   });
@@ -231,6 +235,10 @@ async function processTwitchOAuthUser(accessToken, refreshToken, twitchUser) {
     if (!user.oauthId) {
       user.oauthId = twitchIdStr;
       user.oauthProvider = 'twitch';
+    }
+    // Prefer real Twitch email when Helix finally returns one; never overwrite a real inbox with synthetic.
+    if (twitchUser.email && (!user.email || String(user.email).includes('twitch_'))) {
+      user.email = email;
     }
     if ((!user.licenseKey || String(user.licenseKey).length < 10) && !user.hasUsedTrial) {
       const expiryResult = resolveLicenseExpiry({ licenseType: normalizeLicenseType('trial') });
@@ -2641,13 +2649,18 @@ router.post('/admin/reset-password', requireAdmin, validateBody(adminResetPasswo
   }
 });
 
-// Request password reset (public - by email)
+// Request password reset (public - by email). SA users live in SA DB — do not proxy to platform Auth.
 router.post('/forgot-password', validateBody(forgotPasswordSchema), async (req, res) => {
-  const { email } = req.body;
+  const emailNorm = String(req.body.email || '').trim().toLowerCase();
+  const genericOk = {
+    message: 'If an account with that email exists, a password reset has been sent.',
+  };
   try {
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({
+      where: sequelize.where(sequelize.fn('LOWER', sequelize.col('email')), emailNorm),
+    });
     if (!user) {
-      return res.json({ message: 'If an account with that email exists, a password reset link has been sent.' });
+      return res.json(genericOk);
     }
 
     if (!user.passwordHash) {
@@ -2656,20 +2669,30 @@ router.post('/forgot-password', validateBody(forgotPasswordSchema), async (req, 
       });
     }
 
-    const authBase = String(process.env.DAKINIS_AUTH_URL || process.env.AUTH_PUBLIC_URL || 'https://auth.dakinissystems.com').replace(/\/$/, '');
-    try {
-      await fetch(`${authBase}/auth/password-reset/start`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+    if (!user.email || String(user.email).includes('@users.streamautomator.local') || String(user.email).endsWith('@twitch.local')) {
+      return res.status(400).json({
+        error: 'This account has no real email on file. Sign in with Twitch/Google or ask an admin to set an email.',
       });
-    } catch (proxyErr) {
-      logger.warn('forgot-password: auth proxy failed', { error: proxyErr?.message });
     }
 
-    return res.json({
-      message: 'If an account with that email exists, a password reset link has been sent.',
-    });
+    const tempPassword = generateTemporaryPassword(12);
+    user.passwordHash = await bcrypt.hash(tempPassword, 10);
+    user.lastPasswordChange = new Date();
+    await user.save();
+
+    const { sendPasswordResetEmail } = await import('../utils/notifications.js');
+    const emailResult = await sendPasswordResetEmail(user, tempPassword, { requestedByUser: true });
+    if (!emailResult.success) {
+      logger.warn('forgot-password: email not sent', {
+        userId: user.id,
+        reason: emailResult.reason,
+      });
+      // Still return generic OK to avoid account enumeration; ops must have EMAIL_ENABLED + RESEND_API_KEY.
+    } else {
+      logger.info('forgot-password: email sent', { userId: user.id });
+    }
+
+    return res.json(genericOk);
   } catch (err) {
     logger.error('Error in forgot password', {
       error: err.message,

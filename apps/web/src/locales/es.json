@@ -97,7 +97,7 @@
     "resetPassword": "Restablecer Contraseña",
     "resetPasswordInstructions": "Ingresa tu correo y restableceremos tu contraseña.",
     "passwordResetSuccess": "¡Contraseña restablecida!",
-    "passwordResetEmailSent": "Si existe esa cuenta, se ha procesado el restablecimiento.",
+    "passwordResetEmailSent": "Si existe una cuenta con ese correo, te enviamos una contraseña temporal. Revisa la bandeja (y spam).",
     "passwordResetFailed": "Error al restablecer la contraseña",
     "emailRequired": "El correo es requerido",
     "linkGoogleFailed": "Error al vincular Google",
@@ -365,8 +365,8 @@
     "deleteFailed": "Error al borrar."
   },
   "timeline": {
-    "title": "Timeline del stream",
-    "menu": "Timeline",
+    "title": "Línea de tiempo del stream",
+    "menu": "Línea de tiempo",
     "hint": "Eventos desde Streamer.bot / Mix It Up con POST /api/webhooks/timeline. Usa type: stream_start, donation, clip, etc.",
     "empty": "Aún no hay eventos. Llama a POST /webhooks/timeline desde tu bot para registrar momentos."
   },

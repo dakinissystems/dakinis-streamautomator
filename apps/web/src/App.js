@@ -502,7 +502,7 @@ function AppContent() {
     <>
       <Toaster position="top-right" />
       <CommandPalette open={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} />
-      <div className="dakinis-shell dakinis-shell--stack flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 min-w-0 bg-surface-0">
+      <div className="dakinis-shell dakinis-shell--stack flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 min-w-0 dark:bg-surface-0 text-gray-900 dark:text-gray-100">
         <div className="flex flex-1 min-w-0">
           {showAppShell && (
             <Sidebar
