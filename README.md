@@ -91,6 +91,8 @@ Copyright © 2024-2026 Dakinis Systems. Software propietario — ver [LICENSE](L
 
 ## Docs canónicas (ecosistema)
 
+Los textos de `docs/legal/` son la copia de producto. La base de plataforma está en [dakinis-systems/docs/legal](https://github.com/dakinissystems/dakinis-systems/tree/main/docs/legal). Si cambia la política, se actualizan los dos.
+
 Estado → [STATUS](https://github.com/dakinissystems/dakinis-systems/blob/main/docs/STATUS.md) ·
 Mapa → [SYSTEMS](https://github.com/dakinissystems/dakinis-systems/blob/main/docs/SYSTEMS.md) ·
 Ops → [OPERATIONS](https://github.com/dakinissystems/dakinis-systems/blob/main/docs/OPERATIONS.md) ·
