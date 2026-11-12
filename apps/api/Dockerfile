@@ -7,7 +7,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl python3 ma
 
 COPY package.json package-lock.json ./
 COPY packages ./packages
-RUN npm ci --omit=dev
+# Node 20 ships npm 10.8.2, which crashes on this lock (edgesOut) and
+# rejects it as out of sync. npm 11.6.2 installs the same lockfile.
+RUN npm install -g npm@11.6.2 && npm ci --omit=dev
 
 COPY migrations ./migrations
 COPY scripts ./scripts

@@ -1,21 +1,9 @@
 const OAUTH_LOGIN_ERROR_KEY = 'sa_oauth_login_error';
-const AUTH_DEBUG_KEY = 'sa_last_auth_debug';
 const MAX_AGE_MS = 10 * 60 * 1000;
 
-export function persistOAuthLoginError(message, detail = null) {
-  if (typeof sessionStorage === 'undefined' || !message) return;
-  try {
-    sessionStorage.setItem(
-      OAUTH_LOGIN_ERROR_KEY,
-      JSON.stringify({ message, detail, at: Date.now() }),
-    );
-    sessionStorage.setItem(
-      AUTH_DEBUG_KEY,
-      JSON.stringify({ message, detail, at: new Date().toISOString(), source: 'oauth' }),
-    );
-  } catch {
-    // ignore quota errors
-  }
+export function persistOAuthLoginError() {
+  // The login page reads the error code from the URL. Do not store the
+  // OAuth message, detail, or token material in sessionStorage.
 }
 
 export function consumeOAuthLoginError() {
@@ -32,21 +20,6 @@ export function consumeOAuthLoginError() {
   }
 }
 
-export function logAuthDebug(context, err) {
-  const message = err?.message || err?.response?.data?.error || String(err);
-  console.error(`[auth] ${context}`, err);
-  if (typeof sessionStorage === 'undefined') return;
-  try {
-    sessionStorage.setItem(
-      AUTH_DEBUG_KEY,
-      JSON.stringify({
-        context,
-        message,
-        at: new Date().toISOString(),
-        stack: err?.stack || null,
-      }),
-    );
-  } catch {
-    // ignore
-  }
+export function logAuthDebug(context) {
+  console.error(`[auth] ${context}`);
 }

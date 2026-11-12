@@ -32,6 +32,9 @@ function graphUrl(path) {
 
 async function graphGet(path, params = {}) {
   const url = graphUrl(path);
+  if (url.protocol !== 'https:' || url.hostname !== 'graph.facebook.com') {
+    throw new Error('Blocked Graph host');
+  }
   const res = await axios.get(url.href, {
     params: {
       ...params,
@@ -83,6 +86,9 @@ export async function getInstagramMediaInsights(mediaId) {
 
 async function graphPost(path, payload = {}) {
   const url = graphUrl(path);
+  if (url.protocol !== 'https:' || url.hostname !== 'graph.facebook.com') {
+    throw new Error('Blocked Graph host');
+  }
   const body = new URLSearchParams({
     ...Object.fromEntries(Object.entries(payload).filter(([, v]) => v !== undefined && v !== null)),
     access_token: PAGE_ACCESS_TOKEN,

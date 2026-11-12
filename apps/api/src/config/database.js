@@ -34,6 +34,12 @@ function databaseHost(url) {
   }
 }
 
+function hostIs(host, name) {
+  if (host === name) return true;
+  const suffix = `.${name}`;
+  return host.length > suffix.length && host.slice(-suffix.length) === suffix;
+}
+
 // In production / Railway, DATABASE_URL and SSL are required (never fall back to SQLite)
 if (isProduction && !databaseUrl) {
   logger.error('DATABASE_URL is required in production environment');
@@ -59,7 +65,7 @@ const sequelize = usePostgres
             }
           : false,
         // Supabase pooler compatibility
-        ...(databaseHost(databaseUrl).endsWith('pooler.supabase.com') && {
+        ...(hostIs(databaseHost(databaseUrl), 'pooler.supabase.com') && {
           application_name: 'streamautomator',
         }),
       },
