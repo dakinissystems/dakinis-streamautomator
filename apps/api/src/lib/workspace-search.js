@@ -19,6 +19,14 @@ const STREAM_FRONTEND =
     ""
   );
 
+function serviceAuthHeaders() {
+  const key = String(process.env.DAKINIS_INTERNAL_SERVICE_KEY || process.env.DAKINIS_INTERNAL_API_KEY || "")
+    .split(",")[0]
+    .trim();
+  if (!key) return {};
+  return { Authorization: `Bearer ${key}`, "X-Internal-Api-Key": key };
+}
+
 function searchBaseUrl() {
   const direct = String(process.env.DAKINIS_SEARCH_URL || "").trim().replace(/\/$/, "");
   if (direct) return direct;
@@ -63,7 +71,7 @@ async function remotePlatformSearch(q, scopeRaw) {
   try {
     const params = new URLSearchParams({ q: String(q || "").trim(), scope });
     const res = await fetch(`${base}/v1/query?${params}`, {
-      headers: { Accept: "application/json" },
+      headers: { Accept: "application/json", ...serviceAuthHeaders() },
       signal: AbortSignal.timeout(8_000),
     });
     if (!res.ok) return [];
