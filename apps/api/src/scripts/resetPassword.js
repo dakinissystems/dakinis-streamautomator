@@ -45,10 +45,7 @@ async function resetPassword() {
       await user.save();
     }
     
-    console.log('✅ Password reset successfully!');
-    console.log(`\n📝 Updated credentials:`);
-    console.log(`   Email: ${email}`);
-    console.log(`   Password: ${newPassword}`);
+    console.log('✅ Password reset successfully for', email);
     
     process.exit(0);
   } catch (err) {

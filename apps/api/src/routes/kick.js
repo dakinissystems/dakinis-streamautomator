@@ -90,7 +90,7 @@ router.get('/callback', async (req, res) => {
     }
 
     if (oauthError) {
-      logger.warn('Kick OAuth error', { error: oauthError, errorDescription });
+      logger.warn('Kick OAuth error');
       return res.redirect(
         settingsRedirect({ kick_error: kickErrorParam(errorDescription || oauthError) })
       );

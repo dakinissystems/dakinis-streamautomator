@@ -3,6 +3,19 @@ import { DomainError } from "../shared/domain-error.js";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+function isEmailAddress(value) {
+  const at = value.indexOf("@");
+  if (at <= 0 || value.indexOf("@", at + 1) !== -1) return false;
+  const domain = value.slice(at + 1);
+  const dot = domain.lastIndexOf(".");
+  if (dot <= 0 || dot === domain.length - 1) return false;
+  for (let i = 0; i < value.length; i += 1) {
+    const code = value.charCodeAt(i);
+    if (code <= 32 || code === 127) return false;
+  }
+  return true;
+}
+
 export class Email {
   /** @param {string} raw */
   static from(raw) {
@@ -12,7 +25,7 @@ export class Email {
   /** @param {string} raw */
   constructor(raw) {
     const norm = String(raw || "").trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(norm)) {
+    if (!isEmailAddress(norm)) {
       throw new DomainError("invalid_email", `Invalid email: ${raw}`);
     }
     this._value = norm;

@@ -484,12 +484,13 @@ app.get('/', (req, res) => {
 app.use((req, res) => {
   const redactQuery = (q) => {
     if (!q || typeof q !== 'object') return undefined;
-    const out = {};
+    const out = Object.create(null);
     for (const [k, v] of Object.entries(q)) {
+      if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
       const key = String(k).toLowerCase();
       if (['token', 'key', 'secret', 'code', 'state', 'access_token', 'refresh_token'].includes(key)) {
         out[k] = '[redacted]';
-      } else {
+      } else if (typeof v === 'string') {
         out[k] = v;
       }
     }

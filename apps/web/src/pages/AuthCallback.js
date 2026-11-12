@@ -16,7 +16,10 @@ function consumePostLoginRedirect() {
   if (typeof sessionStorage === 'undefined') return null;
   const raw = sessionStorage.getItem('postLoginRedirect');
   sessionStorage.removeItem('postLoginRedirect');
-  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return null;
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//') || raw.includes('\\') || raw.includes('//')) return null;
+  for (let i = 0; i < raw.length; i += 1) {
+    if (raw.charCodeAt(i) < 32 || raw.charCodeAt(i) === 127) return null;
+  }
   return raw;
 }
 

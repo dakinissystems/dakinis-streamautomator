@@ -293,13 +293,8 @@ router.post('/test-twitter', requireAuth, async (req, res) => {
     
     logger.info('User Twitter status', {
       userId,
-      hasTwitterId: !!user.twitterId,
-      twitterId: user.twitterId,
-      hasAccessToken: !!user.twitterAccessToken,
-      accessTokenLength: user.twitterAccessToken?.length || 0,
-      hasRefreshToken: !!user.twitterRefreshToken,
-      oauthProvider: user.oauthProvider,
-      oauthId: user.oauthId
+      hasTwitterId: Boolean(user.twitterId),
+      hasAccessToken: Boolean(user.twitterAccessToken),
     });
     
     if (!user.twitterAccessToken) {

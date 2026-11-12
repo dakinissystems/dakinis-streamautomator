@@ -92,7 +92,7 @@ router.get('/callback', async (req, res) => {
     }
 
     if (oauthError) {
-      logger.warn('YouTube OAuth error', { error: oauthError });
+      logger.warn('YouTube OAuth error');
       return res.redirect(settingsRedirect({ youtube_error: youtubeErrorParam(oauthError) }));
     }
 

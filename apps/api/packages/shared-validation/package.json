@@ -14,7 +14,7 @@
     "./addon": "./src/addon.js"
   },
   "dependencies": {
-    "zod": "^4.3.6"
+    "zod": "^4.6.7"
   },
   "engines": {
     "node": ">=20"

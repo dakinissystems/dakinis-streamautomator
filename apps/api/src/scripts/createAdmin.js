@@ -38,10 +38,7 @@ async function createAdmin() {
         existing.passwordHash = hash;
         existing.lastPasswordChange = new Date();
         await existing.save();
-        console.log('✅ Password updated successfully!');
-        console.log('\n📝 Updated credentials:');
-        console.log('   Email:', email);
-        console.log('   Password:', password);
+        console.log('✅ Password updated successfully for', email);
       } else {
         console.log('⚠️  User exists but is not admin. Upgrading to admin...');
         const hash = await bcrypt.hash(password, 10);
@@ -51,9 +48,6 @@ async function createAdmin() {
           lastPasswordChange: new Date()
         });
         console.log('✅ User upgraded to admin:', email);
-        console.log('\n📝 Login credentials:');
-        console.log('   Email:', email);
-        console.log('   Password:', password);
       }
       process.exit(0);
     }
@@ -73,9 +67,7 @@ async function createAdmin() {
     console.log('   Username:', admin.username);
     console.log('   Email:', admin.email);
     console.log('   Is Admin:', admin.isAdmin);
-    console.log('\n📝 Login credentials:');
     console.log('   Email:', email);
-    console.log('   Password:', password);
     
     process.exit(0);
   } catch (err) {

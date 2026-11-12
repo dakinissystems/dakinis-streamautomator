@@ -31,8 +31,16 @@ function delay(ms) {
  * Discord API request with 429 handling: waits Retry-After then throws so BullMQ retries.
  * Returns { res, data } on success. On 429: waits and throws DiscordRateLimitError.
  */
+function discordApiUrl(url) {
+  const parsed = new URL(url);
+  if (parsed.protocol !== 'https:' || parsed.hostname !== 'discord.com') {
+    throw new Error('Blocked non-Discord URL');
+  }
+  return parsed;
+}
+
 async function discordFetch(url, options = {}) {
-  const res = await fetch(url, options);
+  const res = await fetch(discordApiUrl(url), options);
   const contentType = res.headers.get('content-type') || '';
   const isJson = contentType.includes('application/json');
   const bodyText = await res.text();

@@ -26,6 +26,14 @@ const onRailway = Boolean(process.env.RAILWAY_ENVIRONMENT);
 const isProduction = nodeEnv === 'production' || onRailway;
 const requireSSL = isProduction || process.env.DATABASE_SSL === 'true';
 
+function databaseHost(url) {
+  try {
+    return new URL(String(url || '')).hostname.toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
 // In production / Railway, DATABASE_URL and SSL are required (never fall back to SQLite)
 if (isProduction && !databaseUrl) {
   logger.error('DATABASE_URL is required in production environment');
@@ -51,7 +59,7 @@ const sequelize = usePostgres
             }
           : false,
         // Supabase pooler compatibility
-        ...(databaseUrl.includes('pooler.supabase.com') && {
+        ...(databaseHost(databaseUrl).endsWith('pooler.supabase.com') && {
           application_name: 'streamautomator',
         }),
       },

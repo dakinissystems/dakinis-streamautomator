@@ -11,26 +11,7 @@
  * @returns {string} Sanitized HTML
  */
 export function sanitizeHtml(html) {
-  if (!html || typeof html !== 'string') {
-    return '';
-  }
-
-  // Allowed tags (whitelist approach)
-  const allowedTags = ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li'];
-  const allowedAttributes = {
-    a: ['href', 'title'],
-  };
-
-  // Remove script tags and event handlers
-  let sanitized = html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '') // Remove event handlers
-    .replace(/javascript:/gi, '') // Remove javascript: protocol
-    .replace(/on\w+\s*=\s*[^\s>]+/gi, ''); // Remove inline event handlers
-
-  // For production, consider using a library like DOMPurify
-  // For now, this provides basic protection
-  return sanitized;
+  return escapeHtml(html);
 }
 
 /**
@@ -43,10 +24,7 @@ export function sanitizeText(text) {
     return '';
   }
 
-  return text
-    .replace(/<[^>]*>/g, '') // Remove all HTML tags
-    .replace(/&[#\w]+;/g, '') // Remove HTML entities
-    .trim();
+  return escapeHtml(text).trim();
 }
 
 /**

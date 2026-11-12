@@ -519,7 +519,10 @@ router.get('/auth/twitch/callback', async (req, res) => {
   if (!isTwitchConfigured()) {
     return res.redirect(`${FRONTEND_URL}/login?error=twitch_not_configured`);
   }
-  const { code, state, error, error_description } = req.query;
+  const code = typeof req.query.code === 'string' ? req.query.code : '';
+  const state = typeof req.query.state === 'string' ? req.query.state : '';
+  const error = typeof req.query.error === 'string' ? req.query.error : '';
+  const error_description = typeof req.query.error_description === 'string' ? req.query.error_description : '';
   if (error) {
     logger.warn('Twitch OAuth callback error', { error, error_description });
     return res.redirect(`${FRONTEND_URL}/login?error=oauth_failed&reason=${encodeURIComponent(error_description || error)}`);
@@ -616,7 +619,10 @@ export const twitterOAuth2Start = async (req, res) => {
 
 /** GET /auth/twitter/callback - Exchange code for token, get user, create/update User, redirect with JWT. */
 export const twitterOAuth2Callback = async (req, res) => {
-  const { code, state, error, error_description } = req.query;
+  const code = typeof req.query.code === 'string' ? req.query.code : '';
+  const state = typeof req.query.state === 'string' ? req.query.state : '';
+  const error = typeof req.query.error === 'string' ? req.query.error : '';
+  const error_description = typeof req.query.error_description === 'string' ? req.query.error_description : '';
   if (error) {
     logger.warn('X OAuth2 callback error', { error, error_description });
     return res.redirect(`${FRONTEND_URL}/login?error=oauth_failed&reason=${encodeURIComponent(error_description || error)}`);
@@ -801,7 +807,10 @@ function twitterLinkReasonFromXError(xError) {
 
 /** X link callback: exchange code, attach Twitter to user by state userId. */
 export const twitterLinkCallback = async (req, res) => {
-  const { code, state, error, error_description } = req.query;
+  const code = typeof req.query.code === 'string' ? req.query.code : '';
+  const state = typeof req.query.state === 'string' ? req.query.state : '';
+  const error = typeof req.query.error === 'string' ? req.query.error : '';
+  const error_description = typeof req.query.error_description === 'string' ? req.query.error_description : '';
   if (error) {
     return res.redirect(`${FRONTEND_URL}/settings?error=link_failed&reason=${encodeURIComponent(error_description || error)}`);
   }
@@ -972,23 +981,21 @@ export const discordLinkStart = async (req, res) => {
 
 /** Discord link callback: exchange code for token, attach Discord to user by state userId. Register before authenticateToken. */
 export const discordLinkCallback = async (req, res) => {
-  const { code, state, error, error_description } = req.query;
+  const code = typeof req.query.code === 'string' ? req.query.code : '';
+  const state = typeof req.query.state === 'string' ? req.query.state : '';
+  const error = typeof req.query.error === 'string' ? req.query.error : '';
+  const error_description = typeof req.query.error_description === 'string' ? req.query.error_description : '';
   
   // Handle Discord OAuth errors
   if (error) {
-    logger.warn('Discord OAuth error in callback', { 
-      error, 
-      error_description,
-      query: req.query 
-    });
+    logger.warn('Discord OAuth error in callback', { hasError: true });
     return res.redirect(`${FRONTEND_URL}/settings?error=link_failed&reason=${encodeURIComponent(error_description || error)}`);
   }
   
   if (!code || !state) {
-    logger.warn('Discord link callback: missing code or state', { 
-      hasCode: !!code, 
-      hasState: !!state,
-      query: req.query 
+    logger.warn('Discord link callback: missing code or state', {
+      hasCode: Boolean(code),
+      hasState: Boolean(state),
     });
     return res.redirect(`${FRONTEND_URL}/settings?error=link_failed&reason=missing_code_or_state`);
   }
@@ -1001,10 +1008,7 @@ export const discordLinkCallback = async (req, res) => {
   
   const parsed = verifyLinkState(state, 'link_discord');
   if (!parsed) {
-    logger.warn('Discord link callback: invalid state token', { 
-      stateLength: state?.length,
-      statePreview: state?.substring(0, 50) 
-    });
+    logger.warn('Discord link callback: invalid state token');
     return res.redirect(`${FRONTEND_URL}/settings?error=link_state_invalid`);
   }
   
@@ -1039,12 +1043,9 @@ export const discordLinkCallback = async (req, res) => {
     
     if (!tokenRes.ok) {
       const errText = await tokenRes.text();
-      logger.error('Discord link token exchange failed', { 
-        status: tokenRes.status, 
+      logger.error('Discord link token exchange failed', {
+        status: tokenRes.status,
         statusText: tokenRes.statusText,
-        body: errText,
-        redirectUri,
-        codeLength: code?.length 
       });
       return res.redirect(`${FRONTEND_URL}/settings?error=link_failed&reason=token_exchange_failed`);
     }
@@ -1466,20 +1467,7 @@ export async function connectedAccountsHandler(req, res) {
       return res.status(500).json({ error: 'Failed to process user data' });
     }
     
-    logger.debug('Connected accounts: User data retrieved', {
-      userId,
-      hasGoogleId: !!u.googleId,
-      hasTwitchId: !!u.twitchId,
-      hasDiscordId: !!u.discordId,
-      hasPassword: !!u.passwordHash,
-      oauthProvider: u.oauthProvider,
-      oauthId: u.oauthId,
-      hasDiscordToken: !!(u.discordAccessToken || u.discordRefreshToken),
-      hasTwitterToken: !!u.twitterAccessToken,
-      hasTwitterId: !!u.twitterId,
-      twitterId: u.twitterId,
-      twitterAccessTokenLength: u.twitterAccessToken?.length || 0
-    });
+    logger.debug('Connected accounts: User data retrieved', { userId });
     
     // Check if Discord is connected: must have discordId AND (discordAccessToken OR discordRefreshToken)
     // This ensures Discord is only shown as connected if it can actually be used (has tokens)
@@ -1931,12 +1919,7 @@ router.post('/disconnect-twitch', requireAuth, async (req, res) => {
     });
     const stillConnected = savedUser && (savedUser.twitchId || (savedUser.oauthProvider === 'twitch' && savedUser.oauthId));
     if (stillConnected) {
-      logger.error('Disconnect Twitch: verification failed, forcing User.update', {
-        userId,
-        twitchId: savedUser.twitchId,
-        oauthProvider: savedUser.oauthProvider,
-        oauthId: savedUser.oauthId,
-      });
+      logger.error('Disconnect Twitch: verification failed, forcing User.update', { userId });
       const newOauthProvider = savedUser.googleId ? 'google' : savedUser.discordId ? 'discord' : savedUser.twitterId ? 'twitter' : null;
       const newOauthId = savedUser.googleId || savedUser.discordId || savedUser.twitterId || null;
       await User.update(
@@ -2058,24 +2041,11 @@ router.post('/disconnect-discord', requireAuth, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
     
-    logger.debug('Disconnect Discord: User data retrieved', {
-      userId: user.id,
-      hasDiscordId: !!user.discordId,
-      hasDiscordToken: !!(user.discordAccessToken || user.discordRefreshToken),
-      oauthProvider: user.oauthProvider,
-      hasGoogleId: !!user.googleId,
-      hasTwitchId: !!user.twitchId,
-      hasPassword: !!user.passwordHash
-    });
+    logger.debug('Disconnect Discord: User data retrieved', { userId: user.id });
     
     const hasDiscord = user.discordId || (user.oauthProvider === 'discord' && user.oauthId);
     if (!hasDiscord) {
-      logger.warn('Disconnect Discord: Discord not connected', { 
-        userId: user.id,
-        discordId: user.discordId,
-        oauthProvider: user.oauthProvider,
-        oauthId: user.oauthId
-      });
+      logger.warn('Disconnect Discord: Discord not connected', { userId: user.id });
       return res.status(400).json({ error: 'Discord is not connected' });
     }
     
@@ -2120,12 +2090,7 @@ router.post('/disconnect-discord', requireAuth, async (req, res) => {
       }
     }
     
-    logger.debug('Disconnect Discord: Saving user changes', {
-      userId: user.id,
-      newOauthProvider: user.oauthProvider,
-      newOauthId: user.oauthId,
-      discordIdCleared: !user.discordId
-    });
+    logger.debug('Disconnect Discord: Saving user changes', { userId: user.id });
     
     await user.save();
     
@@ -2135,14 +2100,7 @@ router.post('/disconnect-discord', requireAuth, async (req, res) => {
     });
     const stillConnected = savedUser && (savedUser.discordId || (savedUser.oauthProvider === 'discord' && savedUser.oauthId));
     if (stillConnected) {
-      logger.error('Discord disconnect verification failed - Discord still appears connected', { 
-        userId,
-        discordId: savedUser.discordId,
-        oauthProvider: savedUser.oauthProvider,
-        oauthId: savedUser.oauthId,
-        googleId: savedUser.googleId,
-        twitchId: savedUser.twitchId
-      });
+      logger.error('Discord disconnect verification failed - Discord still appears connected', { userId });
       // Fix via update to avoid calling save() on a possibly partial instance (no primary key in some Sequelize setups)
       const newOauthProvider = savedUser.googleId ? 'google' : savedUser.twitchId ? 'twitch' : savedUser.twitterId ? 'twitter' : null;
       const newOauthId = savedUser.googleId || savedUser.twitchId || savedUser.twitterId || null;
@@ -2887,7 +2845,10 @@ router.get('/twitch/connect', (req, res, next) => {
 
 /** GET /twitch/callback - Twitch OAuth callback; exchange code, save Integration, set User.twitchId. */
 router.get('/twitch/callback', async (req, res) => {
-  const { code, state, error, error_description } = req.query;
+  const code = typeof req.query.code === 'string' ? req.query.code : '';
+  const state = typeof req.query.state === 'string' ? req.query.state : '';
+  const error = typeof req.query.error === 'string' ? req.query.error : '';
+  const error_description = typeof req.query.error_description === 'string' ? req.query.error_description : '';
   if (error) {
     logger.warn('Twitch connect callback error', { error, error_description });
     return res.redirect(`${FRONTEND_URL_SAFE}/settings?twitch_error=${encodeURIComponent(error_description || error)}`);

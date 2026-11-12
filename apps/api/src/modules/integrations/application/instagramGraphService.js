@@ -6,7 +6,7 @@ import axios from 'axios';
 import logger from '../../../utils/logger.js';
 
 const _gv = process.env.FACEBOOK_GRAPH_API_VERSION || 'v25.0';
-const GRAPH_VERSION = _gv.startsWith('v') ? _gv : `v${_gv}`;
+const GRAPH_VERSION = /^v\d+\.\d+$/.test(_gv) ? _gv : 'v25.0';
 const IG_USER_ID = (process.env.INSTAGRAM_BUSINESS_ACCOUNT_ID || '').trim();
 const PAGE_ACCESS_TOKEN = (process.env.INSTAGRAM_PAGE_ACCESS_TOKEN || '').trim();
 
@@ -18,9 +18,21 @@ export function isInstagramGraphConfigured() {
   return !!(IG_USER_ID && PAGE_ACCESS_TOKEN);
 }
 
+function graphUrl(path) {
+  const clean = String(path || '').replace(/^\/+/, '');
+  if (!clean || clean.includes('..') || clean.includes('\\') || clean.includes('@') || clean.includes('://')) {
+    throw new Error('Blocked Graph path');
+  }
+  const url = new URL(`${graphBase()}/${clean}`);
+  if (url.protocol !== 'https:' || url.hostname !== 'graph.facebook.com') {
+    throw new Error('Blocked Graph host');
+  }
+  return url;
+}
+
 async function graphGet(path, params = {}) {
-  const url = `${graphBase()}/${path.replace(/^\//, '')}`;
-  const res = await axios.get(url, {
+  const url = graphUrl(path);
+  const res = await axios.get(url.href, {
     params: {
       ...params,
       access_token: PAGE_ACCESS_TOKEN,
@@ -70,12 +82,12 @@ export async function getInstagramMediaInsights(mediaId) {
 }
 
 async function graphPost(path, payload = {}) {
-  const url = `${graphBase()}/${path.replace(/^\//, '')}`;
+  const url = graphUrl(path);
   const body = new URLSearchParams({
     ...Object.fromEntries(Object.entries(payload).filter(([, v]) => v !== undefined && v !== null)),
     access_token: PAGE_ACCESS_TOKEN,
   });
-  const res = await axios.post(url, body.toString(), {
+  const res = await axios.post(url.href, body.toString(), {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     timeout: 30000,
     validateStatus: () => true,

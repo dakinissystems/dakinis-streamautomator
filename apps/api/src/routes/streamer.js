@@ -20,6 +20,19 @@ import { KickService } from '../modules/integrations/application/kickService.js'
 import { refreshIntegrationToken } from '../modules/integrations/application/integrationTokenService.js';
 
 const router = express.Router();
+
+function isEmailAddress(value) {
+  const at = value.indexOf('@');
+  if (at <= 0 || value.indexOf('@', at + 1) !== -1) return false;
+  const domain = value.slice(at + 1);
+  const dot = domain.lastIndexOf('.');
+  if (dot <= 0 || dot === domain.length - 1) return false;
+  for (let i = 0; i < value.length; i += 1) {
+    const code = value.charCodeAt(i);
+    if (code <= 32 || code === 127) return false;
+  }
+  return true;
+}
 const twitchService = new TwitchService();
 const kickService = new KickService();
 
@@ -242,7 +255,7 @@ router.post('/:username/remind', async (req, res) => {
     if (!username) {
       return res.status(400).json({ error: 'Username required' });
     }
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!email || !isEmailAddress(email)) {
       return res.status(400).json({ error: 'Valid email required' });
     }
 

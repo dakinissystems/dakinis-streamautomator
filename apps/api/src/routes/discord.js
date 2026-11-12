@@ -15,11 +15,20 @@ const DISCORD_OAUTH2 = 'https://discord.com/api/oauth2';
 const DISCORD_FETCH_TIMEOUT_MS = 15000;
 
 /** fetch with timeout to avoid hanging (e.g. on Render cold start or Discord API slowness). */
+function discordApiUrl(url) {
+  const parsed = new URL(url);
+  if (parsed.protocol !== 'https:' || parsed.hostname !== 'discord.com') {
+    throw new Error('Blocked non-Discord URL');
+  }
+  return parsed;
+}
+
 async function discordFetch(url, options = {}) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), DISCORD_FETCH_TIMEOUT_MS);
   try {
-    const res = await fetch(url, { ...options, signal: controller.signal });
+    const target = discordApiUrl(url);
+    const res = await fetch(target, { ...options, signal: controller.signal });
     clearTimeout(timeoutId);
     return res;
   } catch (err) {
@@ -52,7 +61,7 @@ async function refreshDiscordToken(refreshToken) {
       grant_type: 'refresh_token',
       refresh_token: refreshToken,
     });
-    const res = await fetch(`${DISCORD_OAUTH2}/token`, {
+    const res = await discordFetch(`${DISCORD_OAUTH2}/token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: body.toString(),
@@ -214,7 +223,10 @@ router.get('/guilds', requireAuth, async (req, res) => {
  */
 router.get('/guilds/:guildId/channels', requireAuth, async (req, res) => {
   try {
-    const { guildId } = req.params;
+    const guildId = String(req.params.guildId || '');
+    if (!/^\d{15,25}$/.test(guildId)) {
+      return res.status(400).json({ error: 'Invalid server' });
+    }
     const user = await User.findByPk(req.user.id, { attributes: ['id', 'discordId', 'discordAccessToken', 'discordRefreshToken'] });
     const allowed = await getOwnedGuildsWithBot(user);
     if (!allowed || !allowed.guildIds.has(guildId)) {
@@ -229,7 +241,7 @@ router.get('/guilds/:guildId/channels', requireAuth, async (req, res) => {
       return res.status(503).json({ error: 'Discord bot not configured' });
     }
 
-    const resDiscord = await fetch(`${DISCORD_API}/guilds/${guildId}/channels`, {
+    const resDiscord = await discordFetch(`${DISCORD_API}/guilds/${guildId}/channels`, {
       headers: { Authorization: `Bot ${botToken}` },
     });
 
@@ -267,7 +279,10 @@ router.get('/guilds/:guildId/channels', requireAuth, async (req, res) => {
  */
 router.post('/channels/:channelId/messages', requireAuth, async (req, res) => {
   try {
-    const { channelId } = req.params;
+    const channelId = String(req.params.channelId || '');
+    if (!/^\d{15,25}$/.test(channelId)) {
+      return res.status(400).json({ error: 'Invalid channel' });
+    }
     const user = await User.findByPk(req.user.id, { attributes: ['id', 'discordId', 'discordAccessToken', 'discordRefreshToken'] });
     const allowed = await getOwnedGuildsWithBot(user);
     if (!allowed) {
@@ -278,7 +293,7 @@ router.post('/channels/:channelId/messages', requireAuth, async (req, res) => {
     }
     const botToken = getBotToken();
     if (!botToken) return res.status(503).json({ error: 'Discord bot not configured' });
-    const channelRes = await fetch(`${DISCORD_API}/channels/${channelId}`, {
+    const channelRes = await discordFetch(`${DISCORD_API}/channels/${channelId}`, {
       headers: { Authorization: `Bot ${botToken}` },
     });
     if (!channelRes.ok) {
