@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 jobs:
   frontend-architecture:
@@ -31,6 +32,9 @@ jobs:
 
   backend-architecture-and-smoke:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     defaults:
       run:
         working-directory: apps/api
@@ -39,11 +43,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: apps/api/package-lock.json
-      - run: npm ci
+          registry-url: https://npm.pkg.github.com
+          scope: "@dakinissystems"
+      - name: Install from GitHub Packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN != '' && secrets.NODE_AUTH_TOKEN || github.token }}
+        run: |
+          set -euo pipefail
+          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> "$NPM_CONFIG_USERCONFIG"
+          npm install || install_rc=$?
+          if [ "${install_rc:-0}" -ne 0 ]; then
+            echo "::error::npm install failed (often 403 read_package)."
+            echo "Option A: repo secret NODE_AUTH_TOKEN = PAT with read:packages (covers all @dakinissystems/*)."
+            echo "Option B: Packages → shared-error|shared-db|shared-validation|domain → Manage Actions access → dakinis-streamautomator (Read)."
+            exit "${install_rc}"
+          fi
       - run: npm run check:architecture
       - run: npm run smoke:baseline
       - name: Unit tests
         run: npm test -- --run
-
