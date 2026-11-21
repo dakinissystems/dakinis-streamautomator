@@ -5,7 +5,7 @@
 import logger from '../../../utils/logger.js';
 import AutomationRule from '../infrastructure/AutomationRule.model.js';
 import AutomationRun from '../infrastructure/AutomationRun.model.js';
-import { AutomationRun as AutomationRunAggregate } from '@dakinis/domain/automation';
+import { AutomationRun as AutomationRunAggregate } from '@dakinissystems/domain/automation';
 import { StreamTimelineEvent } from '../../content/infrastructure/models.js';
 import {
   emitPlatformEvent,

@@ -1,4 +1,4 @@
-import { OutboxPublisher } from "@dakinis/shared-db/outbox";
+import { OutboxPublisher } from "@dakinissystems/shared-db/outbox";
 import { isPlatformPgConfigured, platformQuery } from "./platformDb.js";
 import logger from "../utils/logger.js";
 
