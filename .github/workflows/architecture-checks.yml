@@ -42,20 +42,25 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # npm bundled with Node 20 hits arborist edgesOut crash on this tree;
+          # npm >= 11.6.0 has the peer-edge guard (npm/cli#8448).
+          node-version: 22
           registry-url: https://npm.pkg.github.com
           scope: "@dakinissystems"
+      - name: Ensure npm with edgesOut fix
+        run: npm install -g npm@11.6.2
       - name: Install from GitHub Packages
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN != '' && secrets.NODE_AUTH_TOKEN || github.token }}
         run: |
           set -euo pipefail
           echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> "$NPM_CONFIG_USERCONFIG"
-          npm install || install_rc=$?
+          npm --version
+          npm install --no-audit --no-fund || install_rc=$?
           if [ "${install_rc:-0}" -ne 0 ]; then
-            echo "::error::npm install failed (often 403 read_package)."
-            echo "Option A: repo secret NODE_AUTH_TOKEN = PAT with read:packages (covers all @dakinissystems/*)."
-            echo "Option B: Packages → shared-error|shared-db|shared-validation|domain → Manage Actions access → dakinis-streamautomator (Read)."
+            echo "::error::npm install failed."
+            echo "If 403: set repo secret NODE_AUTH_TOKEN (PAT read:packages) or grant Actions Read on the four packages."
+            echo "If edgesOut: need npm >= 11.6.0 (this job pins 11.6.2)."
             exit "${install_rc}"
           fi
       - run: npm run check:architecture

@@ -59,10 +59,10 @@
     "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
-    "@vitest/ui": "^5.1.0",
+    "@vitest/ui": "5.1.0",
     "nodemon": "^3.1.14",
     "sequelize-cli": "^6.6.3",
-    "vitest": "^5.1.0"
+    "vitest": "5.1.0"
   },
   "optionalDependencies": {
     "@socket.io/redis-adapter": "^8.3.0",
