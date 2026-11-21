@@ -1,4 +1,4 @@
-import { createAutomationRuleRepository } from "@dakinis/shared-db/repositories/automation";
+import { createAutomationRuleRepository } from "@dakinissystems/shared-db/repositories/automation";
 import { isPlatformPgConfigured, platformQuery } from "./platformDb.js";
 import { publishPlatformOutbox } from "./platformOutbox.js";
 import logger from "../utils/logger.js";

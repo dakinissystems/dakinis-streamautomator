@@ -2,7 +2,7 @@ import {
   reconcileDirectorSessionToPublic,
   reconcileAutomationRuleToPublic,
   deleteAutomationRuleFromPublic,
-} from "@dakinis/shared-db/legacy/public-sync";
+} from "@dakinissystems/shared-db/legacy/public-sync";
 import { isPlatformPgConfigured, platformQuery } from "./platformDb.js";
 import logger from "../utils/logger.js";
 

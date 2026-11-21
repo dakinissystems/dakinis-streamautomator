@@ -1,5 +1,5 @@
 import { getPlatformPool, isPlatformPgConfigured } from "../lib/platformDb.js";
-import { startOutboxPoller } from "@dakinis/shared-db/outbox/processor";
+import { startOutboxPoller } from "@dakinissystems/shared-db/outbox/processor";
 import { handleStreamAutomatorOutboxEvent } from "../lib/outboxHandlers.js";
 import logger from "../utils/logger.js";
 

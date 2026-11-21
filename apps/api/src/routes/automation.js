@@ -13,8 +13,8 @@ import {
   automationRuleCreateSchema,
   automationRuleUpdateSchema,
   parseOrThrow,
-} from '@dakinis/shared-validation/stream';
-import { mapToHttp } from '@dakinis/shared-error';
+} from '@dakinissystems/shared-validation/stream';
+import { mapToHttp } from '@dakinissystems/shared-error';
 import logger from '../utils/logger.js';
 
 const router = express.Router();

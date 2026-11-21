@@ -1,4 +1,4 @@
-import { createPool, query as poolQuery } from "@dakinis/shared-db/pool";
+import { createPool, query as poolQuery } from "@dakinissystems/shared-db/pool";
 
 /** @type {import('pg').Pool | null} */
 let pool = null;

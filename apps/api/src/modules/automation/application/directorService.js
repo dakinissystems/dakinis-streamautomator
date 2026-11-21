@@ -1,7 +1,7 @@
 import { Op } from 'sequelize';
-import { DirectorSession } from '@dakinis/domain/director';
-import { publishDomainEvents } from '@dakinis/shared-db/outbox/domain-events';
-import { OutboxPublisher } from '@dakinis/shared-db/outbox';
+import { DirectorSession } from '@dakinissystems/domain/director';
+import { publishDomainEvents } from '@dakinissystems/shared-db/outbox/domain-events';
+import { OutboxPublisher } from '@dakinissystems/shared-db/outbox';
 import StreamDirectorSession from '../infrastructure/StreamDirectorSession.model.js';
 import Content from '../../content/infrastructure/Content.model.js';
 import { CONTENT_STATUS } from '../../../constants/contentStatus.js';
